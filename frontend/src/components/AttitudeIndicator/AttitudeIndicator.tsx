@@ -1,5 +1,5 @@
 import React from 'react';
-import { useAttitude } from '../hooks/useAttitude';
+import { useAttitude } from '../../hooks/useAttitude';
 
 export default function AttitudeIndicator() {
   const attitude = useAttitude();

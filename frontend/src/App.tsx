@@ -1,5 +1,5 @@
 import React from 'react';
-import AttitudeIndicator from './components/AttitudeIndicator';
+import AttitudeIndicator from './components/AttitudeIndicator/AttitudeIndicator';
 
 function App() {
   return (
