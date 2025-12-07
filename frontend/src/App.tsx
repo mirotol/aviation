@@ -1,12 +1,8 @@
 import React from 'react';
-import AttitudeIndicator from './components/AttitudeIndicator/AttitudeIndicator';
+import Dashboard from './components/dashboard/Dashboard';
 
 function App() {
-  return (
-    <div className="App">
-      <AttitudeIndicator />
-    </div>
-  );
+  return <Dashboard />;
 }
 
 export default App;

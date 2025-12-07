@@ -1,7 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useAttitude } from '../../hooks/useAttitude';
 
-export default function AttitudeIndicator() {
+interface AttitudeIndicatorProps {
+  width?: string | number;
+  height?: string | number;
+}
+
+export default function AttitudeIndicator({ width = 400, height = 400 }: AttitudeIndicatorProps) {
   const attitude = useAttitude();
   const [displayPitch, setDisplayPitch] = useState(0);
   const [displayRoll, setDisplayRoll] = useState(0);
@@ -26,7 +31,7 @@ export default function AttitudeIndicator() {
   return (
     <div style={{ textAlign: 'center', fontFamily: 'monospace' }}>
       <h2>Attitude Indicator</h2>
-      <svg width={400} height={400} viewBox="-125 -125 250 250">
+      <svg width={width} height={height} viewBox="-125 -125 250 250">
         <defs>
           {/* Circular clip */}
           <clipPath id="circleClip">
@@ -53,7 +58,14 @@ export default function AttitudeIndicator() {
           <rect x={-125} y={pitchOffset} width={250} height={125} fill="url(#groundGrad)" />
 
           {/* Horizon line */}
-          <line x1={-125} y1={pitchOffset} x2={125} y2={pitchOffset} stroke="white" strokeWidth={2} />
+          <line
+            x1={-125}
+            y1={pitchOffset}
+            x2={125}
+            y2={pitchOffset}
+            stroke="white"
+            strokeWidth={2}
+          />
 
           {/* Pitch tick marks */}
           {pitchMarkers.map((deg) => (
