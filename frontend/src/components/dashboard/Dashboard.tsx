@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import AttitudeIndicator from '../attitudeindicator/AttitudeIndicator';
 import Altimeter from '../altimeter/Altimeter';
 import InfoPanel from '../infopanel/InfoPanel';
+import AirspeedIndicator from '../airspeed/AirSpeedIndicator';
 
 export default function Dashboard() {
   const [showInfo, setShowInfo] = useState(true);
@@ -23,6 +24,7 @@ export default function Dashboard() {
     >
       <AttitudeIndicator width={400} height={400} />
       <Altimeter width={400} height={400} />
+      <AirspeedIndicator width={400} height={400} />
 
       {/* Overlay Info Panel */}
       {showInfo && (

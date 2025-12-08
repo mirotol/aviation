@@ -1,5 +1,6 @@
 package com.miro.aviation.service;
 
+import com.miro.aviation.model.AirSpeed;
 import com.miro.aviation.model.Altitude;
 import com.miro.aviation.model.Attitude;
 import org.springframework.stereotype.Service;
@@ -9,11 +10,14 @@ public class SimulatedFlightDataProvider implements FlightDataProvider {
 
     private final AttitudeSimulatorService attitudeSim;
     private final AltitudeSimulatorService altitudeSim;
+    private final AirspeedSimulatorService speedSim;
 
     public SimulatedFlightDataProvider(AttitudeSimulatorService attitudeSim,
-                                       AltitudeSimulatorService altitudeSim) {
+                                       AltitudeSimulatorService altitudeSim,
+                                       AirspeedSimulatorService speedSim) {
         this.attitudeSim = attitudeSim;
         this.altitudeSim = altitudeSim;
+        this.speedSim = speedSim;
     }
 
     @Override
@@ -24,5 +28,10 @@ public class SimulatedFlightDataProvider implements FlightDataProvider {
     @Override
     public Altitude getAltitude() {
         return altitudeSim.getCurrentAltitude();
+    }
+
+    @Override
+    public AirSpeed getSpeed() {
+        return speedSim.getCurrentAirSpeed();
     }
 }

@@ -1,5 +1,6 @@
 package com.miro.aviation.service;
 
+import com.miro.aviation.model.AirSpeed;
 import com.miro.aviation.model.Altitude;
 import com.miro.aviation.model.Attitude;
 import jakarta.annotation.PostConstruct;
@@ -27,6 +28,11 @@ public class RecordedFlightDataProvider implements FlightDataProvider {
     @Override
     public Altitude getAltitude() {
         return flightData.get(index).getAltitude();
+    }
+
+    @Override
+    public AirSpeed getSpeed() {
+        return flightData.get(index).getAirSpeed();
     }
 
     public void next() {

@@ -1,5 +1,6 @@
 package com.miro.aviation.service;
 
+import com.miro.aviation.model.AirSpeed;
 import com.miro.aviation.model.Altitude;
 import com.miro.aviation.model.Attitude;
 
@@ -10,6 +11,7 @@ public class FlightSnapshot {
 
     private Attitude attitude;
     private Altitude altitude;
+    private AirSpeed airSpeed;
 
     public FlightSnapshot() {
         // default constructor
@@ -34,5 +36,13 @@ public class FlightSnapshot {
 
     public void setAltitude(Altitude altitude) {
         this.altitude = altitude;
+    }
+
+    public AirSpeed getAirSpeed() {
+        return airSpeed;
+    }
+
+    public void setAirSpeed(AirSpeed airSpeed) {
+        this.airSpeed = airSpeed;
     }
 }
