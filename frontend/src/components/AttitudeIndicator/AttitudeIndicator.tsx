@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAttitude } from '../../hooks/useAttitude';
+import InstrumentContainer from '../common/InstrumentContainer';
 
 interface AttitudeIndicatorProps {
   width?: string | number;
@@ -29,8 +30,7 @@ export default function AttitudeIndicator({ width = 400, height = 400 }: Attitud
   const pitchMarkers = [-30, -20, -10, 10, 20, 30];
 
   return (
-    <div style={{ textAlign: 'center', fontFamily: 'monospace' }}>
-      <h2>Attitude Indicator</h2>
+    <InstrumentContainer title="Attitude Indicator">
       <svg width={width} height={height} viewBox="-125 -125 250 250">
         <defs>
           {/* Circular clip */}
@@ -109,9 +109,6 @@ export default function AttitudeIndicator({ width = 400, height = 400 }: Attitud
         {/* Optional: center circle for cockpit style */}
         <circle cx="0" cy="0" r="3" fill="white" />
       </svg>
-
-      <p>Pitch: {displayPitch.toFixed(2)}°</p>
-      <p>Roll: {displayRoll.toFixed(2)}°</p>
-    </div>
+    </InstrumentContainer>
   );
 }

@@ -1,0 +1,19 @@
+# Auto normalize all text files
+* text=auto
+
+# Force CRLF on Windows for specific file types (optional)
+*.ts text eol=crlf
+*.tsx text eol=crlf
+*.js text eol=crlf
+*.jsx text eol=crlf
+*.css text eol=crlf
+*.html text eol=crlf
+*.json text eol=lf   # JSON is usually LF
+
+# Binary files (don’t touch line endings)
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.svg binary

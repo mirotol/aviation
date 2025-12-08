@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAttitude } from '../../hooks/useAttitude'; // temporary, or create useAltitude hook
+import InstrumentContainer from '../common/InstrumentContainer';
 
 interface AltimeterProps {
   width?: string | number;
@@ -25,8 +26,7 @@ export default function Altimeter({ width = 400, height = 400 }: AltimeterProps)
   const needleAngle = ((displayAltitude % 10000) / 10000) * 360;
 
   return (
-    <div style={{ textAlign: 'center', fontFamily: 'monospace' }}>
-      <h2>Altimeter</h2>
+    <InstrumentContainer title="Altimeter">
       <svg width={width} height={height} viewBox="-125 -125 250 250">
         {/* Outer circle */}
         <circle cx="0" cy="0" r="100" fill="#222" stroke="white" strokeWidth={2} />
@@ -62,6 +62,6 @@ export default function Altimeter({ width = 400, height = 400 }: AltimeterProps)
           {Math.round(displayAltitude)} ft
         </text>
       </svg>
-    </div>
+    </InstrumentContainer>
   );
 }
