@@ -15,6 +15,7 @@ export default function InfoPanel() {
         padding: '15px',
         fontFamily: 'monospace',
         height: 'fit-content',
+        opacity: 1,
       }}
     >
       <h3 style={{ marginTop: 0, marginBottom: '10px' }}>Flight Data</h3>

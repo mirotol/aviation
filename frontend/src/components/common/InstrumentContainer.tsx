@@ -17,6 +17,8 @@ export default function InstrumentContainer({
         backgroundColor: '#111',
         padding: '10px 0',
         borderRadius: '10px',
+        width: 'fit-content',
+        height: 'fit-content',
       }}
     >
       <h2

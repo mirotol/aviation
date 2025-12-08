@@ -2,14 +2,12 @@ import { useEffect, useState } from 'react';
 import { Client } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 
-export interface Attitude {
-  pitch: number;
-  roll: number;
-  yaw: number;
+export interface Altitude {
+  altitude: number;
 }
 
-export function useAttitude() {
-  const [attitude, setAttitude] = useState<Attitude>({ pitch: 0, roll: 0, yaw: 0 });
+export function useAltitude() {
+  const [alt, setAlt] = useState<Altitude>({ altitude: 0 });
 
   useEffect(() => {
     const socket = new SockJS('http://localhost:8080/ws');
@@ -18,9 +16,9 @@ export function useAttitude() {
     });
 
     stompClient.onConnect = () => {
-      stompClient.subscribe('/topic/attitude', (message) => {
-        const data: Attitude = JSON.parse(message.body);
-        setAttitude(data);
+      stompClient.subscribe('/topic/altitude', (message) => {
+        const data: Altitude = JSON.parse(message.body);
+        setAlt(data);
       });
     };
 
@@ -31,5 +29,5 @@ export function useAttitude() {
     };
   }, []);
 
-  return attitude;
+  return alt;
 }

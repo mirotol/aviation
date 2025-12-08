@@ -10,7 +10,7 @@ export default function Dashboard() {
     <div
       style={{
         display: 'grid',
-        gridTemplateColumns: '1fr 1fr',
+        gridTemplateColumns: 'auto auto',
         gap: '20px',
         padding: '20px',
         backgroundColor: '#1c1c1c',
@@ -18,6 +18,7 @@ export default function Dashboard() {
         width: '100vw',
         boxSizing: 'border-box',
         position: 'relative',
+        justifyContent: 'center',
       }}
     >
       <AttitudeIndicator width={400} height={400} />
@@ -38,6 +39,7 @@ export default function Dashboard() {
             paddingTop: '60px', // <-- keeps text clear from button
             paddingRight: '20px',
             overflowY: 'auto',
+            opacity: 0.8,
           }}
         >
           <InfoPanel />
