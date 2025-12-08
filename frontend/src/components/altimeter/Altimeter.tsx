@@ -8,7 +8,7 @@ interface AltimeterProps {
 }
 
 export default function Altimeter({ width = 400, height = 400 }: AltimeterProps) {
-  const { altitude } = useAltitude(); // ⭐ real altitude data coming from backend
+  const { altitude } = useAltitude();
 
   const [displayAltitude, setDisplayAltitude] = useState(0);
 

@@ -134,9 +134,11 @@ export default function AirspeedIndicator({ width = 400, height = 400 }: Airspee
         {/* Center knob */}
         <circle cx={0} cy={0} r={5} fill="white" />
 
-        {/* Digital readout */}
-        <text x={0} y={60} fill="white" fontSize={18} fontFamily="monospace" textAnchor="middle">
-          {Math.round(displaySpeed)} kt
+        <text x={0} y={-25} fill="white" fontSize={14} fontFamily="monospace" textAnchor="middle">
+          AIRSPEED
+        </text>
+        <text x={0} y={30} fill="white" fontSize={14} fontFamily="monospace" textAnchor="middle">
+          KNOTS
         </text>
       </svg>
     </InstrumentContainer>
