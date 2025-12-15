@@ -1,64 +1,161 @@
-import React, { useState, useEffect } from 'react';
+import React, { JSX } from 'react';
 import { useAltitude } from '../../hooks/useAltitude';
-import InstrumentContainer from '../common/InstrumentContainer';
+import NeedleHundred from './NeedleHundred';
+import NeedleThousand from './NeedleThousand';
 
 interface AltimeterProps {
-  width?: string | number;
-  height?: string | number;
+  width?: number | string;
+  height?: number | string;
 }
 
 export default function Altimeter({ width = 400, height = 400 }: AltimeterProps) {
-  const { altitude } = useAltitude();
+  // const { altitude } = useAltitude();
+  const altitude = 5380;
 
-  const [displayAltitude, setDisplayAltitude] = useState(0);
+  // Ensure numeric values for calculations
+  const w = typeof width === 'number' ? width : parseFloat(width);
+  const h = typeof height === 'number' ? height : parseFloat(height);
+  const centerX = w / 2;
+  const centerY = h / 2;
 
-  // Smooth interpolation
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setDisplayAltitude((prev) => prev + (altitude - prev) * 0.05);
-    }, 16);
-    return () => clearInterval(interval);
-  }, [altitude]);
+  // Radii based on the smaller dimension
+  const outerRadius = Math.min(w, h) / 2.4;
+  const innerRadius = Math.min(w, h) / 4;
 
-  // Convert altitude to needle angle (0–360 per 10,000 ft)
-  const needleAngle = ((displayAltitude % 10000) / 10000) * 360;
+  const startAngle = -Math.PI / 11.5;
+  const endAngle = Math.PI / 11.5;
+
+  const polarToCartesian = (r: number, angle: number) => ({
+    x: centerX + r * Math.cos(angle),
+    y: centerY + r * Math.sin(angle),
+  });
+
+  const leftStart = polarToCartesian(innerRadius, startAngle);
+  const leftEnd = polarToCartesian(innerRadius, endAngle);
+  const rightEnd = polarToCartesian(outerRadius, endAngle);
+  const rightStart = polarToCartesian(outerRadius, startAngle);
+
+  // Ticks
+  const majorTickCount = 10;
+  const minorTickCount = 4; // between major ticks
+  const tickRadius = Math.min(w, h) / 2.05;
+  const tickLengthMajor = 30;
+  const tickLengthMinor = 18;
+  const majorTickWidth = 4;
+  const minorTickWidth = 2;
+
+  const ticks: JSX.Element[] = [];
+  const totalAngle = 2 * Math.PI;
+  const majorStep = totalAngle / majorTickCount;
+
+  for (let i = 0; i < majorTickCount; i++) {
+    const angle = i * majorStep - Math.PI / 2;
+    const start = polarToCartesian(tickRadius - tickLengthMajor, angle);
+    const end = polarToCartesian(tickRadius, angle);
+    ticks.push(
+      <line
+        key={`major-${i}`}
+        x1={start.x}
+        y1={start.y}
+        x2={end.x}
+        y2={end.y}
+        stroke="#FFFFFF"
+        strokeWidth={majorTickWidth}
+      />
+    );
+
+    for (let j = 1; j <= minorTickCount; j++) {
+      const minorAngle = angle + (j * majorStep) / (minorTickCount + 1);
+      const minorStart = polarToCartesian(tickRadius - tickLengthMinor, minorAngle);
+      const minorEnd = polarToCartesian(tickRadius, minorAngle);
+      ticks.push(
+        <line
+          key={`minor-${i}-${j}`}
+          x1={minorStart.x}
+          y1={minorStart.y}
+          x2={minorEnd.x}
+          y2={minorEnd.y}
+          stroke="#FFFFFF"
+          strokeWidth={minorTickWidth}
+        />
+      );
+    }
+  }
+
+  // Numbers for major ticks
+  const numbers: JSX.Element[] = [];
+  const labelRadius = tickRadius - tickLengthMajor - 15; // distance from center
+
+  for (let i = 0; i < majorTickCount; i++) {
+    if (i === 6) continue; // skip number 6
+
+    let angle = i * majorStep - Math.PI / 2;
+
+    // Shift numbers 2 and 3 slightly to avoid the gap
+    if (i === 2) angle -= 0.13; // small clockwise shift
+    if (i === 3) angle += 0.12; // small counter-clockwise shift
+
+    const pos = polarToCartesian(labelRadius, angle);
+
+    // Vertical offset
+    const upperVerticalGroup = [0, 1, 2, 8, 9];
+    const yOffset = upperVerticalGroup.includes(i) ? 15 : 7;
+
+    numbers.push(
+      <text
+        key={`label-${i}`}
+        x={pos.x}
+        y={pos.y + yOffset}
+        fill="#FFFFFF"
+        fontFamily="sans-serif"
+        fontSize={25}
+        fontWeight="bold"
+        textAnchor="middle"
+        alignmentBaseline="middle"
+      >
+        {i}
+      </text>
+    );
+  }
+
+  const needleRotationOffset = 90;
 
   return (
-    <InstrumentContainer title="Altimeter">
-      <svg width={width} height={height} viewBox="-125 -125 250 250">
-        {/* Outer circle */}
-        <circle cx="0" cy="0" r="100" fill="#222" stroke="white" strokeWidth={2} />
+    <svg width={w} height={h} viewBox={`0 0 ${w} ${h}`}>
+      <defs>
+        <mask id="altimeterHoleMask">
+          <rect width={w} height={h} fill="white" />
+          <path
+            d={`
+              M ${leftStart.x} ${leftStart.y}
+              A ${innerRadius} ${innerRadius} 0 0 1 ${leftEnd.x} ${leftEnd.y}
+              L ${rightEnd.x} ${rightEnd.y}
+              A ${outerRadius} ${outerRadius} 0 0 0 ${rightStart.x} ${rightStart.y}
+              Z
+            `}
+            fill="black"
+          />
+        </mask>
+      </defs>
 
-        {/* Tick marks (every 30 degrees / 1000 ft) */}
-        {[0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330].map((deg) => {
-          const rad = (deg * Math.PI) / 180;
-          const x1 = Math.sin(rad) * 90;
-          const y1 = -Math.cos(rad) * 90;
-          const x2 = Math.sin(rad) * 80;
-          const y2 = -Math.cos(rad) * 80;
+      <circle
+        cx={centerX}
+        cy={centerY}
+        r={Math.min(w, h) / 2}
+        fill="#232323"
+        mask="url(#altimeterHoleMask)"
+      />
 
-          return <line key={deg} x1={x1} y1={y1} x2={x2} y2={y2} stroke="white" strokeWidth={2} />;
-        })}
-
-        {/* Needle */}
-        <line
-          x1={0}
-          y1={0}
-          x2={0}
-          y2={-70}
-          stroke="red"
-          strokeWidth={2}
-          transform={`rotate(${needleAngle})`}
-        />
-
-        {/* Center knob */}
-        <circle cx="0" cy="0" r="5" fill="white" />
-
-        {/* Digital altitude readout */}
-        <text x="0" y="60" fill="white" fontSize="18" fontFamily="monospace" textAnchor="middle">
-          {Math.round(displayAltitude)} ft
-        </text>
-      </svg>
-    </InstrumentContainer>
+      {ticks}
+      {numbers}
+      <NeedleHundred
+        tipOffset={-131} // adjust this until the tip reaches the outer edge
+        transform={`translate(${centerX}, ${centerY}) rotate(${needleRotationOffset + altitude * 0.36})`}
+      />
+      <NeedleThousand
+        tipOffset={-133} // adjust this until the tip reaches the outer edge
+        transform={`translate(${centerX}, ${centerY}) rotate(${altitude * 0.036})`}
+      />
+    </svg>
   );
 }
