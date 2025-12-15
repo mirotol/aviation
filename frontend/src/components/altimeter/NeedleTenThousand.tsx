@@ -1,0 +1,62 @@
+import React from 'react';
+
+interface Props {
+  idPrefix?: string;
+  transform?: string;
+  tipOffset?: number; // how far to move the needle tip outward to get pivot centered
+}
+
+export default function NeedleTenThousand({ transform, tipOffset = 0 }: Props) {
+  const pivotX = 68;
+  const pivotY = 200;
+
+  return (
+    <g transform={transform}>
+      <defs>
+        <filter filterUnits="objectBoundingBox" id="shadowFilter">
+          <feGaussianBlur stdDeviation="5" result="blur" in="SourceAlpha"></feGaussianBlur>
+          <feOffset dy="0" dx="0" result="offsetBlurredAlpha" in="blur"></feOffset>
+          <feMerge>
+            <feMergeNode in="offsetBlurredAlpha"></feMergeNode>
+            <feMergeNode in="SourceGraphic"></feMergeNode>
+          </feMerge>
+        </filter>
+      </defs>
+
+      {/* Translate pivot to origin, then move the tip outward */}
+      <g filter="url(#shadowFilter)" transform={`translate(${-pivotX + tipOffset}, ${-pivotY})`}>
+        <polygon
+          fill="#FFFFFF"
+          stroke="#B2B2B2"
+          stroke-width="0.5"
+          stroke-miterlimit="10"
+          points="
+          40,199
+          35,200
+          40,202 
+          150,202 
+          150,199"
+        />
+        <polygon
+          fill="#FFFFFF"
+          points="
+          120,204
+          110, 200 
+          120,196
+          190, 196
+          190, 204"
+        />
+        <path
+          fill="#232323"
+          stroke="#353535"
+          stroke-width="0.5"
+          stroke-miterlimit="10"
+          d="M239.042,196.417
+            c-3.563-3.563-8.918,0-13.063,0c-0.787,0-3.148,0-3.148,0h-11.969c-1.51-4.271-5.573-7.337-10.362-7.337s-8.852,3.065-10.362,7.337
+            h-5.804v7.167h5.745c1.464,4.355,5.572,7.496,10.42,7.496s8.956-3.141,10.42-7.496h12.036c0,0,2.314,0,3.085,0
+            c3.874,0,9.458,3.542,13,0C241.124,201.501,241.25,198.625,239.042,196.417z"
+        />
+      </g>
+    </g>
+  );
+}

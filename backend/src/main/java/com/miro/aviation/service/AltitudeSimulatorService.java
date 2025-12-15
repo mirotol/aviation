@@ -13,7 +13,7 @@ public class AltitudeSimulatorService {
 
     public AltitudeSimulatorService() {
         // Initial altitude (feet)
-        currentAltitude.setAltitude(2000.0);
+        currentAltitude.setAltitude(25500.0);
     }
 
     /**

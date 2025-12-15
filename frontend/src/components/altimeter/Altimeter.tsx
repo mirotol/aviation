@@ -2,6 +2,7 @@ import React, { JSX } from 'react';
 import { useAltitude } from '../../hooks/useAltitude';
 import NeedleHundred from './NeedleHundred';
 import NeedleThousand from './NeedleThousand';
+import NeedleTenThousand from './NeedleTenThousand';
 
 interface AltimeterProps {
   width?: number | string;
@@ -9,8 +10,7 @@ interface AltimeterProps {
 }
 
 export default function Altimeter({ width = 400, height = 400 }: AltimeterProps) {
-  // const { altitude } = useAltitude();
-  const altitude = 5380;
+  const { altitude } = useAltitude();
 
   // Ensure numeric values for calculations
   const w = typeof width === 'number' ? width : parseFloat(width);
@@ -137,7 +137,6 @@ export default function Altimeter({ width = 400, height = 400 }: AltimeterProps)
           />
         </mask>
       </defs>
-
       <circle
         cx={centerX}
         cy={centerY}
@@ -145,16 +144,19 @@ export default function Altimeter({ width = 400, height = 400 }: AltimeterProps)
         fill="#232323"
         mask="url(#altimeterHoleMask)"
       />
-
       {ticks}
       {numbers}
-      <NeedleHundred
-        tipOffset={-131} // adjust this until the tip reaches the outer edge
-        transform={`translate(${centerX}, ${centerY}) rotate(${needleRotationOffset + altitude * 0.36})`}
+      <NeedleTenThousand
+        tipOffset={-131}
+        transform={`translate(${centerX}, ${centerY}) rotate(${needleRotationOffset + altitude * 0.0036})`}
       />
       <NeedleThousand
         tipOffset={-133} // adjust this until the tip reaches the outer edge
         transform={`translate(${centerX}, ${centerY}) rotate(${altitude * 0.036})`}
+      />
+      <NeedleHundred
+        tipOffset={-131} // adjust this until the tip reaches the outer edge
+        transform={`translate(${centerX}, ${centerY}) rotate(${needleRotationOffset + altitude * 0.36})`}
       />
     </svg>
   );
