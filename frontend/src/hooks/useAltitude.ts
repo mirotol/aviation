@@ -2,12 +2,17 @@ import { useEffect, useState } from 'react';
 import { Client } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 
-export interface Altitude {
+// Update interface to include kollsmanPressure
+export interface AltitudeData {
   altitude: number;
+  kollsmanPressure: number;
 }
 
 export function useAltitude() {
-  const [alt, setAlt] = useState<Altitude>({ altitude: 0 });
+  const [alt, setAlt] = useState<AltitudeData>({
+    altitude: 0,
+    kollsmanPressure: 29.92, // default sea-level
+  });
 
   useEffect(() => {
     const socket = new SockJS('http://localhost:8080/ws');
@@ -17,8 +22,12 @@ export function useAltitude() {
 
     stompClient.onConnect = () => {
       stompClient.subscribe('/topic/altitude', (message) => {
-        const data: Altitude = JSON.parse(message.body);
-        setAlt(data);
+        const data: AltitudeData = JSON.parse(message.body);
+        // Ensure both altitude and Kollsman pressure are updated
+        setAlt({
+          altitude: data.altitude,
+          kollsmanPressure: data.kollsmanPressure,
+        });
       });
     };
 

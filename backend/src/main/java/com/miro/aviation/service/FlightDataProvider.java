@@ -12,5 +12,5 @@ public interface FlightDataProvider {
 
     AirSpeed getSpeed();
 
-    // You can extend later with Airspeed, Heading, etc.
+    // Extend later with more statistics
 }

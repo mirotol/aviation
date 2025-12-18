@@ -11,11 +11,10 @@ interface AltimeterProps {
 }
 
 export default function Altimeter({ width = 400, height = 400 }: AltimeterProps) {
-  const { altitude } = useAltitude();
+  const { altitude, kollsmanPressure } = useAltitude();
 
   // --- Kollsman Calculation ---
   const standardPressure = 29.92; // inHg
-  const kollsmanPressure = 29.9; // Example, normally from KollsmanWindow
   const pressureCorrection = (standardPressure - kollsmanPressure) * 1000; // feet per inHg
   const adjustedAltitude = altitude + pressureCorrection;
 
