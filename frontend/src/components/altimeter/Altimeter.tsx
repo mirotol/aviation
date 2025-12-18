@@ -13,6 +13,12 @@ interface AltimeterProps {
 export default function Altimeter({ width = 400, height = 400 }: AltimeterProps) {
   const { altitude } = useAltitude();
 
+  // --- Kollsman Calculation ---
+  const standardPressure = 29.92; // inHg
+  const kollsmanPressure = 29.9; // Example, normally from KollsmanWindow
+  const pressureCorrection = (standardPressure - kollsmanPressure) * 1000; // feet per inHg
+  const adjustedAltitude = altitude + pressureCorrection;
+
   const w = typeof width === 'number' ? width : parseFloat(width);
   const h = typeof height === 'number' ? height : parseFloat(height);
   const centerX = w / 2;
@@ -34,7 +40,7 @@ export default function Altimeter({ width = 400, height = 400 }: AltimeterProps)
   const rightEnd = polarToCartesian(outerRadius, endAngle);
   const rightStart = polarToCartesian(outerRadius, startAngle);
 
-  // Ticks
+  // --- Ticks ---
   const majorTickCount = 10;
   const minorTickCount = 4;
   const tickRadius = Math.min(w, h) / 2.05;
@@ -81,15 +87,13 @@ export default function Altimeter({ width = 400, height = 400 }: AltimeterProps)
     }
   }
 
-  // Major numbers (0-9, skip 6)
+  // --- Numbers ---
   const numbers: JSX.Element[] = [];
   const labelRadius = tickRadius - tickLengthMajor - 15;
 
   for (let i = 0; i < majorTickCount; i++) {
     if (i === 6) continue;
-
     let angle = i * majorStep - Math.PI / 2;
-
     if (i === 2) angle -= 0.13;
     if (i === 3) angle += 0.12;
 
@@ -114,7 +118,7 @@ export default function Altimeter({ width = 400, height = 400 }: AltimeterProps)
     );
   }
 
-  // Extra labels
+  // --- Extra labels ---
   const labels: JSX.Element[] = [];
   const zeroAngle = -Math.PI / 2;
   const labelDistance = 140;
@@ -152,9 +156,9 @@ export default function Altimeter({ width = 400, height = 400 }: AltimeterProps)
     </text>
   );
 
-  // New left-side label: "CALIBRATED TO 20,000 FEET" stacked
-  const calibratedDistance = 50; // distance from center
-  const calibratedAngle = Math.PI; // 180°, left side
+  // Left-side "CALIBRATED TO 20,000 FEET"
+  const calibratedDistance = 50;
+  const calibratedAngle = Math.PI;
   const calibratedPos = polarToCartesian(calibratedDistance, calibratedAngle);
 
   labels.push(
@@ -171,7 +175,7 @@ export default function Altimeter({ width = 400, height = 400 }: AltimeterProps)
       <tspan x={calibratedPos.x} dy="-1.2em">
         CALIBRATED
       </tspan>
-      <tspan x={calibratedPos.x - 29} dy="1.2em">
+      <tspan x={calibratedPos.x} dy="1.2em">
         TO
       </tspan>
       <tspan x={calibratedPos.x} dy="1.2em">
@@ -182,7 +186,7 @@ export default function Altimeter({ width = 400, height = 400 }: AltimeterProps)
 
   const needleRotationOffset = 90;
 
-  // Kollsman indicator
+  // --- Kollsman Indicator ---
   const kollsmanPointerRadius = Math.min(w, h) / 2.2;
   const pointerAngle = 0;
   const pointerHeight = 12;
@@ -193,7 +197,6 @@ export default function Altimeter({ width = 400, height = 400 }: AltimeterProps)
   const pointerBottom = polarToCartesian(kollsmanPointerRadius, pointerAngle + halfAngle);
 
   const squareDepth = 14;
-
   const squareTopLeft = { x: pointerTop.x - 0.5, y: pointerTop.y };
   const squareTopRight = { x: pointerBottom.x - 0.5, y: pointerBottom.y };
   const squareBottomRight = { x: pointerBottom.x + squareDepth, y: pointerBottom.y };
@@ -235,7 +238,7 @@ export default function Altimeter({ width = 400, height = 400 }: AltimeterProps)
         </mask>
       </defs>
 
-      <KollsmanWindow width={w} height={h} value={30} min={29.5} max={30.5} />
+      <KollsmanWindow width={w} height={h} value={kollsmanPressure} min={29.5} max={30.5} />
       <circle
         cx={centerX}
         cy={centerY}
@@ -251,15 +254,15 @@ export default function Altimeter({ width = 400, height = 400 }: AltimeterProps)
 
       <NeedleTenThousand
         tipOffset={-131}
-        transform={`translate(${centerX}, ${centerY}) rotate(${needleRotationOffset + altitude * 0.0036})`}
+        transform={`translate(${centerX}, ${centerY}) rotate(${needleRotationOffset + adjustedAltitude * 0.0036})`}
       />
       <NeedleThousand
         tipOffset={-133}
-        transform={`translate(${centerX}, ${centerY}) rotate(${altitude * 0.036})`}
+        transform={`translate(${centerX}, ${centerY}) rotate(${adjustedAltitude * 0.036})`}
       />
       <NeedleHundred
         tipOffset={-131}
-        transform={`translate(${centerX}, ${centerY}) rotate(${needleRotationOffset + altitude * 0.36})`}
+        transform={`translate(${centerX}, ${centerY}) rotate(${needleRotationOffset + adjustedAltitude * 0.36})`}
       />
     </svg>
   );
