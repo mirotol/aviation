@@ -3,6 +3,7 @@ import { useAltitude } from '../../hooks/useAltitude';
 import NeedleHundred from './NeedleHundred';
 import NeedleThousand from './NeedleThousand';
 import NeedleTenThousand from './NeedleTenThousand';
+import KollsmanWindow from './KollsmanWindow';
 
 interface AltimeterProps {
   width?: number | string;
@@ -12,23 +13,21 @@ interface AltimeterProps {
 export default function Altimeter({ width = 400, height = 400 }: AltimeterProps) {
   const { altitude } = useAltitude();
 
-  // Ensure numeric values for calculations
   const w = typeof width === 'number' ? width : parseFloat(width);
   const h = typeof height === 'number' ? height : parseFloat(height);
   const centerX = w / 2;
   const centerY = h / 2;
 
-  // Radii based on the smaller dimension
   const outerRadius = Math.min(w, h) / 2.4;
   const innerRadius = Math.min(w, h) / 4;
-
-  const startAngle = -Math.PI / 11.5;
-  const endAngle = Math.PI / 11.5;
 
   const polarToCartesian = (r: number, angle: number) => ({
     x: centerX + r * Math.cos(angle),
     y: centerY + r * Math.sin(angle),
   });
+
+  const startAngle = -Math.PI / 11.5;
+  const endAngle = Math.PI / 11.5;
 
   const leftStart = polarToCartesian(innerRadius, startAngle);
   const leftEnd = polarToCartesian(innerRadius, endAngle);
@@ -37,7 +36,7 @@ export default function Altimeter({ width = 400, height = 400 }: AltimeterProps)
 
   // Ticks
   const majorTickCount = 10;
-  const minorTickCount = 4; // between major ticks
+  const minorTickCount = 4;
   const tickRadius = Math.min(w, h) / 2.05;
   const tickLengthMajor = 30;
   const tickLengthMinor = 18;
@@ -82,28 +81,25 @@ export default function Altimeter({ width = 400, height = 400 }: AltimeterProps)
     }
   }
 
-  // Numbers for major ticks
+  // Major numbers (0-9, skip 6)
   const numbers: JSX.Element[] = [];
-  const labelRadius = tickRadius - tickLengthMajor - 15; // distance from center
+  const labelRadius = tickRadius - tickLengthMajor - 15;
 
   for (let i = 0; i < majorTickCount; i++) {
-    if (i === 6) continue; // skip number 6
+    if (i === 6) continue;
 
     let angle = i * majorStep - Math.PI / 2;
 
-    // Shift numbers 2 and 3 slightly to avoid the gap
-    if (i === 2) angle -= 0.13; // small clockwise shift
-    if (i === 3) angle += 0.12; // small counter-clockwise shift
+    if (i === 2) angle -= 0.13;
+    if (i === 3) angle += 0.12;
 
     const pos = polarToCartesian(labelRadius, angle);
-
-    // Vertical offset
     const upperVerticalGroup = [0, 1, 2, 8, 9];
     const yOffset = upperVerticalGroup.includes(i) ? 15 : 7;
 
     numbers.push(
       <text
-        key={`label-${i}`}
+        key={`number-${i}`}
         x={pos.x}
         y={pos.y + yOffset}
         fill="#FFFFFF"
@@ -118,7 +114,108 @@ export default function Altimeter({ width = 400, height = 400 }: AltimeterProps)
     );
   }
 
+  // Extra labels
+  const labels: JSX.Element[] = [];
+  const zeroAngle = -Math.PI / 2;
+  const labelDistance = 140;
+
+  const label100 = polarToCartesian(labelDistance, zeroAngle - Math.PI / 18);
+  const labelFeet = polarToCartesian(labelDistance, zeroAngle + Math.PI / 18);
+
+  labels.push(
+    <text
+      key="label-100"
+      x={label100.x}
+      y={label100.y}
+      fill="#FFFFFF"
+      fontFamily="sans-serif"
+      fontSize={16}
+      textAnchor="end"
+      alignmentBaseline="middle"
+    >
+      100
+    </text>
+  );
+
+  labels.push(
+    <text
+      key="label-feet"
+      x={labelFeet.x}
+      y={labelFeet.y}
+      fill="#FFFFFF"
+      fontFamily="sans-serif"
+      fontSize={16}
+      textAnchor="start"
+      alignmentBaseline="middle"
+    >
+      FEET
+    </text>
+  );
+
+  // New left-side label: "CALIBRATED TO 20,000 FEET" stacked
+  const calibratedDistance = 50; // distance from center
+  const calibratedAngle = Math.PI; // 180°, left side
+  const calibratedPos = polarToCartesian(calibratedDistance, calibratedAngle);
+
+  labels.push(
+    <text
+      key="label-calibrated"
+      x={calibratedPos.x}
+      y={calibratedPos.y + 5}
+      fill="#FFFFFF"
+      fontFamily="sans-serif"
+      fontSize={12}
+      textAnchor="end"
+      alignmentBaseline="middle"
+    >
+      <tspan x={calibratedPos.x} dy="-1.2em">
+        CALIBRATED
+      </tspan>
+      <tspan x={calibratedPos.x - 29} dy="1.2em">
+        TO
+      </tspan>
+      <tspan x={calibratedPos.x} dy="1.2em">
+        20,000 FEET
+      </tspan>
+    </text>
+  );
+
   const needleRotationOffset = 90;
+
+  // Kollsman indicator
+  const kollsmanPointerRadius = Math.min(w, h) / 2.2;
+  const pointerAngle = 0;
+  const pointerHeight = 12;
+  const halfAngle = 0.025;
+
+  const pointerTip = polarToCartesian(kollsmanPointerRadius - pointerHeight, pointerAngle);
+  const pointerTop = polarToCartesian(kollsmanPointerRadius, pointerAngle - halfAngle);
+  const pointerBottom = polarToCartesian(kollsmanPointerRadius, pointerAngle + halfAngle);
+
+  const squareDepth = 14;
+
+  const squareTopLeft = { x: pointerTop.x - 0.5, y: pointerTop.y };
+  const squareTopRight = { x: pointerBottom.x - 0.5, y: pointerBottom.y };
+  const squareBottomRight = { x: pointerBottom.x + squareDepth, y: pointerBottom.y };
+  const squareBottomLeft = { x: pointerTop.x + squareDepth, y: pointerTop.y };
+
+  const kollsmanIndicator = (
+    <>
+      <polygon
+        points={`${pointerTip.x},${pointerTip.y} ${pointerTop.x},${pointerTop.y} ${pointerBottom.x},${pointerBottom.y}`}
+        fill="#fff"
+      />
+      <polygon
+        points={`
+          ${squareTopLeft.x},${squareTopLeft.y} 
+          ${squareTopRight.x},${squareTopRight.y} 
+          ${squareBottomRight.x},${squareBottomRight.y} 
+          ${squareBottomLeft.x},${squareBottomLeft.y}
+        `}
+        fill="#fff"
+      />
+    </>
+  );
 
   return (
     <svg width={w} height={h} viewBox={`0 0 ${w} ${h}`}>
@@ -137,6 +234,8 @@ export default function Altimeter({ width = 400, height = 400 }: AltimeterProps)
           />
         </mask>
       </defs>
+
+      <KollsmanWindow width={w} height={h} value={30} min={29.5} max={30.5} />
       <circle
         cx={centerX}
         cy={centerY}
@@ -144,18 +243,22 @@ export default function Altimeter({ width = 400, height = 400 }: AltimeterProps)
         fill="#232323"
         mask="url(#altimeterHoleMask)"
       />
+
+      {kollsmanIndicator}
       {ticks}
       {numbers}
+      {labels}
+
       <NeedleTenThousand
         tipOffset={-131}
         transform={`translate(${centerX}, ${centerY}) rotate(${needleRotationOffset + altitude * 0.0036})`}
       />
       <NeedleThousand
-        tipOffset={-133} // adjust this until the tip reaches the outer edge
+        tipOffset={-133}
         transform={`translate(${centerX}, ${centerY}) rotate(${altitude * 0.036})`}
       />
       <NeedleHundred
-        tipOffset={-131} // adjust this until the tip reaches the outer edge
+        tipOffset={-131}
         transform={`translate(${centerX}, ${centerY}) rotate(${needleRotationOffset + altitude * 0.36})`}
       />
     </svg>
