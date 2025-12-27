@@ -42,7 +42,7 @@ export default function AttitudeIndicator({ width = 400, height = 400 }: Attitud
             <stop offset="100%" stopColor="#4682B4" />
           </linearGradient>
           <linearGradient id="groundGrad" x1="0" y1="0" x2="0" y2="100">
-            <stop offset="0%" stopColor="#A0522D" />
+            <stop offset="0%" stopColor="#a0512db2" />
             <stop offset="100%" stopColor="#8B4513" />
           </linearGradient>
         </defs>
@@ -86,27 +86,65 @@ export default function AttitudeIndicator({ width = 400, height = 400 }: Attitud
               </text>
             </g>
           ))}
-          {/* Moving roll pointer (rotates with sky) */}
-          <polygon points="-5,-70 0,-78 5,-70" fill="orange" />{' '}
+          {/* Roll arc */}
+          {rollTicks.map((deg) => {
+            const rad = (deg * Math.PI) / 180;
+            const rOuter = 90;
+            const rInner = deg % 30 === 0 ? 80 : 85;
+            const x1 = Math.sin(rad) * rOuter;
+            const y1 = -Math.cos(rad) * rOuter;
+            const x2 = Math.sin(rad) * rInner;
+            const y2 = -Math.cos(rad) * rInner;
+            return (
+              <line key={deg} x1={x1} y1={y1} x2={x2} y2={y2} stroke="white" strokeWidth={2} />
+            );
+          })}
         </g>
 
         {/* Fixed aircraft reference symbol */}
-        <polygon points="-10,0 10,0 0,-10" fill="white" stroke="black" strokeWidth={1} />
-
-        {/* Roll arc */}
-        {rollTicks.map((deg) => {
-          const rad = (deg * Math.PI) / 180;
-          const rOuter = 90;
-          const rInner = deg % 30 === 0 ? 80 : 85;
-          const x1 = Math.sin(rad) * rOuter;
-          const y1 = -Math.cos(rad) * rOuter;
-          const x2 = Math.sin(rad) * rInner;
-          const y2 = -Math.cos(rad) * rInner;
-          return <line key={deg} x1={x1} y1={y1} x2={x2} y2={y2} stroke="white" strokeWidth={2} />;
-        })}
-
-        {/* Optional: center circle */}
-        <circle cx="0" cy="0" r="3" fill="white" />
+        <g fill="none">
+          {/* ORANGE WINGS */}
+          <line
+            x1={-50}
+            y1={0}
+            x2={-18}
+            y2={0}
+            stroke="orange"
+            strokeWidth={4}
+            strokeLinecap="round"
+          />
+          <line
+            x1={50}
+            y1={0}
+            x2={17}
+            y2={0}
+            stroke="orange"
+            strokeWidth={4}
+            strokeLinecap="round"
+          />
+          {/* === DOWNWARD SEMICIRCLE WITH LARGER GRAY SECTION === */}
+          {/* Short left orange arc */}
+          <path d="M -17 0 A 30 15 0 0 0 -17 6" stroke="orange" strokeWidth={3} fill="none" />
+          {/* Short right orange arc */}
+          <path d="M 17 6 A 30 15 0 0 0 17 0" stroke="orange" strokeWidth={3} fill="none" />
+          {/* **Large middle gray arc** */}
+          <path d="M -17 6 A 18 15 0 0 0 17 6" stroke="#b0a899" strokeWidth={3} fill="none" />
+          {/* CENTER VERTICAL BAR */}
+          <line x1={0} y1={0} x2={0} y2={15} stroke="#b0a899" strokeWidth={3} />
+          <line
+            x1={0}
+            y1={15}
+            x2={0}
+            y2={30}
+            stroke="#b0a899"
+            strokeWidth={6}
+            strokeLinecap="round"
+          />
+          {/* ORANGE CENTER DOT */}
+          <circle cx={0} cy={0} r={3} fill="orange" />
+          {/* BANK POINTER CHEVRON, ORANGE TRIANGLE */}
+          <polygon points="-5,-70 0,-78 5,-70" fill="none" stroke="orange" strokeWidth="2" />
+        </g>
       </svg>
     </InstrumentContainer>
   );

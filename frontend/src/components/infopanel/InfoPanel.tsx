@@ -5,7 +5,8 @@ import { useAirspeed } from '../../hooks/useAirSpeed';
 
 export default function InfoPanel() {
   const attitude = useAttitude();
-  const altitude = useAltitude();
+  const { altitude, kollsmanPressure } = useAltitude();
+
   const airspeed = useAirspeed();
 
   return (
@@ -25,7 +26,8 @@ export default function InfoPanel() {
       <div>Roll: {attitude.roll.toFixed(2)}°</div>
       <div>Yaw: {attitude.yaw.toFixed(2)}°</div>
       <br />
-      <div>Altitude: {altitude.altitude.toFixed(2)} ft</div>
+      <div>Altitude: {altitude.toFixed(2)} ft</div>
+      <div>Kollsman Pressure: {kollsmanPressure.toFixed(2)} inHg</div>
       <br />
       <div>Airspeed: {airspeed.speed.toFixed(2)} kt</div>
     </div>
