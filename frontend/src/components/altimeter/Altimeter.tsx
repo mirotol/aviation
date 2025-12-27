@@ -174,7 +174,7 @@ export default function Altimeter({ width = 400, height = 400 }: AltimeterProps)
       <tspan x={calibratedPos.x} dy="-1.2em">
         CALIBRATED
       </tspan>
-      <tspan x={calibratedPos.x} dy="1.2em">
+      <tspan x={calibratedPos.x - 30} dy="1.2em">
         TO
       </tspan>
       <tspan x={calibratedPos.x} dy="1.2em">
