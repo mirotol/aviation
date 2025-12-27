@@ -11,7 +11,7 @@ export interface AltitudeData {
 export function useAltitude() {
   const [alt, setAlt] = useState<AltitudeData>({
     altitude: 0,
-    kollsmanPressure: 29.92, // default sea-level
+    kollsmanPressure: 29.92, // default sea-level in inHg
   });
 
   useEffect(() => {

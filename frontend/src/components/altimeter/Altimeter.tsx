@@ -219,9 +219,32 @@ export default function Altimeter({ width = 400, height = 400 }: AltimeterProps)
     </>
   );
 
+  const bezelOuterRadius = Math.min(w, h) / 2 - 2;
+  const bezelThickness = 10;
+  const bezelInnerRadius = bezelOuterRadius - bezelThickness;
+  const bezelPath = `
+  M ${centerX},${centerY}
+  m -${bezelOuterRadius},0
+  a ${bezelOuterRadius},${bezelOuterRadius} 0 1,0 ${bezelOuterRadius * 2},0
+  a ${bezelOuterRadius},${bezelOuterRadius} 0 1,0 -${bezelOuterRadius * 2},0
+
+  M ${centerX},${centerY}
+  m -${bezelInnerRadius},0
+  a ${bezelInnerRadius},${bezelInnerRadius} 0 1,1 ${bezelInnerRadius * 2},0
+  a ${bezelInnerRadius},${bezelInnerRadius} 0 1,1 -${bezelInnerRadius * 2},0
+  `;
+
   return (
     <svg width={w} height={h} viewBox={`0 0 ${w} ${h}`}>
       <defs>
+        <filter id="bezelShadow" x="-20%" y="-20%" width="140%" height="140%">
+          <feGaussianBlur in="SourceAlpha" stdDeviation="5" result="blur" />
+          <feOffset dx="0" dy="0" result="offsetBlur" />
+          <feMerge>
+            <feMergeNode in="offsetBlur" />
+            <feMergeNode in="SourceGraphic" />
+          </feMerge>
+        </filter>
         <mask id="altimeterHoleMask">
           <rect width={w} height={h} fill="white" />
           <path
@@ -237,7 +260,7 @@ export default function Altimeter({ width = 400, height = 400 }: AltimeterProps)
         </mask>
       </defs>
 
-      <KollsmanWindow width={w} height={h} value={kollsmanPressure} min={29.5} max={30.5} />
+      <KollsmanWindow width={w} height={h} value={kollsmanPressure} />
       <circle
         cx={centerX}
         cy={centerY}
@@ -263,6 +286,8 @@ export default function Altimeter({ width = 400, height = 400 }: AltimeterProps)
         tipOffset={-131}
         transform={`translate(${centerX}, ${centerY}) rotate(${needleRotationOffset + adjustedAltitude * 0.36})`}
       />
+
+      <path d={bezelPath} fill="#232323" fillRule="evenodd" filter="url(#bezelShadow)" />
     </svg>
   );
 }
