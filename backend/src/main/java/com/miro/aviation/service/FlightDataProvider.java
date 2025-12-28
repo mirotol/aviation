@@ -12,5 +12,10 @@ public interface FlightDataProvider {
 
     AirSpeed getSpeed();
 
-    // Extend later with more statistics
+    //TODO: Extend with more statistics
+
+    default void tick() {
+        // simulated providers may override
+    }
+
 }
