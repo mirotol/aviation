@@ -1,9 +1,7 @@
 package com.miro.aviation.controller;
 
-import com.miro.aviation.model.AirSpeed;
-import com.miro.aviation.model.Altitude;
-import com.miro.aviation.model.Attitude;
 import com.miro.aviation.service.FlightDataProvider;
+import com.miro.aviation.service.FlightSnapshot;
 import com.miro.aviation.service.RecordedFlightDataProvider;
 import com.miro.aviation.service.SimulatedFlightDataProvider;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -33,20 +31,12 @@ public class FlightDataWebSocketController {
     // Broadcast every 50ms (~20Hz)
     @Scheduled(fixedRate = 50)
     public void broadcastFlightData() {
+        FlightSnapshot snapshot = activeProvider.getCurrentSnapshot();
+        messagingTemplate.convertAndSend("/topic/flightData", snapshot);
 
-        // advance recorded flight if active
-        if (activeProvider instanceof RecordedFlightDataProvider recorded) {
-            recorded.tick();
+        if (activeProvider instanceof RecordedFlightDataProvider) {
+            activeProvider.tick();
         }
-
-        Attitude attitude = activeProvider.getAttitude();
-        Altitude altitude = activeProvider.getAltitude();
-        AirSpeed airSpeed = activeProvider.getSpeed();
-
-        // Converts Java classes into JSON using Jackson
-        messagingTemplate.convertAndSend("/topic/attitude", attitude);
-        messagingTemplate.convertAndSend("/topic/altitude", altitude);
-        messagingTemplate.convertAndSend("/topic/airspeed", airSpeed);
     }
 
     // Endpoint for frontend to switch provider

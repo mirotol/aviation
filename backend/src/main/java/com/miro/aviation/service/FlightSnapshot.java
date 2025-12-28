@@ -14,6 +14,16 @@ public class FlightSnapshot {
     private Altitude altitude;
     private AirSpeed airSpeed;
 
+    public FlightSnapshot(long timestamp, Attitude attitude, Altitude altitude, AirSpeed airSpeed) {
+        this.timestamp = timestamp;
+        this.attitude = attitude;
+        this.altitude = altitude;
+        this.airSpeed = airSpeed;
+    }
+
+    public FlightSnapshot() {
+    }
+
     public long getTimestamp() {
         return timestamp;
     }

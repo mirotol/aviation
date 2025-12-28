@@ -1,5 +1,5 @@
 import React, { JSX } from 'react';
-import { useAltitude } from '../../hooks/useAltitude';
+import { useFlightData } from '../../hooks/useFlightData';
 import NeedleHundred from './NeedleHundred';
 import NeedleThousand from './NeedleThousand';
 import NeedleTenThousand from './NeedleTenThousand';
@@ -11,7 +11,9 @@ interface AltimeterProps {
 }
 
 export default function Altimeter({ width = 400, height = 400 }: AltimeterProps) {
-  const { altitude, kollsmanPressure } = useAltitude();
+  const snapshot = useFlightData();
+  const altitude = snapshot?.altitude.altitude ?? 0;
+  const kollsmanPressure = snapshot?.altitude.kollsmanPressure ?? 29.92;
 
   // --- Kollsman Calculation ---
   const standardPressure = 29.92; // inHg
