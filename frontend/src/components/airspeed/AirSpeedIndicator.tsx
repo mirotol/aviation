@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useAirspeed } from '../../hooks/useAirSpeed';
+import { useFlightData } from '../../hooks/useFlightData';
 import InstrumentContainer from '../common/InstrumentContainer';
 
 interface AirspeedIndicatorProps {
@@ -8,7 +8,8 @@ interface AirspeedIndicatorProps {
 }
 
 export default function AirspeedIndicator({ width = 400, height = 400 }: AirspeedIndicatorProps) {
-  const { speed } = useAirspeed();
+  const snapshot = useFlightData();
+  const speed = snapshot?.airSpeed.speed ?? 0;
   const [displaySpeed, setDisplaySpeed] = useState(0);
 
   const minSpeed = 40;

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import InstrumentContainer from '../common/InstrumentContainer';
-import { useAttitude } from '../../hooks/useAttitude';
+import { useFlightData } from '../../hooks/useFlightData';
 
 interface AttitudeIndicatorProps {
   width?: string | number;
@@ -8,7 +8,8 @@ interface AttitudeIndicatorProps {
 }
 
 export default function AttitudeIndicator({ width = 400, height = 400 }: AttitudeIndicatorProps) {
-  const attitude = useAttitude();
+  const snapshot = useFlightData();
+  const attitude = snapshot?.attitude ?? { pitch: 0, roll: 0, yaw: 0 };
 
   const [displayPitch, setDisplayPitch] = useState(0);
   const [displayRoll, setDisplayRoll] = useState(0);

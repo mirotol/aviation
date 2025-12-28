@@ -20,6 +20,27 @@ public class RecordedFlightDataProvider implements FlightDataProvider {
     private List<FlightSnapshot> flightData;
     private int index = 0;
 
+    @Override
+    public Attitude getAttitude() {
+        return flightData.get(index).getAttitude();
+    }
+
+    @Override
+    public Altitude getAltitude() {
+        return flightData.get(index).getAltitude();
+    }
+
+    @Override
+    public AirSpeed getSpeed() {
+        return flightData.get(index).getAirSpeed();
+    }
+
+    @Override
+    public FlightSnapshot getCurrentSnapshot() {
+        if (flightData.isEmpty()) return null;
+        return flightData.get(index);
+    }
+
     // time (in ms) at which the next snapshot should be shown
     private long nextAdvanceTime = 0;
 
@@ -41,21 +62,6 @@ public class RecordedFlightDataProvider implements FlightDataProvider {
             e.printStackTrace();
             flightData = List.of(); // fallback empty list
         }
-    }
-
-    @Override
-    public Attitude getAttitude() {
-        return flightData.get(index).getAttitude();
-    }
-
-    @Override
-    public Altitude getAltitude() {
-        return flightData.get(index).getAltitude();
-    }
-
-    @Override
-    public AirSpeed getSpeed() {
-        return flightData.get(index).getAirSpeed();
     }
 
     public void tick() {

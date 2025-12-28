@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
-import { useAttitude } from '../../hooks/useAttitude';
-import { useAltitude } from '../../hooks/useAltitude';
-import { useAirspeed } from '../../hooks/useAirSpeed';
+import { useFlightData } from '../../hooks/useFlightData';
 import { useFlightProviderSwitch } from '../../hooks/useFlightProviderSwitch';
 
 export default function InfoPanel() {
-  const attitude = useAttitude();
-  const { altitude, kollsmanPressure } = useAltitude();
-  const airspeed = useAirspeed();
+  const snapshot = useFlightData();
+  const attitude = snapshot?.attitude ?? { pitch: 0, roll: 0, yaw: 0 };
+  const altitude = snapshot?.altitude.altitude ?? 0;
+  const kollsmanPressure = snapshot?.altitude.kollsmanPressure ?? 29.92;
+  const airspeed = snapshot?.airSpeed.speed ?? 0;
 
   const { switchProvider } = useFlightProviderSwitch();
   const [active, setActive] = useState<'simulated' | 'recorded'>('simulated');
@@ -68,7 +68,7 @@ export default function InfoPanel() {
 
       <br />
 
-      <div>Airspeed: {airspeed.speed.toFixed(2)} kt</div>
+      <div>Airspeed: {airspeed.toFixed(2)} kt</div>
     </div>
   );
 }

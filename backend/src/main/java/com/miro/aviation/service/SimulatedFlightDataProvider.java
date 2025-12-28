@@ -34,4 +34,16 @@ public class SimulatedFlightDataProvider implements FlightDataProvider {
     public AirSpeed getSpeed() {
         return speedSim.getCurrentAirSpeed();
     }
+
+    @Override
+    public FlightSnapshot getCurrentSnapshot() {
+        return new FlightSnapshot(
+                System.currentTimeMillis(),
+                getAttitude(),
+                getAltitude(),
+                getSpeed()
+        );
+    }
+
+
 }
