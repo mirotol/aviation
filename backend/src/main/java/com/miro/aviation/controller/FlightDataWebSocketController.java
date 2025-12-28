@@ -33,6 +33,12 @@ public class FlightDataWebSocketController {
     // Broadcast every 50ms (~20Hz)
     @Scheduled(fixedRate = 50)
     public void broadcastFlightData() {
+
+        // advance recorded flight if active
+        if (activeProvider instanceof RecordedFlightDataProvider recorded) {
+            recorded.tick();
+        }
+
         Attitude attitude = activeProvider.getAttitude();
         Altitude altitude = activeProvider.getAltitude();
         AirSpeed airSpeed = activeProvider.getSpeed();
@@ -41,16 +47,12 @@ public class FlightDataWebSocketController {
         messagingTemplate.convertAndSend("/topic/attitude", attitude);
         messagingTemplate.convertAndSend("/topic/altitude", altitude);
         messagingTemplate.convertAndSend("/topic/airspeed", airSpeed);
-
-        // advance recorded flight if active
-        if (activeProvider instanceof RecordedFlightDataProvider) {
-            ((RecordedFlightDataProvider) activeProvider).next();
-        }
     }
 
     // Endpoint for frontend to switch provider
     @MessageMapping("/switchProvider")
     public void switchProvider(String providerName) {
+        System.out.println("Switching provider to: " + providerName);
         if ("simulated".equalsIgnoreCase(providerName)) {
             activeProvider = simulatedProvider;
         } else if ("recorded".equalsIgnoreCase(providerName)) {

@@ -9,17 +9,17 @@ import com.miro.aviation.model.Attitude;
  */
 public class FlightSnapshot {
 
+    private long timestamp; // epoch seconds or millis
     private Attitude attitude;
     private Altitude altitude;
     private AirSpeed airSpeed;
 
-    public FlightSnapshot() {
-        // default constructor
+    public long getTimestamp() {
+        return timestamp;
     }
 
-    public FlightSnapshot(Attitude attitude, Altitude altitude) {
-        this.attitude = attitude;
-        this.altitude = altitude;
+    public void setTimestamp(long timestamp) {
+        this.timestamp = timestamp;
     }
 
     public Attitude getAttitude() {
