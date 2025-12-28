@@ -51,6 +51,7 @@ public class FlightDataWebSocketController {
     // Endpoint for frontend to switch provider
     @MessageMapping("/switchProvider")
     public void switchProvider(String providerName) {
+        System.out.println("Switching provider to: " + providerName);
         if ("simulated".equalsIgnoreCase(providerName)) {
             activeProvider = simulatedProvider;
         } else if ("recorded".equalsIgnoreCase(providerName)) {

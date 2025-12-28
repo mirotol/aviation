@@ -3,6 +3,7 @@ package com.miro.aviation.service;
 import com.miro.aviation.model.AirSpeed;
 import com.miro.aviation.model.Altitude;
 import com.miro.aviation.model.Attitude;
+import com.miro.aviation.utils.CsvFlightLoader;
 import jakarta.annotation.PostConstruct;
 import org.springframework.stereotype.Service;
 
@@ -11,13 +12,19 @@ import java.util.List;
 @Service
 public class RecordedFlightDataProvider implements FlightDataProvider {
 
-    private List<FlightSnapshot> flightData; // custom DTO: Attitude + Altitude
+    private List<FlightSnapshot> flightData;
     private int index = 0;
 
     @PostConstruct
     public void loadFlightData() {
-        // TODO: load CSV or JSON into flightData list
-        // Example: flightData = CsvLoader.load("flight1.csv");
+        try {
+            flightData = CsvFlightLoader.load(
+                    getClass().getResourceAsStream("/flights/AY523_2025_12_28.csv") // test CSV
+            );
+        } catch (Exception e) {
+            e.printStackTrace();
+            flightData = List.of(); // fallback empty list
+        }
     }
 
     @Override
@@ -27,7 +34,9 @@ public class RecordedFlightDataProvider implements FlightDataProvider {
 
     @Override
     public Altitude getAltitude() {
-        return flightData.get(index).getAltitude();
+        Altitude alt = flightData.get(index).getAltitude();
+        System.out.println("REC index=" + index + " alt=" + alt.getAltitude());
+        return alt;
     }
 
     @Override
