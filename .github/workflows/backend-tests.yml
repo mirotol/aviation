@@ -27,6 +27,7 @@ jobs:
         run: chmod +x gradlew
 
       - name: Run tests + coverage
+        working-directory: backend
         run: ./gradlew test jacocoTestReport
 
       - name: Upload coverage to Codecov
