@@ -6,6 +6,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 @SpringBootTest
 class AviationApplicationTests {
 
+	// Github workflow trigger test
 	@Test
 	void contextLoads() {
 	}
