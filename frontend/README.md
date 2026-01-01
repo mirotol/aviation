@@ -55,6 +55,7 @@ To start the development server with Hot Module Replacement (HMR):
 ```bash
 npm run dev
 ```
+By default, the application will be available at `http://localhost:5173`.
 
 ## Linting and Formatting
 
