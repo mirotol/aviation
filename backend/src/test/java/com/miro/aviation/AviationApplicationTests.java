@@ -9,6 +9,7 @@ class AviationApplicationTests {
 	// Github workflow trigger test
 	@Test
 	void contextLoads() {
+		throw new RuntimeException("Intentional failure to test branch protection");
 	}
 
 }
