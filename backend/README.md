@@ -1,3 +1,5 @@
+[![codecov](https://codecov.io/gh/mirotol/aviation/branch/master/graph/badge.svg)](https://codecov.io/gh/mirotol/aviation)
+
 ## Features
 
 *   **Real-time Flight Telemetry**: Stream flight data snapshots including altitude, airspeed, and attitude (roll, pitch, yaw).
@@ -53,3 +55,7 @@ Default file: `AY523_2025_12_28.csv`.
 
 **Required CSV Headers:**
 `Timestamp`, `Altitude`, `Speed`, `Direction`.
+
+## Code Coverage
+![Coverage History](https://codecov.io/gh/mirotol/aviation/graphs/icicle.svg)
+    
