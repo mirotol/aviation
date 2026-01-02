@@ -7,12 +7,13 @@ import com.miro.aviation.utils.CsvFlightLoader;
 import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
-
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 
-@Service
+@Component
+@Scope("prototype") // Every client gets their own provider
 public class RecordedFlightDataProvider implements FlightDataProvider {
 
     private static final Logger logger = LoggerFactory.getLogger(RecordedFlightDataProvider.class);
