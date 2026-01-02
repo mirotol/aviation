@@ -2,6 +2,12 @@
 
 A full-stack application for real-time flight telemetry visualization. This project features a Spring Boot backend that streams flight data via WebSockets and a React-based frontend cockpit dashboard.
 
+
+## UI Preview
+
+![UI Preview](docs/images/ui_preview.png)
+
+
 ## Project Overview
 
 The **Aviation Project** provides a real-time cockpit interface with live flight instruments. It supports two modes of data:
