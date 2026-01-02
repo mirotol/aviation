@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useWebSocket } from '../../contexts/WebSocketContext';
+import { formatZuluTime } from '../../utils/timeUtils';
 
 export default function InfoPanel() {
   const { snapshot, switchProvider, isConnected, activeProvider, reconnectCountdown } =
@@ -102,6 +103,11 @@ export default function InfoPanel() {
         </p>
         {snapshot ? (
           <div style={{ backgroundColor: '#111', padding: '15px', borderRadius: '6px' }}>
+            <div style={dataRowStyle}>
+              <span>Time</span>
+              <span style={{ color: '#4a90e2' }}>{formatZuluTime(snapshot.timestamp)}</span>
+            </div>
+            {/* ... rest of the rows ... */}
             <div style={dataRowStyle}>
               <span>Altitude</span>
               <span style={{ color: '#4a90e2' }}>{snapshot.altitude.altitude.toFixed(0)} FT</span>
