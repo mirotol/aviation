@@ -32,7 +32,7 @@ export default function AttitudeIndicator({ width = 400, height = 400 }: Attitud
   const pitchMarkers = [30, 20, 10, -10, -20, -30];
 
   return (
-    <InstrumentContainer title="Attitude Indicator">
+    <InstrumentContainer>
       <svg width={width} height={height} viewBox="-125 -125 250 250">
         <defs>
           <clipPath id="circleClip">

@@ -58,7 +58,7 @@ export default function AirspeedIndicator({ width = 400, height = 400 }: Airspee
   const needleAngle = speedToAngle(displaySpeed);
 
   return (
-    <InstrumentContainer title="Airspeed">
+    <InstrumentContainer>
       <svg width={width} height={height} viewBox="-125 -125 250 250">
         {/* Outer circle */}
         <circle cx={0} cy={0} r={100} fill="#222" stroke="white" strokeWidth={2} />
