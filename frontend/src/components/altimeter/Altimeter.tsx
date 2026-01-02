@@ -4,6 +4,7 @@ import NeedleHundred from './NeedleHundred';
 import NeedleThousand from './NeedleThousand';
 import NeedleTenThousand from './NeedleTenThousand';
 import KollsmanWindow from './KollsmanWindow';
+import InstrumentContainer from '../common/InstrumentContainer';
 
 interface AltimeterProps {
   width?: number | string;
@@ -122,7 +123,15 @@ export default function Altimeter({ width = 400, height = 400 }: AltimeterProps)
   // --- Extra labels ---
   const labels: JSX.Element[] = [];
   const zeroAngle = -Math.PI / 2;
-  const labelDistance = 140;
+
+  // Calculate distances as a ratio of the instrument size
+  const baseRadius = Math.min(w, h) / 2;
+  const labelDistance = baseRadius * 0.7; // 70% of the radius
+  const calibratedDistance = baseRadius * 0.25; // 25% of the radius
+
+  // Scale font sizes based on width
+  const labelFontSize = Math.max(8, w / 25);
+  const smallFontSize = Math.max(6, w / 33);
 
   const label100 = polarToCartesian(labelDistance, zeroAngle - Math.PI / 18);
   const labelFeet = polarToCartesian(labelDistance, zeroAngle + Math.PI / 18);
@@ -134,7 +143,7 @@ export default function Altimeter({ width = 400, height = 400 }: AltimeterProps)
       y={label100.y}
       fill="#FFFFFF"
       fontFamily="sans-serif"
-      fontSize={16}
+      fontSize={labelFontSize}
       textAnchor="end"
       alignmentBaseline="middle"
     >
@@ -149,7 +158,7 @@ export default function Altimeter({ width = 400, height = 400 }: AltimeterProps)
       y={labelFeet.y}
       fill="#FFFFFF"
       fontFamily="sans-serif"
-      fontSize={16}
+      fontSize={labelFontSize}
       textAnchor="start"
       alignmentBaseline="middle"
     >
@@ -158,7 +167,6 @@ export default function Altimeter({ width = 400, height = 400 }: AltimeterProps)
   );
 
   // Left-side "CALIBRATED TO 20,000 FEET"
-  const calibratedDistance = 50;
   const calibratedAngle = Math.PI;
   const calibratedPos = polarToCartesian(calibratedDistance, calibratedAngle);
 
@@ -169,7 +177,7 @@ export default function Altimeter({ width = 400, height = 400 }: AltimeterProps)
       y={calibratedPos.y + 5}
       fill="#FFFFFF"
       fontFamily="sans-serif"
-      fontSize={12}
+      fontSize={smallFontSize}
       textAnchor="end"
       alignmentBaseline="middle"
     >
@@ -211,9 +219,9 @@ export default function Altimeter({ width = 400, height = 400 }: AltimeterProps)
       />
       <polygon
         points={`
-          ${squareTopLeft.x},${squareTopLeft.y} 
-          ${squareTopRight.x},${squareTopRight.y} 
-          ${squareBottomRight.x},${squareBottomRight.y} 
+          ${squareTopLeft.x},${squareTopLeft.y}
+          ${squareTopRight.x},${squareTopRight.y}
+          ${squareBottomRight.x},${squareBottomRight.y}
           ${squareBottomLeft.x},${squareBottomLeft.y}
         `}
         fill="#fff"
@@ -237,59 +245,61 @@ export default function Altimeter({ width = 400, height = 400 }: AltimeterProps)
   `;
 
   return (
-    <svg width={w} height={h} viewBox={`0 0 ${w} ${h}`}>
-      <defs>
-        <filter id="bezelShadow" x="-20%" y="-20%" width="140%" height="140%">
-          <feGaussianBlur in="SourceAlpha" stdDeviation="5" result="blur" />
-          <feOffset dx="0" dy="0" result="offsetBlur" />
-          <feMerge>
-            <feMergeNode in="offsetBlur" />
-            <feMergeNode in="SourceGraphic" />
-          </feMerge>
-        </filter>
-        <mask id="altimeterHoleMask">
-          <rect width={w} height={h} fill="white" />
-          <path
-            d={`
+    <InstrumentContainer>
+      <svg width={w} height={h} viewBox={`0 0 ${w} ${h}`}>
+        <defs>
+          <filter id="bezelShadow" x="-20%" y="-20%" width="140%" height="140%">
+            <feGaussianBlur in="SourceAlpha" stdDeviation="5" result="blur" />
+            <feOffset dx="0" dy="0" result="offsetBlur" />
+            <feMerge>
+              <feMergeNode in="offsetBlur" />
+              <feMergeNode in="SourceGraphic" />
+            </feMerge>
+          </filter>
+          <mask id="altimeterHoleMask">
+            <rect width={w} height={h} fill="white" />
+            <path
+              d={`
               M ${leftStart.x} ${leftStart.y}
               A ${innerRadius} ${innerRadius} 0 0 1 ${leftEnd.x} ${leftEnd.y}
               L ${rightEnd.x} ${rightEnd.y}
               A ${outerRadius} ${outerRadius} 0 0 0 ${rightStart.x} ${rightStart.y}
               Z
             `}
-            fill="black"
-          />
-        </mask>
-      </defs>
+              fill="black"
+            />
+          </mask>
+        </defs>
 
-      <KollsmanWindow width={w} height={h} value={kollsmanPressure} />
-      <circle
-        cx={centerX}
-        cy={centerY}
-        r={Math.min(w, h) / 2}
-        fill="#232323"
-        mask="url(#altimeterHoleMask)"
-      />
+        <KollsmanWindow width={w} height={h} value={kollsmanPressure} />
+        <circle
+          cx={centerX}
+          cy={centerY}
+          r={Math.min(w, h) / 2}
+          fill="#232323"
+          mask="url(#altimeterHoleMask)"
+        />
 
-      {kollsmanIndicator}
-      {ticks}
-      {numbers}
-      {labels}
+        {kollsmanIndicator}
+        {ticks}
+        {numbers}
+        {labels}
 
-      <NeedleTenThousand
-        tipOffset={-131}
-        transform={`translate(${centerX}, ${centerY}) rotate(${needleRotationOffset + adjustedAltitude * 0.0036})`}
-      />
-      <NeedleThousand
-        tipOffset={-133}
-        transform={`translate(${centerX}, ${centerY}) rotate(${adjustedAltitude * 0.036})`}
-      />
-      <NeedleHundred
-        tipOffset={-131}
-        transform={`translate(${centerX}, ${centerY}) rotate(${needleRotationOffset + adjustedAltitude * 0.36})`}
-      />
+        <NeedleTenThousand
+          tipOffset={-131}
+          transform={`translate(${centerX}, ${centerY}) rotate(${needleRotationOffset + adjustedAltitude * 0.0036})`}
+        />
+        <NeedleThousand
+          tipOffset={-133}
+          transform={`translate(${centerX}, ${centerY}) rotate(${adjustedAltitude * 0.036})`}
+        />
+        <NeedleHundred
+          tipOffset={-131}
+          transform={`translate(${centerX}, ${centerY}) rotate(${needleRotationOffset + adjustedAltitude * 0.36})`}
+        />
 
-      <path d={bezelPath} fill="#232323" fillRule="evenodd" filter="url(#bezelShadow)" />
-    </svg>
+        <path d={bezelPath} fill="#232323" fillRule="evenodd" filter="url(#bezelShadow)" />
+      </svg>
+    </InstrumentContainer>
   );
 }
