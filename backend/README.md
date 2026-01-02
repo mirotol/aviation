@@ -40,7 +40,7 @@
 The application uses STOMP over WebSockets for real-time data delivery.
 
 *   **Telemetry Stream**: Subscribe to `/topic/flightData` to receive `FlightSnapshot` objects.
-    *   **Broadcast Frequency**: 20Hz (every 50ms).
+    *   **Broadcast Frequency**: 20 Hz (every 50 ms).
 *   **Provider Switching**: Send a message to `/app/switchProvider` with one of the following strings to toggle the data source:
     *   `"simulated"`: Starts the dynamic math-based simulator.
     *   `"recorded"`: Begins playback of the CSV flight log from the start.
