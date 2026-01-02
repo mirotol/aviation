@@ -5,7 +5,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.Random;
 
-@Service
 public class AttitudeSimulatorService {
 
     private final Random random = new Random();

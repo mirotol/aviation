@@ -1,35 +1,37 @@
+import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
-import { useFlightData, FlightSnapshot } from '../useFlightData';
+import { useFlightData } from '../useFlightData';
+import { WebSocketProvider, FlightSnapshot } from '../../contexts/WebSocketContext';
 
 // Mock SockJS
 jest.mock('sockjs-client', () => {
   return jest.fn().mockImplementation(() => ({}));
 });
 
-// Mock STOMP client
 const mockTimestamp = Date.now();
+const fakeSnapshot: FlightSnapshot = {
+  timestamp: mockTimestamp,
+  attitude: { pitch: 1, roll: 2, yaw: 3 },
+  altitude: { altitude: 1000, kollsmanPressure: 29.92 },
+  airSpeed: { speed: 250 },
+};
+
+// Mock STOMP client
 jest.mock('@stomp/stompjs', () => {
   return {
-    Client: jest.fn().mockImplementation(() => {
+    Client: jest.fn().mockImplementation((config) => {
       const client = {
         activate: jest.fn(() => {
-          // Trigger onConnect when activate is called
-          if (client.onConnect) {
-            client.onConnect({});
+          if (config.onConnect) {
+            config.onConnect({});
           }
         }),
         deactivate: jest.fn(),
-        subscribe: jest.fn((destination: string, callback: any) => {
-          // Simulate receiving a flight snapshot immediately
-          const fakeSnapshot: FlightSnapshot = {
-            timestamp: mockTimestamp,
-            attitude: { pitch: 1, roll: 2, yaw: 3 },
-            altitude: { altitude: 1000, kollsmanPressure: 29.92 },
-            airSpeed: { speed: 250 },
-          };
+        subscribe: jest.fn((_dest, callback) => {
           callback({ body: JSON.stringify(fakeSnapshot) });
         }),
-        onConnect: null as any,
+        publish: jest.fn(),
+        connected: true,
       };
       return client;
     }),
@@ -37,21 +39,32 @@ jest.mock('@stomp/stompjs', () => {
 });
 
 describe('useFlightData hook', () => {
-  it('receives a flight snapshot', async () => {
-    const { result } = renderHook(() => useFlightData());
+  it('receives a complete flight snapshot', async () => {
+    const wrapper = ({ children }: { children: React.ReactNode }) => (
+      <WebSocketProvider>{children}</WebSocketProvider>
+    );
 
-    // Wait for the hook state to be updated
+    const { result } = renderHook(() => useFlightData(), { wrapper });
+
     await waitFor(() => {
       expect(result.current).not.toBeNull();
-    });
+    }, { timeout: 2000 });
 
     const snapshot = result.current!;
+    
+    // Core Metadata
     expect(snapshot.timestamp).toBe(mockTimestamp);
+
+    // Attitude verification
     expect(snapshot.attitude.pitch).toBe(1);
     expect(snapshot.attitude.roll).toBe(2);
     expect(snapshot.attitude.yaw).toBe(3);
+
+    // Altitude verification
     expect(snapshot.altitude.altitude).toBe(1000);
     expect(snapshot.altitude.kollsmanPressure).toBe(29.92);
+
+    // Airspeed verification
     expect(snapshot.airSpeed.speed).toBe(250);
   });
 });

@@ -19,7 +19,13 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void configureMessageBroker(MessageBrokerRegistry registry) {
-        registry.enableSimpleBroker("/topic"); // where server pushes updates
-        registry.setApplicationDestinationPrefixes("/app"); // where client sends messages
+        // Add "/queue" to support private, user-specific messaging
+        registry.enableSimpleBroker("/topic", "/queue"); 
+        
+        registry.setApplicationDestinationPrefixes("/app");
+        
+        // This tells Spring that any destination starting with /user is 
+        // a "User Destination" and should be handled by the UserDestinationMessageHandler
+        registry.setUserDestinationPrefix("/user");
     }
 }

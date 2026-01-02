@@ -20,7 +20,7 @@ This is the frontend application for the Aviation Project, built with React, Typ
 
 ## Project Structure
 
-- `src/components/dashboard`: Main entry point for the cockpit interface.
+- `src/components/cockpit`: Main entry point for the cockpit interface.
 - `src/components/attitudeindicator`: Logic and styles for the artificial horizon.
 - `src/components/altimeter`: Vertical flight data visualization.
 - `src/components/airspeed`: Velocity data visualization.
@@ -31,7 +31,7 @@ This is the frontend application for the Aviation Project, built with React, Typ
 
 ### Prerequisites
 
-Ensure you have Node.js installed on your machine.
+Ensure you have Node.js installed on your machine (latest LTS).
 
 ### Installation
 
@@ -55,6 +55,7 @@ To start the development server with Hot Module Replacement (HMR):
 ```bash
 npm run dev
 ```
+
 By default, the application will be available at `http://localhost:5173`.
 
 ## Linting and Formatting
