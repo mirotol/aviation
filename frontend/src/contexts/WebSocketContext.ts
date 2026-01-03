@@ -5,6 +5,7 @@ export interface FlightSnapshot {
   attitude: { pitch: number; roll: number; yaw: number };
   altitude: { altitude: number; kollsmanPressure: number };
   airSpeed: { speed: number };
+  position: { latitude: number; longitude: number };
   progress: {
     currentIndex: number;
     totalSamples: number;

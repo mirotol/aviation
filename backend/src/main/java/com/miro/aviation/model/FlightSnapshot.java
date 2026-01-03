@@ -2,21 +2,25 @@ package com.miro.aviation.model;
 
 /**
  * Represents a single snapshot of flight data.
+ * In future can use JsonPropertyOrder for ordering JSON properties for frontend if needed
  */
+//
 public class FlightSnapshot {
 
     private long timestamp; // epoch seconds or millis
     private Attitude attitude;
     private Altitude altitude;
     private AirSpeed airSpeed;
+    private Position position;
     private PlaybackProgress progress;
 
-    public FlightSnapshot(long timestamp, Attitude attitude, Altitude altitude, AirSpeed airSpeed, PlaybackProgress progress) {
+    public FlightSnapshot(long timestamp, Attitude attitude, Altitude altitude, AirSpeed airSpeed, PlaybackProgress progress, Position position) {
         this.timestamp = timestamp;
         this.attitude = attitude;
         this.altitude = altitude;
         this.airSpeed = airSpeed;
         this.progress = progress;
+        this.position = position;
     }
 
     public FlightSnapshot() {
@@ -60,5 +64,13 @@ public class FlightSnapshot {
 
     public void setProgress(PlaybackProgress progress) {
         this.progress = progress;
+    }
+
+    public Position getPosition() {
+        return position;
+    }
+
+    public void setPosition(Position position) {
+        this.position = position;
     }
 }
