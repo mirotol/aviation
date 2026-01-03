@@ -24,8 +24,12 @@ The **Aviation Project** provides a real-time cockpit interface with live flight
 - **Live Flight Instruments**: Visual Attitude Indicator (Pitch/Roll), Altimeter, and Airspeed Indicator.
 - **WebSocket Streaming**: Low-latency data delivery using STOMP over SockJS.
 - **Data Flexibility**: Ability to switch between live simulations and recorded CSV data.
+- **Simulation & Playback Control**: 
+    - **Pause/Resume**: Instantly freeze simulation state across both live and recorded providers.
+    - **Variable Time Scale**: Analysis-grade speeds from **0.25x** (for landing analysis) up to **16x** (for rapid transitions).
+    - **Time-Deterministic Engine**: Backend services utilize a scaled `deltaTime` architecture for smooth movement at any speed.
 
-## GitHub Workflows
+## Project Structure
 
 This project uses GitHub Actions to automate testing and quality assurance:
 

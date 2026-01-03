@@ -1,7 +1,7 @@
 import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
 import { useAvailableFlights } from '../useAvailableFlights';
-import { WebSocketProvider } from '../../contexts/WebSocketContext';
+import { WebSocketProvider } from '../../contexts/WebSocketProvider';
 
 /**
  * Note: This test relies on src/setupTests.ts to provide TextEncoder/TextDecoder globals,
@@ -56,7 +56,7 @@ describe('useAvailableFlights hook', () => {
   });
 
   it('handles fetch errors gracefully', async () => {
-    const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    const consoleSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
     global.fetch = jest.fn().mockImplementation(() => Promise.reject(new Error('Network error')));
 
     const wrapper = ({ children }: { children: React.ReactNode }) => (
@@ -70,7 +70,8 @@ describe('useAvailableFlights hook', () => {
     });
 
     expect(result.current.availableFlights).toEqual([]);
-    expect(consoleSpy).toHaveBeenCalledWith('Failed to fetch flights', expect.any(Error));
+    
+    expect(consoleSpy).toHaveBeenCalledWith('Backend unavailable, retrying fetch on next mount...');
 
     consoleSpy.mockRestore();
   });

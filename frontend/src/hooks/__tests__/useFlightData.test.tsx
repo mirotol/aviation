@@ -1,7 +1,8 @@
 import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
 import { useFlightData } from '../useFlightData';
-import { WebSocketProvider, FlightSnapshot } from '../../contexts/WebSocketContext';
+import { WebSocketProvider } from '../../contexts/WebSocketProvider';
+import { FlightSnapshot } from '../../contexts/WebSocketContext';
 
 // Mock SockJS
 jest.mock('sockjs-client', () => {

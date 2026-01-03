@@ -9,19 +9,20 @@ interface AttitudeIndicatorProps {
 
 export default function AttitudeIndicator({ width = 400, height = 400 }: AttitudeIndicatorProps) {
   const snapshot = useFlightData();
-  const attitude = snapshot?.attitude ?? { pitch: 0, roll: 0, yaw: 0 };
+  const pitch = snapshot?.attitude.pitch ?? 0;
+  const roll = snapshot?.attitude.roll ?? 0;
 
   const [displayPitch, setDisplayPitch] = useState(0);
   const [displayRoll, setDisplayRoll] = useState(0);
 
-  // Smooth interpolation
+  // Smooth interpolation using primitive dependencies
   useEffect(() => {
     const interval = setInterval(() => {
-      setDisplayPitch((prev) => prev + (attitude.pitch - prev) * 0.1);
-      setDisplayRoll((prev) => prev + (attitude.roll - prev) * 0.1);
+      setDisplayPitch((prev) => prev + (pitch - prev) * 0.1);
+      setDisplayRoll((prev) => prev + (roll - prev) * 0.1);
     }, 16);
     return () => clearInterval(interval);
-  }, [attitude]);
+  }, [pitch, roll]);
 
   const pitchOffset = displayPitch * 2;
 

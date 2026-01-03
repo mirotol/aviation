@@ -1,6 +1,6 @@
 import React from 'react';
 import './PlaybackControls.css';
-import { useWebSocket } from '../../contexts/WebSocketContext';
+import { useWebSocket } from '../../hooks/useWebSocket';
 
 const SPEED_OPTIONS = [0.25, 0.5, 1, 2, 4, 8, 16];
 

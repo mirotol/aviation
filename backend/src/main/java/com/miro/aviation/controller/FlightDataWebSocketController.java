@@ -51,22 +51,35 @@ public class FlightDataWebSocketController {
     }
 
     @MessageMapping("/switchProvider")
-    public void switchProvider(Map<String, String> payload, SimpMessageHeaderAccessor headerAccessor) {
+    public void switchProvider(Map<String, Object> payload, SimpMessageHeaderAccessor headerAccessor) {
         String sessionId = headerAccessor.getSessionId();
-        String providerType = payload.get("type");
-        String fileName = payload.get("fileName");
+        String providerType = (String) payload.get("type");
+        String fileName = (String) payload.get("fileName");
 
         logger.info("Switching provider for session: {} to {} {}", 
                 sessionId, providerType, (fileName != null ? "file: " + fileName : ""));
 
+        FlightDataProvider provider;
         if ("recorded".equalsIgnoreCase(providerType)) {
-            RecordedFlightDataProvider provider = recordedProviderFactory.getObject();
+            RecordedFlightDataProvider recordedProvider = recordedProviderFactory.getObject();
             String resourcePath = "/flights/" + (fileName != null ? fileName : "AY523_2025_12_28.csv");
-            provider.initialize(resourcePath);
-            userProviders.put(sessionId, provider);
+            recordedProvider.initialize(resourcePath);
+            provider = recordedProvider;
         } else {
-            userProviders.put(sessionId, simulatedProviderFactory.getObject());
+            provider = simulatedProviderFactory.getObject();
         }
+
+        // Apply current UI state to the NEW provider BEFORE putting it in the map
+        if (payload.containsKey("paused")) {
+            provider.setPaused((Boolean) payload.get("paused"));
+        }
+        if (payload.containsKey("speed")) {
+            // Handle both Integer and Double from JSON
+            Number speed = (Number) payload.get("speed");
+            provider.setSpeedMultiplier(speed.doubleValue());
+        }
+
+        userProviders.put(sessionId, provider);
     }
 
     @EventListener
