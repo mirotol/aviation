@@ -1,10 +1,12 @@
 package com.miro.aviation.service;
 
 import com.miro.aviation.model.Altitude;
-import org.springframework.stereotype.Service;
-
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 import java.util.Random;
 
+@Component
+@Scope("prototype") // Create new instance for each client
 public class AltitudeSimulatorService {
 
     private final Random random = new Random();
@@ -19,7 +21,7 @@ public class AltitudeSimulatorService {
     /**
      * Simulates gentle altitude movement
      */
-    public Altitude getCurrentAltitude() {
+    public void tick() {
         double change = random.nextDouble() * 20 - 10; // -10 to +10 ft
         double newAltitude = currentAltitude.getAltitude() + change;
 
@@ -27,7 +29,11 @@ public class AltitudeSimulatorService {
         newAltitude = Math.max(0, Math.min(40000, newAltitude));
 
         currentAltitude.setAltitude(newAltitude);
-        return currentAltitude;
+    }
+
+    public Altitude getCurrentAltitude() {
+        // Return a copy to ensure snapshot integrity
+        return new Altitude(currentAltitude.getAltitude(), currentAltitude.getKollsmanPressure());
     }
 
     /** Allows external control of Kollsman (e.g., from frontend knob) */

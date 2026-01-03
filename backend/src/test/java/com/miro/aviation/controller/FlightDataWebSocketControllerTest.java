@@ -1,13 +1,12 @@
 package com.miro.aviation.controller;
 
-import com.miro.aviation.service.FlightSnapshot;
+import com.miro.aviation.model.FlightSnapshot;
 import com.miro.aviation.service.RecordedFlightDataProvider;
 import com.miro.aviation.service.SimulatedFlightDataProvider;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;

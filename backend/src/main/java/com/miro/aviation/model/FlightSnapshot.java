@@ -1,8 +1,4 @@
-package com.miro.aviation.service;
-
-import com.miro.aviation.model.AirSpeed;
-import com.miro.aviation.model.Altitude;
-import com.miro.aviation.model.Attitude;
+package com.miro.aviation.model;
 
 /**
  * Represents a single snapshot of flight data.

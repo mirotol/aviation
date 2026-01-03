@@ -1,6 +1,6 @@
 package com.miro.aviation.utils;
 
-import com.miro.aviation.service.FlightSnapshot;
+import com.miro.aviation.model.FlightSnapshot;
 import org.junit.jupiter.api.Test;
 import java.io.ByteArrayInputStream;
 import java.util.List;
