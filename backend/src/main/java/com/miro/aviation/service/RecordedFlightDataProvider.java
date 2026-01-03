@@ -19,7 +19,7 @@ public class RecordedFlightDataProvider implements FlightDataProvider {
 
     private static final Logger logger = LoggerFactory.getLogger(RecordedFlightDataProvider.class);
 
-    private List<FlightSnapshot> flightData;
+    private List<FlightSnapshot> flightData = List.of();
     private int index = 0;
 
     @Override
@@ -39,30 +39,29 @@ public class RecordedFlightDataProvider implements FlightDataProvider {
 
     @Override
     public FlightSnapshot getCurrentSnapshot() {
-        if (flightData.isEmpty()) return null;
+        if (flightData == null || flightData.isEmpty()) return null;
         return flightData.get(index);
     }
 
     // time (in ms) at which the next snapshot should be shown
     private long nextAdvanceTime = 0;
 
-    @PostConstruct
-    public void loadFlightData() {
+    public void initialize(String resourcePath) {
         try {
             flightData = CsvFlightLoader.load(
-                    getClass().getResourceAsStream("/flights/AY523_2025_12_28.csv")
+                    getClass().getResourceAsStream(resourcePath)
             );
 
             // init nextAdvanceTime to current time plus the delta between snapshot[0] and snapshot[1]
-            if (!flightData.isEmpty()) {
+            if (flightData.size() > 1) {
                 nextAdvanceTime = System.currentTimeMillis()
                         + flightData.get(1).getTimestamp()
                         - flightData.get(0).getTimestamp();
             }
 
         } catch (Exception e) {
-            e.printStackTrace();
-            flightData = List.of(); // fallback empty list
+            logger.error("Failed to load flight data from {}", resourcePath, e);
+            flightData = List.of();
         }
     }
 

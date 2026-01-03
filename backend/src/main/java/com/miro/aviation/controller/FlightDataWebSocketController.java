@@ -47,12 +47,18 @@ public class FlightDataWebSocketController {
     }
 
     @MessageMapping("/switchProvider")
-    public void switchProvider(String providerName, SimpMessageHeaderAccessor headerAccessor) {
+    public void switchProvider(Map<String, String> payload, SimpMessageHeaderAccessor headerAccessor) {
         String sessionId = headerAccessor.getSessionId();
-        System.out.println("Switching provider for session: " + sessionId); // LOG THIS
-        
-        if ("recorded".equalsIgnoreCase(providerName)) {
-            userProviders.put(sessionId, recordedProviderFactory.getObject());
+        String providerType = payload.get("type");
+        String fileName = payload.get("fileName");
+
+        System.out.println("Switching provider for session: " + sessionId + " to " + providerType + (fileName != null ? " file: " + fileName : ""));
+
+        if ("recorded".equalsIgnoreCase(providerType)) {
+            RecordedFlightDataProvider provider = recordedProviderFactory.getObject();
+            String resourcePath = "/flights/" + (fileName != null ? fileName : "AY523_2025_12_28.csv");
+            provider.initialize(resourcePath);
+            userProviders.put(sessionId, provider);
         } else {
             userProviders.put(sessionId, simulatedProviderFactory.getObject());
         }
