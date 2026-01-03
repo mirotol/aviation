@@ -29,13 +29,20 @@ export default function InfoPanel() {
     transition: 'all 0.2s ease',
   });
 
-  const dataRowStyle = {
+  const dataRowStyle = (isLast = false) => ({
     display: 'flex',
     justifyContent: 'space-between',
-    padding: '8px 0',
-    borderBottom: '1px solid #333',
-    fontSize: '0.9rem',
-    color: '#ccc',
+    alignItems: 'center',
+    padding: '12px 0',
+    borderBottom: isLast ? 'none' : '1px solid #333',
+    fontSize: '1rem',
+    color: '#aaa',
+  });
+
+  const valueStyle = {
+    color: '#4a90e2',
+    fontSize: '1.1rem',
+    fontFamily: 'monospace',
   };
 
   const selectStyle = {
@@ -86,7 +93,7 @@ export default function InfoPanel() {
       <section style={{ marginBottom: '30px' }}>
         <p
           style={{
-            fontSize: '0.7rem',
+            fontSize: '0.8rem',
             color: '#666',
             marginBottom: '10px',
             textTransform: 'uppercase',
@@ -133,36 +140,36 @@ export default function InfoPanel() {
       <section style={{ marginBottom: '30px' }}>
         <p
           style={{
-            fontSize: '0.7rem',
+            fontSize: '0.8rem',
             color: '#666',
             marginBottom: '10px',
             textTransform: 'uppercase',
+            letterSpacing: '1px',
           }}
         >
-          Live Data
+          Live Telemetry
         </p>
         {snapshot ? (
-          <div style={{ backgroundColor: '#111', padding: '15px', borderRadius: '6px' }}>
-            <div style={dataRowStyle}>
-              <span>Time (Z / UTC)</span>
-              <span style={{ color: '#4a90e2' }}>{formatZuluTime(snapshot.timestamp)}</span>
+          <div style={{ backgroundColor: '#111', padding: '10px 20px', borderRadius: '8px', border: '1px solid #222' }}>
+            <div style={dataRowStyle()}>
+              <span>Time (Z)</span>
+              <span style={valueStyle}>{formatZuluTime(snapshot.timestamp)}</span>
             </div>
-            {/* ... rest of the rows ... */}
-            <div style={dataRowStyle}>
+            <div style={dataRowStyle()}>
               <span>Altitude</span>
-              <span style={{ color: '#4a90e2' }}>{snapshot.altitude.altitude.toFixed(0)} FT</span>
+              <span style={valueStyle}>{snapshot.altitude.altitude.toFixed(0)} FT</span>
             </div>
-            <div style={dataRowStyle}>
+            <div style={dataRowStyle()}>
               <span>Airspeed</span>
-              <span style={{ color: '#4a90e2' }}>{snapshot.airSpeed.speed.toFixed(1)} KTS</span>
+              <span style={valueStyle}>{snapshot.airSpeed.speed.toFixed(1)} KT</span>
             </div>
-            <div style={dataRowStyle}>
+            <div style={dataRowStyle()}>
               <span>Pitch</span>
-              <span style={{ color: '#4a90e2' }}>{snapshot.attitude.pitch.toFixed(1)}°</span>
+              <span style={valueStyle}>{snapshot.attitude.pitch.toFixed(1)}°</span>
             </div>
-            <div style={dataRowStyle}>
+            <div style={dataRowStyle(true)}>
               <span>Roll</span>
-              <span style={{ color: '#4a90e2' }}>{snapshot.attitude.roll.toFixed(1)}°</span>
+              <span style={valueStyle}>{snapshot.attitude.roll.toFixed(1)}°</span>
             </div>
           </div>
         ) : (
@@ -194,12 +201,13 @@ export default function InfoPanel() {
               marginTop: '15px',
               padding: '12px',
               backgroundColor: '#000',
-              border: '1px solid #222',
+              border: '1px solid #333',
               borderRadius: '4px',
-              fontSize: '0.7rem',
-              color: '#0f0',
-              overflowX: 'auto',
-              maxHeight: '200px',
+              fontSize: '1rem',
+              color: '#4a90e2',
+              overflow: 'auto',
+              maxHeight: '600px',
+              lineHeight: '1.4',
             }}
           >
             {JSON.stringify(snapshot, null, 2)}
