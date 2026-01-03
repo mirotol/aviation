@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useWebSocket } from '../../contexts/WebSocketContext';
+import { useAvailableFlights } from '../../hooks/useAvailableFlights';
 import { formatZuluTime } from '../../utils/timeUtils';
 
 export default function InfoPanel() {
@@ -12,20 +13,7 @@ export default function InfoPanel() {
     reconnectCountdown,
   } = useWebSocket();
   const [showJson, setShowJson] = useState(false);
-  const [availableFlights, setAvailableFlights] = useState<string[]>([]);
-
-  useEffect(() => {
-    fetch('http://localhost:8080/api/flights')
-      .then((res) => res.json())
-      .then((data) => {
-        setAvailableFlights(data);
-        // If we are in recorded mode but haven't selected a flight yet, pick the first one
-        if (activeProvider === 'recorded' && !selectedFlight && data.length > 0) {
-          switchProvider('recorded', data[0]);
-        }
-      })
-      .catch((err) => console.error('Failed to fetch flights', err));
-  }, []);
+  const { availableFlights } = useAvailableFlights();
 
   const buttonStyle = (active: boolean) => ({
     flex: 1,

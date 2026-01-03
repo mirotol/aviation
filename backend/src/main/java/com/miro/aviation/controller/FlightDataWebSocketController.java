@@ -2,6 +2,8 @@ package com.miro.aviation.controller;
 
 import com.miro.aviation.model.FlightSnapshot;
 import com.miro.aviation.service.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.context.event.EventListener;
 import org.springframework.messaging.MessageHeaders;
@@ -17,6 +19,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Controller
 public class FlightDataWebSocketController {
+
+    private static final Logger logger = LoggerFactory.getLogger(FlightDataWebSocketController.class);
 
     private final SimpMessagingTemplate messagingTemplate;
     private final ObjectProvider<SimulatedFlightDataProvider> simulatedProviderFactory;
@@ -52,7 +56,8 @@ public class FlightDataWebSocketController {
         String providerType = payload.get("type");
         String fileName = payload.get("fileName");
 
-        System.out.println("Switching provider for session: " + sessionId + " to " + providerType + (fileName != null ? " file: " + fileName : ""));
+        logger.info("Switching provider for session: {} to {} {}", 
+                sessionId, providerType, (fileName != null ? "file: " + fileName : ""));
 
         if ("recorded".equalsIgnoreCase(providerType)) {
             RecordedFlightDataProvider provider = recordedProviderFactory.getObject();
@@ -67,7 +72,7 @@ public class FlightDataWebSocketController {
     @EventListener
     public void handleDisconnect(SessionDisconnectEvent event) {
         String sessionId = event.getSessionId();
-        System.out.println("Removing session: " + sessionId); // LOG THIS
+        logger.info("Removing session: {}", sessionId);
         userProviders.remove(sessionId);
     }
 

@@ -58,7 +58,6 @@ export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
   };
 
   useEffect(() => {
-    // MOVE socket creation INSIDE the webSocketFactory
     const client = new Client({
       webSocketFactory: () => new SockJS('http://localhost:8080/ws'),
       reconnectDelay: RECONNECT_INTERVAL,
@@ -77,7 +76,7 @@ export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
           destination: '/app/switchProvider',
           body: JSON.stringify({
             type: activeProvider,
-            fileName: selectedFlight
+            fileName: selectedFlight,
           }),
         });
       },
@@ -108,7 +107,7 @@ export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
         destination: '/app/switchProvider',
         body: JSON.stringify({
           type: provider,
-          fileName: fileName
+          fileName: fileName,
         }),
       });
     }
@@ -118,7 +117,14 @@ export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
 
   return (
     <WebSocketContext.Provider
-      value={{ snapshot, switchProvider, isConnected, activeProvider, selectedFlight, reconnectCountdown }}
+      value={{
+        snapshot,
+        switchProvider,
+        isConnected,
+        activeProvider,
+        selectedFlight,
+        reconnectCountdown,
+      }}
     >
       {children}
     </WebSocketContext.Provider>
