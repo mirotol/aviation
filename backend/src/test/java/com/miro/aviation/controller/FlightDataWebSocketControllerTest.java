@@ -12,6 +12,8 @@ import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.socket.messaging.SessionDisconnectEvent;
 
+import java.util.Map;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
@@ -55,12 +57,12 @@ class FlightDataWebSocketControllerTest {
         // Setup session 1 with Recorded
         SimpMessageHeaderAccessor header1 = SimpMessageHeaderAccessor.create();
         header1.setSessionId(session1);
-        controller.switchProvider("recorded", header1);
+        controller.switchProvider(Map.of("type", "recorded", "fileName", "test.csv"), header1);
 
         // Setup session 2 with Simulated
         SimpMessageHeaderAccessor header2 = SimpMessageHeaderAccessor.create();
         header2.setSessionId(session2);
-        controller.switchProvider("simulated", header2);
+        controller.switchProvider(Map.of("type", "simulated"), header2);
 
         // Mock snapshots
         FlightSnapshot snap1 = mock(FlightSnapshot.class);
@@ -73,6 +75,7 @@ class FlightDataWebSocketControllerTest {
 
         // Verify ticks occurred
         verify(mockRecordedProvider).tick();
+        verify(mockRecordedProvider).initialize("/flights/test.csv");
         verify(mockSimulatedProvider).tick();
 
         // Verify messages sent to specific sessions
@@ -92,7 +95,7 @@ class FlightDataWebSocketControllerTest {
         String sessionId = "disconnect-me";
         SimpMessageHeaderAccessor header = SimpMessageHeaderAccessor.create();
         header.setSessionId(sessionId);
-        controller.switchProvider("simulated", header);
+        controller.switchProvider(Map.of("type", "simulated"), header);
 
         // Create mock disconnect event
         SessionDisconnectEvent disconnectEvent = mock(SessionDisconnectEvent.class);

@@ -18,7 +18,7 @@ public interface FlightDataProvider {
     FlightSnapshot getCurrentSnapshot();
 
     default void tick() {
-        // simulated providers may override
+        // providers may override
     }
 
 }

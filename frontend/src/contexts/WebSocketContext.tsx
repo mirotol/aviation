@@ -11,9 +11,10 @@ export interface FlightSnapshot {
 
 interface WebSocketContextType {
   snapshot: FlightSnapshot | null;
-  switchProvider: (provider: 'simulated' | 'recorded') => void;
+  switchProvider: (provider: 'simulated' | 'recorded', fileName?: string) => void;
   isConnected: boolean;
   activeProvider: 'simulated' | 'recorded';
+  selectedFlight: string | null;
   reconnectCountdown: number | null;
 }
 
@@ -29,6 +30,7 @@ export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
   const [snapshot, setSnapshot] = useState<FlightSnapshot | null>(null);
   const [isConnected, setIsConnected] = useState(false);
   const [activeProvider, setActiveProvider] = useState<'simulated' | 'recorded'>('simulated');
+  const [selectedFlight, setSelectedFlight] = useState<string | null>(null);
   const [reconnectCountdown, setReconnectCountdown] = useState<number | null>(null);
   const clientRef = useRef<Client | null>(null);
   const timerRef = useRef<number | null>(null);
@@ -56,7 +58,6 @@ export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
   };
 
   useEffect(() => {
-    // MOVE socket creation INSIDE the webSocketFactory
     const client = new Client({
       webSocketFactory: () => new SockJS('http://localhost:8080/ws'),
       reconnectDelay: RECONNECT_INTERVAL,
@@ -73,7 +74,10 @@ export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
         // Re-apply the current provider upon connection/reconnection
         client.publish({
           destination: '/app/switchProvider',
-          body: activeProvider,
+          body: JSON.stringify({
+            type: activeProvider,
+            fileName: selectedFlight,
+          }),
         });
       },
       onDisconnect: () => {
@@ -95,21 +99,32 @@ export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
       client.deactivate();
       stopCountdown();
     };
-  }, [activeProvider]); // Re-run effect if activeProvider changes to ensure the closure has the right value
+  }, [activeProvider, selectedFlight]);
 
-  const switchProvider = (provider: 'simulated' | 'recorded') => {
+  const switchProvider = (provider: 'simulated' | 'recorded', fileName?: string) => {
     if (clientRef.current?.connected) {
       clientRef.current.publish({
         destination: '/app/switchProvider',
-        body: provider,
+        body: JSON.stringify({
+          type: provider,
+          fileName: fileName,
+        }),
       });
     }
     setActiveProvider(provider);
+    if (fileName) setSelectedFlight(fileName);
   };
 
   return (
     <WebSocketContext.Provider
-      value={{ snapshot, switchProvider, isConnected, activeProvider, reconnectCountdown }}
+      value={{
+        snapshot,
+        switchProvider,
+        isConnected,
+        activeProvider,
+        selectedFlight,
+        reconnectCountdown,
+      }}
     >
       {children}
     </WebSocketContext.Provider>

@@ -1,11 +1,19 @@
 import React, { useState } from 'react';
 import { useWebSocket } from '../../contexts/WebSocketContext';
+import { useAvailableFlights } from '../../hooks/useAvailableFlights';
 import { formatZuluTime } from '../../utils/timeUtils';
 
 export default function InfoPanel() {
-  const { snapshot, switchProvider, isConnected, activeProvider, reconnectCountdown } =
-    useWebSocket();
+  const {
+    snapshot,
+    switchProvider,
+    isConnected,
+    activeProvider,
+    selectedFlight,
+    reconnectCountdown,
+  } = useWebSocket();
   const [showJson, setShowJson] = useState(false);
+  const { availableFlights } = useAvailableFlights();
 
   const buttonStyle = (active: boolean) => ({
     flex: 1,
@@ -28,6 +36,18 @@ export default function InfoPanel() {
     borderBottom: '1px solid #333',
     fontSize: '0.9rem',
     color: '#ccc',
+  };
+
+  const selectStyle = {
+    width: '100%',
+    marginTop: '10px',
+    padding: '8px',
+    backgroundColor: '#1a1a1a',
+    color: '#eee',
+    border: '1px solid #444',
+    borderRadius: '4px',
+    fontSize: '0.8rem',
+    outline: 'none',
   };
 
   return (
@@ -83,11 +103,31 @@ export default function InfoPanel() {
           </button>
           <button
             style={buttonStyle(activeProvider === 'recorded')}
-            onClick={() => switchProvider('recorded')}
+            onClick={() => {
+              if (availableFlights.length > 0) {
+                switchProvider('recorded', selectedFlight || availableFlights[0]);
+              } else {
+                switchProvider('recorded');
+              }
+            }}
           >
             Recorded
           </button>
         </div>
+
+        {activeProvider === 'recorded' && availableFlights.length > 0 && (
+          <select
+            style={selectStyle}
+            value={selectedFlight || ''}
+            onChange={(e) => switchProvider('recorded', e.target.value)}
+          >
+            {availableFlights.map((flight) => (
+              <option key={flight} value={flight}>
+                {flight}
+              </option>
+            ))}
+          </select>
+        )}
       </section>
 
       <section style={{ marginBottom: '30px' }}>

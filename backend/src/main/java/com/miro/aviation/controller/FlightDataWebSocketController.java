@@ -2,6 +2,8 @@ package com.miro.aviation.controller;
 
 import com.miro.aviation.model.FlightSnapshot;
 import com.miro.aviation.service.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.context.event.EventListener;
 import org.springframework.messaging.MessageHeaders;
@@ -17,6 +19,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Controller
 public class FlightDataWebSocketController {
+
+    private static final Logger logger = LoggerFactory.getLogger(FlightDataWebSocketController.class);
 
     private final SimpMessagingTemplate messagingTemplate;
     private final ObjectProvider<SimulatedFlightDataProvider> simulatedProviderFactory;
@@ -47,12 +51,19 @@ public class FlightDataWebSocketController {
     }
 
     @MessageMapping("/switchProvider")
-    public void switchProvider(String providerName, SimpMessageHeaderAccessor headerAccessor) {
+    public void switchProvider(Map<String, String> payload, SimpMessageHeaderAccessor headerAccessor) {
         String sessionId = headerAccessor.getSessionId();
-        System.out.println("Switching provider for session: " + sessionId); // LOG THIS
-        
-        if ("recorded".equalsIgnoreCase(providerName)) {
-            userProviders.put(sessionId, recordedProviderFactory.getObject());
+        String providerType = payload.get("type");
+        String fileName = payload.get("fileName");
+
+        logger.info("Switching provider for session: {} to {} {}", 
+                sessionId, providerType, (fileName != null ? "file: " + fileName : ""));
+
+        if ("recorded".equalsIgnoreCase(providerType)) {
+            RecordedFlightDataProvider provider = recordedProviderFactory.getObject();
+            String resourcePath = "/flights/" + (fileName != null ? fileName : "AY523_2025_12_28.csv");
+            provider.initialize(resourcePath);
+            userProviders.put(sessionId, provider);
         } else {
             userProviders.put(sessionId, simulatedProviderFactory.getObject());
         }
@@ -61,7 +72,7 @@ public class FlightDataWebSocketController {
     @EventListener
     public void handleDisconnect(SessionDisconnectEvent event) {
         String sessionId = event.getSessionId();
-        System.out.println("Removing session: " + sessionId); // LOG THIS
+        logger.info("Removing session: {}", sessionId);
         userProviders.remove(sessionId);
     }
 
