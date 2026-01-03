@@ -4,6 +4,7 @@ import com.miro.aviation.model.AirSpeed;
 import com.miro.aviation.model.Altitude;
 import com.miro.aviation.model.Attitude;
 import com.miro.aviation.model.FlightSnapshot;
+import com.miro.aviation.model.PlaybackProgress;
 
 public interface FlightDataProvider {
 
@@ -35,4 +36,17 @@ public interface FlightDataProvider {
         // providers may override
     }
 
+    /**
+     * @return progress metadata if applicable (Recorded), or null (Simulated).
+     */
+    default PlaybackProgress getProgress() {
+        return null;
+    }
+
+    /**
+     * Jump to a specific position in the recorded flight
+     */
+    default void setSeek(double percentage) {
+        // providers may override
+    }
 }

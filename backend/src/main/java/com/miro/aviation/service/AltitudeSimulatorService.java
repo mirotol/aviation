@@ -22,11 +22,13 @@ public class AltitudeSimulatorService {
      * Simulates gentle altitude movement
      */
     public void tick(double deltaTime) {
-        double change = (random.nextDouble() * 20 - 10) * deltaTime; // Scaled by deltaTime
+        double change = (random.nextDouble() * 20 - 10) * deltaTime;
         double newAltitude = currentAltitude.getAltitude() + change;
 
-        // Clamp altitude for realism (0 to 40,000 ft)
         newAltitude = Math.max(0, Math.min(40000, newAltitude));
+        
+        // Round to 1 decimal place
+        newAltitude = Math.round(newAltitude * 10.0) / 10.0;
 
         currentAltitude.setAltitude(newAltitude);
     }

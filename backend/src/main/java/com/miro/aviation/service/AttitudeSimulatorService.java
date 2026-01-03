@@ -30,6 +30,11 @@ public class AttitudeSimulatorService {
         currentPitch = Math.max(-10, Math.min(10, currentPitch));
         currentRoll  = Math.max(-30, Math.min(30, currentRoll));
         currentYaw   = Math.max(0, Math.min(360, currentYaw));
+
+        // Round to 2 decimal places
+        currentPitch = Math.round(currentPitch * 100.0) / 100.0;
+        currentRoll  = Math.round(currentRoll * 100.0) / 100.0;
+        currentYaw   = Math.round(currentYaw * 100.0) / 100.0;
     }
 
     public Attitude getCurrentAttitude() {

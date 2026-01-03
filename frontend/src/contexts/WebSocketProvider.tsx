@@ -69,8 +69,14 @@ export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
           destination: '/app/switchProvider',
           body: JSON.stringify({ type: current.activeProvider, fileName: current.selectedFlight }),
         });
-        client.publish({ destination: '/app/pause', body: JSON.stringify({ paused: current.isPaused }) });
-        client.publish({ destination: '/app/speed', body: JSON.stringify({ speed: current.speed }) });
+        client.publish({
+          destination: '/app/pause',
+          body: JSON.stringify({ paused: current.isPaused }),
+        });
+        client.publish({
+          destination: '/app/speed',
+          body: JSON.stringify({ speed: current.speed }),
+        });
       },
       onDisconnect: () => {
         setIsConnected(false);
@@ -99,11 +105,11 @@ export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
       // Send everything in ONE payload to avoid race conditions
       clientRef.current.publish({
         destination: '/app/switchProvider',
-        body: JSON.stringify({ 
-          type: provider, 
+        body: JSON.stringify({
+          type: provider,
           fileName: fileName,
           paused: stateRef.current.isPaused, // Use current UI state
-          speed: stateRef.current.speed 
+          speed: stateRef.current.speed,
         }),
       });
     }
@@ -131,6 +137,15 @@ export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
     }
   }, []);
 
+  const seek = useCallback((percentage: number) => {
+    if (clientRef.current?.connected) {
+      clientRef.current.publish({
+        destination: '/app/seek',
+        body: JSON.stringify({ percentage }),
+      });
+    }
+  }, []);
+
   return (
     <WebSocketContext.Provider
       value={{
@@ -138,6 +153,7 @@ export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
         switchProvider,
         setPaused,
         setSpeed,
+        seek,
         isPaused,
         speed,
         isConnected,

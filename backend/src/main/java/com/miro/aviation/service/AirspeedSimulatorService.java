@@ -26,6 +26,9 @@ public class AirspeedSimulatorService {
         // Clamp to min/max
         if (currentSpeed < minSpeed) currentSpeed = minSpeed;
         if (currentSpeed > maxSpeed) currentSpeed = maxSpeed;
+
+        // Round to 1 decimal place
+        currentSpeed = Math.round(currentSpeed * 10.0) / 10.0;
     }
 
     public AirSpeed getCurrentAirSpeed() {

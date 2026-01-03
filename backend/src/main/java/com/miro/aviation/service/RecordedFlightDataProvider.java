@@ -4,6 +4,7 @@ import com.miro.aviation.model.AirSpeed;
 import com.miro.aviation.model.Altitude;
 import com.miro.aviation.model.Attitude;
 import com.miro.aviation.model.FlightSnapshot;
+import com.miro.aviation.model.PlaybackProgress;
 import com.miro.aviation.utils.CsvFlightLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,9 +49,35 @@ public class RecordedFlightDataProvider implements FlightDataProvider {
     }
 
     @Override
+    public PlaybackProgress getProgress() {
+        if (flightData.isEmpty()) return null;
+        
+        double rawPercentage = (double) index / (flightData.size() - 1);
+        // Round to 4 decimal places
+        double roundedPercentage = Math.round(rawPercentage * 10000.0) / 10000.0;
+        
+        return new PlaybackProgress(
+            index,
+            flightData.size(),
+            roundedPercentage,
+            flightData.get(0).getTimestamp(),
+            flightData.get(flightData.size() - 1).getTimestamp()
+        );
+    }
+
+    @Override
     public FlightSnapshot getCurrentSnapshot() {
         if (flightData == null || flightData.isEmpty()) return null;
-        return flightData.get(index);
+        FlightSnapshot snapshot = flightData.get(index);
+        
+        // Return a copy with current progress metadata
+        return new FlightSnapshot(
+            snapshot.getTimestamp(),
+            snapshot.getAttitude(),
+            snapshot.getAltitude(),
+            snapshot.getAirSpeed(),
+            getProgress()
+        );
     }
     
     public void initialize(String resourcePath) {
@@ -112,6 +139,29 @@ public class RecordedFlightDataProvider implements FlightDataProvider {
 
     public void setPaused(boolean paused) {
         this.paused = paused;
+    }
+
+    /**
+     * Jumps to a specific position in the flight.
+     * @param percentage Value between 0.0 and 1.0
+     */
+    @Override
+    public void setSeek(double percentage) {
+        if (flightData.isEmpty()) return;
+
+        // 1. Calculate new index
+        int newIndex = (int) (percentage * (flightData.size() - 1));
+        this.index = Math.max(0, Math.min(flightData.size() - 1, newIndex));
+
+        // 2. Re-anchor the clocks to current time
+        long now = clock.millis();
+        this.lastTickTime = now;
+        this.lastAdvanceTime = now;
+        
+        // 3. Recalculate when the NEXT sample should happen
+        calculateNextAdvanceTime();
+        
+        logger.info("Seek performed to index {} ({})", index, percentage);
     }
 
     public void setSpeedMultiplier(double multiplier) {

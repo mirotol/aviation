@@ -150,7 +150,14 @@ export default function InfoPanel() {
           Live Telemetry
         </p>
         {snapshot ? (
-          <div style={{ backgroundColor: '#111', padding: '10px 20px', borderRadius: '8px', border: '1px solid #222' }}>
+          <div
+            style={{
+              backgroundColor: '#111',
+              padding: '10px 20px',
+              borderRadius: '8px',
+              border: '1px solid #222',
+            }}
+          >
             <div style={dataRowStyle()}>
               <span>Time (Z)</span>
               <span style={valueStyle}>{formatZuluTime(snapshot.timestamp)}</span>
