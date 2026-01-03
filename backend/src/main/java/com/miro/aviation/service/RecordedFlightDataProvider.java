@@ -1,10 +1,6 @@
 package com.miro.aviation.service;
 
-import com.miro.aviation.model.AirSpeed;
-import com.miro.aviation.model.Altitude;
-import com.miro.aviation.model.Attitude;
-import com.miro.aviation.model.FlightSnapshot;
-import com.miro.aviation.model.PlaybackProgress;
+import com.miro.aviation.model.*;
 import com.miro.aviation.utils.CsvFlightLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,6 +45,11 @@ public class RecordedFlightDataProvider implements FlightDataProvider {
     }
 
     @Override
+    public Position getPosition() {
+        return flightData.get(index).getPosition();
+    }
+
+    @Override
     public PlaybackProgress getProgress() {
         if (flightData.isEmpty()) return null;
         
@@ -76,7 +77,8 @@ public class RecordedFlightDataProvider implements FlightDataProvider {
             snapshot.getAttitude(),
             snapshot.getAltitude(),
             snapshot.getAirSpeed(),
-            getProgress()
+            getProgress(),
+            snapshot.getPosition()
         );
     }
     

@@ -5,6 +5,7 @@ import com.miro.aviation.model.Altitude;
 import com.miro.aviation.model.Attitude;
 import com.miro.aviation.model.FlightSnapshot;
 import com.miro.aviation.model.PlaybackProgress;
+import com.miro.aviation.model.Position;
 
 public interface FlightDataProvider {
 
@@ -13,6 +14,8 @@ public interface FlightDataProvider {
     Altitude getAltitude();
 
     AirSpeed getSpeed();
+
+    Position getPosition();
 
     //TODO: Extend with more statistics
 

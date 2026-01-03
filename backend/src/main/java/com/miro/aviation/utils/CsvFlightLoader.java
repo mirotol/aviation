@@ -4,6 +4,7 @@ import com.miro.aviation.model.AirSpeed;
 import com.miro.aviation.model.Altitude;
 import com.miro.aviation.model.Attitude;
 import com.miro.aviation.model.FlightSnapshot;
+import com.miro.aviation.model.Position;
 import com.opencsv.CSVReaderHeaderAware;
 
 import java.io.InputStream;
@@ -29,6 +30,15 @@ public class CsvFlightLoader {
                 double altitudeFt = Double.parseDouble(row.get("Altitude"));
                 double speedKt = Double.parseDouble(row.get("Speed"));
                 double heading = Double.parseDouble(row.get("Direction"));
+                
+                // Parse "lat,lon" from the Position column
+                Position position = new Position(0, 0);
+                String posStr = row.get("Position");
+                if (posStr != null && posStr.contains(",")) {
+                    String[] parts = posStr.replace("\"", "").split(",");
+                    position.setLatitude(Double.parseDouble(parts[0].trim()));
+                    position.setLongitude(Double.parseDouble(parts[1].trim()));
+                }
 
                 // Attitude (limited data → simulate roll/pitch)
                 Attitude attitude = new Attitude(
@@ -49,6 +59,7 @@ public class CsvFlightLoader {
                 snapshot.setAttitude(attitude);
                 snapshot.setAltitude(altitude);
                 snapshot.setAirSpeed(airSpeed);
+                snapshot.setPosition(position); // Set parsed position
 
                 snapshots.add(snapshot);
             }

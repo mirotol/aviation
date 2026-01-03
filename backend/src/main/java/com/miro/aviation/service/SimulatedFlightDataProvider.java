@@ -4,6 +4,7 @@ import com.miro.aviation.model.AirSpeed;
 import com.miro.aviation.model.Altitude;
 import com.miro.aviation.model.Attitude;
 import com.miro.aviation.model.FlightSnapshot;
+import com.miro.aviation.model.Position;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
@@ -14,10 +15,15 @@ public class SimulatedFlightDataProvider implements FlightDataProvider {
     private final AttitudeSimulatorService attitudeSim;
     private final AltitudeSimulatorService altitudeSim;
     private final AirspeedSimulatorService speedSim;
+    
+    // For now, let's keep simulated position at Helsinki Airport (EFHK)
+    private double currentLat = 60.3172;
+    private double currentLon = 24.9633;
 
-    private boolean paused = false;
     private double speedMultiplier = 1.0;
     private long simulatedTime; // Internal clock for the simulation
+
+    private boolean paused = false;
 
     public SimulatedFlightDataProvider(
             AttitudeSimulatorService attitudeSim,
@@ -45,13 +51,19 @@ public class SimulatedFlightDataProvider implements FlightDataProvider {
     }
 
     @Override
+    public Position getPosition() {
+        return new Position(currentLat, currentLon);
+    }
+
+    @Override
     public FlightSnapshot getCurrentSnapshot() {
         return new FlightSnapshot(
                 simulatedTime, // Use our internal simulation clock, not the real clock!
                 getAttitude(),
                 getAltitude(),
                 getSpeed(),
-                null // No playback progress for simulated
+                null, // No playback progress for simulated
+                getPosition() // Added position
         );
     }
 
