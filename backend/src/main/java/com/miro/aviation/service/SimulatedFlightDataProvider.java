@@ -8,7 +8,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 @Component
-@Scope("prototype") // Every client gets their own provider
+@Scope("prototype") // // Create new instance for each client
 public class SimulatedFlightDataProvider implements FlightDataProvider {
 
     private final AttitudeSimulatorService attitudeSim;

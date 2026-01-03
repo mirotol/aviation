@@ -23,7 +23,8 @@ public class RecordedFlightController {
 
     @GetMapping
     public List<String> listAvailableFlights() throws IOException {
-        Resource[] resources = resourcePatternResolver.getResources("classpath:flights/*.csv");
+        // Use classpath*: to find matching resources in ALL classpath locations
+        Resource[] resources = resourcePatternResolver.getResources("classpath*:flights/*.csv");
         return Arrays.stream(resources)
                 .map(Resource::getFilename)
                 .collect(Collectors.toList());

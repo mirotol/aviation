@@ -22,8 +22,8 @@ class RecordedFlightControllerTest {
         mockMvc.perform(get("/api/flights"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType("application/json"))
-                // Verify that our main recorded flight file is in the list
+                // Verify that our test flight file is in the list
                 .andExpect(jsonPath("$").isArray())
-                .andExpect(jsonPath("$", hasItem("AY523_2025_12_28.csv")));
+                .andExpect(jsonPath("$", hasItem("test_flight.csv")));
     }
 }

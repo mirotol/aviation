@@ -5,22 +5,32 @@ import com.miro.aviation.model.Altitude;
 import com.miro.aviation.model.Attitude;
 import com.miro.aviation.model.FlightSnapshot;
 import com.miro.aviation.utils.CsvFlightLoader;
-import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import java.time.Clock;
 import java.util.List;
 
 @Component
-@Scope("prototype") // Every client gets their own provider
+@Scope("prototype") // Create new instance for each client
 public class RecordedFlightDataProvider implements FlightDataProvider {
 
     private static final Logger logger = LoggerFactory.getLogger(RecordedFlightDataProvider.class);
+    private final Clock clock;
 
     private List<FlightSnapshot> flightData = List.of();
     private int index = 0;
+    private long lastAdvanceTime = 0;
+    private long nextAdvanceTime = 0;
+    private long lastTickTime = 0; // Track the last time tick() was processed
+    private double speedMultiplier = 1.0;
+    private boolean paused = false;
+
+    public RecordedFlightDataProvider(Clock clock) {
+        this.clock = clock;
+    }
 
     @Override
     public Attitude getAttitude() {
@@ -42,21 +52,16 @@ public class RecordedFlightDataProvider implements FlightDataProvider {
         if (flightData == null || flightData.isEmpty()) return null;
         return flightData.get(index);
     }
-
-    // time (in ms) at which the next snapshot should be shown
-    private long nextAdvanceTime = 0;
-
+    
     public void initialize(String resourcePath) {
         try {
-            flightData = CsvFlightLoader.load(
-                    getClass().getResourceAsStream(resourcePath)
-            );
-
-            // init nextAdvanceTime to current time plus the delta between snapshot[0] and snapshot[1]
-            if (flightData.size() > 1) {
-                nextAdvanceTime = System.currentTimeMillis()
-                        + flightData.get(1).getTimestamp()
-                        - flightData.get(0).getTimestamp();
+            flightData = CsvFlightLoader.load(getClass().getResourceAsStream(resourcePath));
+            if (!flightData.isEmpty()) {
+                index = 0;
+                long now = clock.millis();
+                lastAdvanceTime = now;
+                lastTickTime = now;
+                calculateNextAdvanceTime();
             }
 
         } catch (Exception e) {
@@ -68,41 +73,59 @@ public class RecordedFlightDataProvider implements FlightDataProvider {
     public void tick() {
         if (flightData.isEmpty() || index >= flightData.size() - 1) return;
 
-        // Current wall clock time in milliseconds
-        long now = System.currentTimeMillis();
+        long now = clock.millis();
+        long elapsedSinceLastTick = now - lastTickTime;
+        lastTickTime = now;
 
-        FlightSnapshot current = flightData.get(index);
-        FlightSnapshot next = flightData.get(index + 1);
-
-        // Compute how much time (in ms) should elapse between the current and next snapshot
-        long deltaMillis = next.getTimestamp() - current.getTimestamp();
-
-        // Debug logging, in future there might be more calculations done for debug
-        if (logger.isDebugEnabled()) {
-            long millisUntilNext = nextAdvanceTime - now;
-            double secondsUntilNext = millisUntilNext / 1000.0;
-
-            logger.debug("Tick: index={} -> next index={}, seconds until next snapshot: {}",
-                    index, index + 1, secondsUntilNext);
+        if (paused) {
+            // If paused, we simply push the scheduled times forward by 
+            // the amount of real-world time that just passed.
+            lastAdvanceTime += elapsedSinceLastTick;
+            nextAdvanceTime += elapsedSinceLastTick;
+            return;
         }
 
-
-        // If enough real time has passed to move to the next snapshot
         if (now >= nextAdvanceTime) {
-            index++;  // advance to the next snapshot
-
-            // Schedule the next advance by adding the delta from the CSV
-            nextAdvanceTime = now + deltaMillis;
+            index++;
+            lastAdvanceTime = now;
+            calculateNextAdvanceTime();
         }
     }
 
+    private void calculateNextAdvanceTime() {
+        if (index >= flightData.size() - 1) return;
+
+        FlightSnapshot current = flightData.get(index);
+        FlightSnapshot next = flightData.get(index + 1);
+        long deltaMillis = next.getTimestamp() - current.getTimestamp();
+
+        this.nextAdvanceTime = lastAdvanceTime + (long) (deltaMillis / speedMultiplier);
+    }
 
     public void reset() {
         index = 0;
-        if (!flightData.isEmpty()) {
-            nextAdvanceTime = System.currentTimeMillis()
-                    + flightData.get(1).getTimestamp()
-                    - flightData.get(0).getTimestamp();
+        long now = clock.millis();
+        lastAdvanceTime = now;
+        lastTickTime = now;
+        calculateNextAdvanceTime();
+    }
+
+    public void setPaused(boolean paused) {
+        this.paused = paused;
+    }
+
+    public void setSpeedMultiplier(double multiplier) {
+        if (!flightData.isEmpty() && index < flightData.size() - 1) {
+            long now = clock.millis();
+            long elapsedCsvTime = (long) ((now - lastAdvanceTime) * this.speedMultiplier);
+
+            this.speedMultiplier = multiplier;
+            // Re-anchor lastAdvanceTime based on the new multiplier
+            this.lastAdvanceTime = now - (long) (elapsedCsvTime / speedMultiplier);
+            
+            calculateNextAdvanceTime();
+        } else {
+            this.speedMultiplier = multiplier;
         }
     }
 }
