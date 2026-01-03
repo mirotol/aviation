@@ -3,6 +3,7 @@ package com.miro.aviation.service;
 import com.miro.aviation.model.AirSpeed;
 import com.miro.aviation.model.Altitude;
 import com.miro.aviation.model.Attitude;
+import com.miro.aviation.model.FlightSnapshot;
 
 public interface FlightDataProvider {
 

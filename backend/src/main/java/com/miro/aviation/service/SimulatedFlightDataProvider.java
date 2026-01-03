@@ -3,6 +3,7 @@ package com.miro.aviation.service;
 import com.miro.aviation.model.AirSpeed;
 import com.miro.aviation.model.Altitude;
 import com.miro.aviation.model.Attitude;
+import com.miro.aviation.model.FlightSnapshot;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
@@ -14,11 +15,13 @@ public class SimulatedFlightDataProvider implements FlightDataProvider {
     private final AltitudeSimulatorService altitudeSim;
     private final AirspeedSimulatorService speedSim;
 
-    public SimulatedFlightDataProvider() {
-        // Instantiate the simulators so they are unique to this provider instance
-        this.attitudeSim = new AttitudeSimulatorService();
-        this.altitudeSim = new AltitudeSimulatorService();
-        this.speedSim = new AirspeedSimulatorService();
+    public SimulatedFlightDataProvider(
+            AttitudeSimulatorService attitudeSim,
+            AltitudeSimulatorService altitudeSim,
+            AirspeedSimulatorService speedSim) {
+        this.attitudeSim = attitudeSim;
+        this.altitudeSim = altitudeSim;
+        this.speedSim = speedSim;
     }
 
     @Override
@@ -48,8 +51,9 @@ public class SimulatedFlightDataProvider implements FlightDataProvider {
 
     @Override
     public void tick() {
-        FlightDataProvider.super.tick();
+        // Trigger the heartbeat for all internal simulators
+        attitudeSim.tick();
+        altitudeSim.tick();
+        speedSim.tick();
     }
-
-
 }

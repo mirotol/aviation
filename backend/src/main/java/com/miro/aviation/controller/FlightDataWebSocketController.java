@@ -1,5 +1,6 @@
 package com.miro.aviation.controller;
 
+import com.miro.aviation.model.FlightSnapshot;
 import com.miro.aviation.service.*;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.context.event.EventListener;
