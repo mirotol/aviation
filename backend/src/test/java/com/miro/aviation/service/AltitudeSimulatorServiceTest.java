@@ -22,8 +22,8 @@ class AltitudeSimulatorServiceTest {
         // Verify stability
         assertEquals(initialAlt, service.getCurrentAltitude().getAltitude(), "Altitude must be stable between ticks");
 
-        // Verify evolution
-        service.tick();
+        // Verify evolution with deltaTime
+        service.tick(1.0);
         assertNotEquals(initialAlt, service.getCurrentAltitude().getAltitude(), "Altitude should change after tick");
     }
 

@@ -33,7 +33,7 @@ class AttitudeSimulatorServiceTest {
         AttitudeSimulatorService service = new AttitudeSimulatorService();
         Attitude initial = service.getCurrentAttitude();
 
-        service.tick(); 
+        service.tick(1.0);
         Attitude afterTick = service.getCurrentAttitude();
 
         // Now values should be different

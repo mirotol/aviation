@@ -21,4 +21,18 @@ public interface FlightDataProvider {
         // providers may override
     }
 
+    /**
+     * Pause or resume the data generation/playback.
+     */
+    default void setPaused(boolean paused) {
+        // providers may override
+    }
+
+    /**
+     * Set the speed factor for the simulation or playback.
+     */
+    default void setSpeedMultiplier(double multiplier) {
+        // providers may override
+    }
+
 }
