@@ -17,18 +17,26 @@ class AttitudeSimulatorServiceTest {
     }
 
     @Test
-    void shouldUpdateValuesOnConsecutiveCalls() {
+    void shouldMaintainStabilityUntilTicked() {
         AttitudeSimulatorService service = new AttitudeSimulatorService();
+        
+        Attitude firstCall = service.getCurrentAttitude();
+        Attitude secondCall = service.getCurrentAttitude();
 
-        // First call captures initial (or first random) state
-        Attitude first = service.getCurrentAttitude();
-
-        // Calling it again triggers the internal random update
-        Attitude second = service.getCurrentAttitude();
-
-        // The values should change because the service updates state on every get
-        assertNotEquals(first.getPitch(), second.getPitch(), "Pitch should evolve on every call");
-        assertNotEquals(first.getRoll(), second.getRoll(), "Roll should evolve on every call");
+        // Values should be identical because we haven't called tick()
+        assertEquals(firstCall.getPitch(), secondCall.getPitch(), "State should not change without a tick");
+        assertEquals(firstCall.getRoll(), secondCall.getRoll(), "State should not change without a tick");
     }
 
+    @Test
+    void shouldUpdateValuesWhenTicked() {
+        AttitudeSimulatorService service = new AttitudeSimulatorService();
+        Attitude initial = service.getCurrentAttitude();
+
+        service.tick(); 
+        Attitude afterTick = service.getCurrentAttitude();
+
+        // Now values should be different
+        assertNotEquals(initial.getPitch(), afterTick.getPitch(), "Pitch should evolve after a tick");
+    }
 }

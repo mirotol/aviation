@@ -15,10 +15,25 @@ class AltitudeSimulatorServiceTest {
     }
 
     @Test
-    void kollsmanPressureShouldBeUpdatable() {
+    void shouldChangeAltitudeOnlyOnTick() {
         AltitudeSimulatorService service = new AltitudeSimulatorService();
-        service.setKollsmanPressure(30.01);
+        double initialAlt = service.getCurrentAltitude().getAltitude();
+
+        // Verify stability
+        assertEquals(initialAlt, service.getCurrentAltitude().getAltitude(), "Altitude must be stable between ticks");
+
+        // Verify evolution
+        service.tick();
+        assertNotEquals(initialAlt, service.getCurrentAltitude().getAltitude(), "Altitude should change after tick");
+    }
+
+    @Test
+    void shouldRespectKollsmanPressureChanges() {
+        AltitudeSimulatorService service = new AltitudeSimulatorService();
+        double newPressure = 30.15;
         
-        assertEquals(30.01, service.getCurrentAltitude().getKollsmanPressure());
+        service.setKollsmanPressure(newPressure);
+        
+        assertEquals(newPressure, service.getCurrentAltitude().getKollsmanPressure());
     }
 }
