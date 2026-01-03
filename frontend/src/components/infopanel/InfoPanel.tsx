@@ -104,7 +104,7 @@ export default function InfoPanel() {
         {snapshot ? (
           <div style={{ backgroundColor: '#111', padding: '15px', borderRadius: '6px' }}>
             <div style={dataRowStyle}>
-              <span>Time</span>
+              <span>Time (Z / UTC)</span>
               <span style={{ color: '#4a90e2' }}>{formatZuluTime(snapshot.timestamp)}</span>
             </div>
             {/* ... rest of the rows ... */}
