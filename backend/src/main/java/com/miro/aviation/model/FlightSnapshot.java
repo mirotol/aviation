@@ -9,12 +9,14 @@ public class FlightSnapshot {
     private Attitude attitude;
     private Altitude altitude;
     private AirSpeed airSpeed;
+    private PlaybackProgress progress;
 
-    public FlightSnapshot(long timestamp, Attitude attitude, Altitude altitude, AirSpeed airSpeed) {
+    public FlightSnapshot(long timestamp, Attitude attitude, Altitude altitude, AirSpeed airSpeed, PlaybackProgress progress) {
         this.timestamp = timestamp;
         this.attitude = attitude;
         this.altitude = altitude;
         this.airSpeed = airSpeed;
+        this.progress = progress;
     }
 
     public FlightSnapshot() {
@@ -50,5 +52,13 @@ public class FlightSnapshot {
 
     public void setAirSpeed(AirSpeed airSpeed) {
         this.airSpeed = airSpeed;
+    }
+
+    public PlaybackProgress getProgress() {
+        return progress;
+    }
+
+    public void setProgress(PlaybackProgress progress) {
+        this.progress = progress;
     }
 }

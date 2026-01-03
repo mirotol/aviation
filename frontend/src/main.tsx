@@ -1,13 +1,13 @@
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
-import './index.css'
-import App from './App.tsx'
-import { WebSocketProvider } from './contexts/WebSocketProvider.tsx'
+import { StrictMode } from 'react';
+import { createRoot } from 'react-dom/client';
+import './index.css';
+import App from './App';
+import { WebSocketProvider } from './contexts/WebSocketProvider';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <WebSocketProvider>
       <App />
     </WebSocketProvider>
-  </StrictMode>,
-)
+  </StrictMode>
+);

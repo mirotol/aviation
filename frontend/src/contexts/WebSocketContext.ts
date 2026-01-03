@@ -5,6 +5,13 @@ export interface FlightSnapshot {
   attitude: { pitch: number; roll: number; yaw: number };
   altitude: { altitude: number; kollsmanPressure: number };
   airSpeed: { speed: number };
+  progress: {
+    currentIndex: number;
+    totalSamples: number;
+    percentage: number;
+    startTime: number;
+    endTime: number;
+  } | null;
 }
 
 export interface WebSocketContextType {
@@ -12,6 +19,7 @@ export interface WebSocketContextType {
   switchProvider: (provider: 'simulated' | 'recorded', fileName?: string) => void;
   setPaused: (paused: boolean) => void;
   setSpeed: (speed: number) => void;
+  seek: (percentage: number) => void; // New method for scrubbing
   isPaused: boolean;
   speed: number;
   isConnected: boolean;

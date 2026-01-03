@@ -113,4 +113,13 @@ public class FlightDataWebSocketController {
             provider.setSpeedMultiplier(payload.get("speed"));
         }
     }
+
+    @MessageMapping("/seek")
+    public void seek(Map<String, Double> payload, SimpMessageHeaderAccessor headerAccessor) {
+        String sessionId = headerAccessor.getSessionId();
+        FlightDataProvider provider = userProviders.get(sessionId);
+        if (provider != null) {
+            provider.setSeek(payload.get("percentage"));
+        }
+    }
 }

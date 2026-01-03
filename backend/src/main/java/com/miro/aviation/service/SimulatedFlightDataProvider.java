@@ -50,7 +50,8 @@ public class SimulatedFlightDataProvider implements FlightDataProvider {
                 simulatedTime, // Use our internal simulation clock, not the real clock!
                 getAttitude(),
                 getAltitude(),
-                getSpeed()
+                getSpeed(),
+                null // No playback progress for simulated
         );
     }
 
