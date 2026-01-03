@@ -4,13 +4,22 @@ This is the frontend application for the Aviation Project, built with React, Typ
 
 ## Current Features
 
-- **Real-time Flight Instruments:** Live updates for flight data including:
+- **Real-time Flight Instruments:** High-fidelity, reactive dashboard including:
   - **Attitude Indicator:** Visual representation of aircraft pitch and roll.
-  - **Altimeter:** Real-time altitude monitoring.
-  - **Airspeed Indicator:** Current velocity tracking.
-- **WebSocket Integration:** Low-latency data streaming using STOMP over SockJS to ensure instrument precision.
+  - **Altimeter:** Real-time altitude monitoring with Kollsman pressure sync.
+  - **Airspeed Indicator:** Velocity tracking with smooth signal interpolation.
+- **Simulation Control Panel:** Floating "Glass Cockpit" style controls for simulation manipulation:
+  - **Universal Pause/Play**: Instantly freeze simulation telemetry.
+  - **Precision Speed Control**: Integrated segmented controller for speeds ranging from **0.25x** (Analysis) to **16x** (Travel).
+- **Unified WebSocket Management:** Robust STOMP integration with automatic state synchronization on reconnection.
 
-## Tech Stack
+## Architecture
+
+- **Context-Driven State**: The application uses a centralized `WebSocketContext` to manage both telemetry snapshots and simulation control state.
+- **Signal Interpolation**: Instruments use internal timers and interpolation factors to ensure needle movement remains fluid even at low data frequencies or in slow motion.
+- **Optimistic UI**: Control actions (Pause, Speed) are reflected immediately in the UI while synchronization with the backend happens asynchronously via WebSockets.
+
+## Project Structure
 
 - **Framework:** React 19
 - **Build Tool:** Vite
@@ -25,9 +34,9 @@ This is the frontend application for the Aviation Project, built with React, Typ
 - `src/components/altimeter`: Vertical flight data visualization.
 - `src/components/airspeed`: Velocity data visualization.
 - `src/components/infopanel`: Supplemental flight and system information.
-- `src/hooks`: Custom hooks for managing WebSocket state and telemetry data.
-
-## Getting Started
+- `src/components/playback`: Unified simulation controls and timeline management.
+- `src/contexts`: Global state management including `WebSocketContext`.
+- `src/hooks`: Custom hooks for telemetry consumption and playback state.
 
 ### Prerequisites
 

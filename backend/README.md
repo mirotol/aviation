@@ -3,8 +3,10 @@
 ## Features
 
 *   **Real-time Flight Telemetry**: Stream flight data snapshots including altitude, airspeed, and attitude (roll, pitch, yaw).
+*   **Universal Simulation Control**: 
+    - **Pause/Resume**: Support for freezing simulation state across all data providers.
+    - **Speed Scaling**: Dynamic speed manipulation (0.25x to 16x) using a time-deterministic `deltaTime` architecture.
 *   **Dual Data Providers**:
-    *   **Simulated**: Generates dynamic flight data using specialized simulator services.
     *   **Recorded**: Parses and plays back historical flight data from CSV files.
 *   **WebSocket Integration**: Efficient, low-latency data streaming to clients.
 
@@ -39,14 +41,17 @@
 ### WebSocket Connection
 The application uses STOMP over WebSockets for real-time data delivery.
 
-*   **Telemetry Stream**: Subscribe to `/topic/flightData` to receive `FlightSnapshot` objects.
+*   **Telemetry Stream**: Subscribe to `/user/queue/flightData` to receive `FlightSnapshot` objects (Session-isolated).
     *   **Broadcast Frequency**: 20 Hz (every 50 ms).
-*   **Provider Switching**: Send a message to `/app/switchProvider` with one of the following strings to toggle the data source:
-    *   `"simulated"`: Starts the dynamic math-based simulator.
-    *   `"recorded"`: Begins playback of the CSV flight log from the start.
+*   **Control Mappings**:
+    - `/app/switchProvider`: payload `{"type": "simulated" | "recorded", "fileName": string?}`
+    - `/app/pause`: payload `{"paused": boolean}`
+    - `/app/speed`: payload `{"speed": double}`
 
-### REST Endpoints
-*   `GET /health`: Basic health check to verify the application is running.
+### Simulation Architecture
+The backend utilizes a polymorphic `FlightDataProvider` interface. 
+- **`SimulatedFlightDataProvider`**: Uses internal simulation clocking (`simulatedTime`) and `tick(deltaTime)` scaling to ensure smooth, high-fidelity physics regardless of playback speed.
+- **`RecordedFlightDataProvider`**: Manages CSV index calculations with time-anchoring to allow seamless speed changes and pausing of historical data.
 
 ## Data Format
 

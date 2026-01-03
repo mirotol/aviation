@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useWebSocket } from '../../contexts/WebSocketContext';
+import { useWebSocket } from '../../hooks/useWebSocket';
 import { useAvailableFlights } from '../../hooks/useAvailableFlights';
 import { formatZuluTime } from '../../utils/timeUtils';
 

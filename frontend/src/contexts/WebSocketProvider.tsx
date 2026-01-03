@@ -1,32 +1,11 @@
-import React, { createContext, useContext, useEffect, useRef, useState, ReactNode } from 'react';
+import React, { useEffect, useRef, useState, ReactNode, useCallback } from 'react';
 import { Client } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
-
-export interface FlightSnapshot {
-  timestamp: number;
-  attitude: { pitch: number; roll: number; yaw: number };
-  altitude: { altitude: number; kollsmanPressure: number };
-  airSpeed: { speed: number };
-}
-
-interface WebSocketContextType {
-  snapshot: FlightSnapshot | null;
-  switchProvider: (provider: 'simulated' | 'recorded', fileName?: string) => void;
-  setPaused: (paused: boolean) => void;
-  setSpeed: (speed: number) => void;
-  isPaused: boolean;
-  speed: number;
-  isConnected: boolean;
-  activeProvider: 'simulated' | 'recorded';
-  selectedFlight: string | null;
-  reconnectCountdown: number | null;
-}
+import { WebSocketContext, FlightSnapshot } from './WebSocketContext';
 
 interface WebSocketProviderProps {
   children: ReactNode;
 }
-
-const WebSocketContext = createContext<WebSocketContextType | null>(null);
 
 const RECONNECT_INTERVAL = 5000;
 
@@ -42,6 +21,12 @@ export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
   const clientRef = useRef<Client | null>(null);
   const timerRef = useRef<number | null>(null);
 
+  // Keep track of current state in refs
+  const stateRef = useRef({ isPaused, speed, activeProvider, selectedFlight });
+  useEffect(() => {
+    stateRef.current = { isPaused, speed, activeProvider, selectedFlight };
+  }, [isPaused, speed, activeProvider, selectedFlight]);
+
   const startCountdown = () => {
     if (timerRef.current) clearInterval(timerRef.current);
     let seconds = RECONNECT_INTERVAL / 1000;
@@ -50,7 +35,7 @@ export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
     timerRef.current = window.setInterval(() => {
       seconds -= 1;
       if (seconds <= 0) {
-        seconds = RECONNECT_INTERVAL / 1000; // Reset for next attempt if connection fails
+        seconds = RECONNECT_INTERVAL / 1000;
       }
       setReconnectCountdown(seconds);
     }, 1000);
@@ -78,24 +63,14 @@ export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
           setSnapshot(JSON.parse(message.body));
         });
 
-        // Re-apply the current provider and playback state upon connection/reconnection
+        // Initial sync on connection
+        const current = stateRef.current;
         client.publish({
           destination: '/app/switchProvider',
-          body: JSON.stringify({
-            type: activeProvider,
-            fileName: selectedFlight,
-          }),
+          body: JSON.stringify({ type: current.activeProvider, fileName: current.selectedFlight }),
         });
-
-        client.publish({
-          destination: '/app/pause',
-          body: JSON.stringify({ paused: isPaused }),
-        });
-
-        client.publish({
-          destination: '/app/speed',
-          body: JSON.stringify({ speed: speed }),
-        });
+        client.publish({ destination: '/app/pause', body: JSON.stringify({ paused: current.isPaused }) });
+        client.publish({ destination: '/app/speed', body: JSON.stringify({ speed: current.speed }) });
       },
       onDisconnect: () => {
         setIsConnected(false);
@@ -116,23 +91,27 @@ export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
       client.deactivate();
       stopCountdown();
     };
-  }, [activeProvider, selectedFlight]);
+    // The connection should stay open during provider switches.
+  }, []);
 
-  const switchProvider = (provider: 'simulated' | 'recorded', fileName?: string) => {
+  const switchProvider = useCallback((provider: 'simulated' | 'recorded', fileName?: string) => {
     if (clientRef.current?.connected) {
+      // Send everything in ONE payload to avoid race conditions
       clientRef.current.publish({
         destination: '/app/switchProvider',
-        body: JSON.stringify({
-          type: provider,
+        body: JSON.stringify({ 
+          type: provider, 
           fileName: fileName,
+          paused: stateRef.current.isPaused, // Use current UI state
+          speed: stateRef.current.speed 
         }),
       });
     }
     setActiveProvider(provider);
     if (fileName) setSelectedFlight(fileName);
-  };
+  }, []);
 
-  const setPaused = (paused: boolean) => {
+  const setPaused = useCallback((paused: boolean) => {
     setIsPaused(paused);
     if (clientRef.current?.connected) {
       clientRef.current.publish({
@@ -140,9 +119,9 @@ export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
         body: JSON.stringify({ paused }),
       });
     }
-  };
+  }, []);
 
-  const setSpeed = (newSpeed: number) => {
+  const setSpeed = useCallback((newSpeed: number) => {
     setSpeedState(newSpeed);
     if (clientRef.current?.connected) {
       clientRef.current.publish({
@@ -150,7 +129,7 @@ export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
         body: JSON.stringify({ speed: newSpeed }),
       });
     }
-  };
+  }, []);
 
   return (
     <WebSocketContext.Provider
@@ -170,12 +149,4 @@ export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
       {children}
     </WebSocketContext.Provider>
   );
-};
-
-export const useWebSocket = () => {
-  const context = useContext(WebSocketContext);
-  if (!context) {
-    throw new Error('useWebSocket must be used within a WebSocketProvider');
-  }
-  return context;
 };
