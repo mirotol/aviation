@@ -82,4 +82,22 @@ public class FlightDataWebSocketController {
         headerAccessor.setLeaveMutable(true);
         return headerAccessor.getMessageHeaders();
     }
+
+    @MessageMapping("/pause")
+    public void setPaused(Map<String, Boolean> payload, SimpMessageHeaderAccessor headerAccessor) {
+        String sessionId = headerAccessor.getSessionId();
+        FlightDataProvider provider = userProviders.get(sessionId);
+        if (provider != null) {
+            provider.setPaused(payload.get("paused"));
+        }
+    }
+
+    @MessageMapping("/speed")
+    public void setSpeed(Map<String, Double> payload, SimpMessageHeaderAccessor headerAccessor) {
+        String sessionId = headerAccessor.getSessionId();
+        FlightDataProvider provider = userProviders.get(sessionId);
+        if (provider != null) {
+            provider.setSpeedMultiplier(payload.get("speed"));
+        }
+    }
 }

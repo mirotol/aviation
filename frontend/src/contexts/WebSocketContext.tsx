@@ -12,6 +12,10 @@ export interface FlightSnapshot {
 interface WebSocketContextType {
   snapshot: FlightSnapshot | null;
   switchProvider: (provider: 'simulated' | 'recorded', fileName?: string) => void;
+  setPaused: (paused: boolean) => void;
+  setSpeed: (speed: number) => void;
+  isPaused: boolean;
+  speed: number;
   isConnected: boolean;
   activeProvider: 'simulated' | 'recorded';
   selectedFlight: string | null;
@@ -32,6 +36,9 @@ export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
   const [activeProvider, setActiveProvider] = useState<'simulated' | 'recorded'>('simulated');
   const [selectedFlight, setSelectedFlight] = useState<string | null>(null);
   const [reconnectCountdown, setReconnectCountdown] = useState<number | null>(null);
+  const [isPaused, setIsPaused] = useState(false);
+  const [speed, setSpeedState] = useState(1.0);
+
   const clientRef = useRef<Client | null>(null);
   const timerRef = useRef<number | null>(null);
 
@@ -71,13 +78,23 @@ export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
           setSnapshot(JSON.parse(message.body));
         });
 
-        // Re-apply the current provider upon connection/reconnection
+        // Re-apply the current provider and playback state upon connection/reconnection
         client.publish({
           destination: '/app/switchProvider',
           body: JSON.stringify({
             type: activeProvider,
             fileName: selectedFlight,
           }),
+        });
+
+        client.publish({
+          destination: '/app/pause',
+          body: JSON.stringify({ paused: isPaused }),
+        });
+
+        client.publish({
+          destination: '/app/speed',
+          body: JSON.stringify({ speed: speed }),
         });
       },
       onDisconnect: () => {
@@ -115,11 +132,35 @@ export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
     if (fileName) setSelectedFlight(fileName);
   };
 
+  const setPaused = (paused: boolean) => {
+    setIsPaused(paused);
+    if (clientRef.current?.connected) {
+      clientRef.current.publish({
+        destination: '/app/pause',
+        body: JSON.stringify({ paused }),
+      });
+    }
+  };
+
+  const setSpeed = (newSpeed: number) => {
+    setSpeedState(newSpeed);
+    if (clientRef.current?.connected) {
+      clientRef.current.publish({
+        destination: '/app/speed',
+        body: JSON.stringify({ speed: newSpeed }),
+      });
+    }
+  };
+
   return (
     <WebSocketContext.Provider
       value={{
         snapshot,
         switchProvider,
+        setPaused,
+        setSpeed,
+        isPaused,
+        speed,
         isConnected,
         activeProvider,
         selectedFlight,

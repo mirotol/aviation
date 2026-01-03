@@ -15,6 +15,10 @@ public class SimulatedFlightDataProvider implements FlightDataProvider {
     private final AltitudeSimulatorService altitudeSim;
     private final AirspeedSimulatorService speedSim;
 
+    private boolean paused = false;
+    private double speedMultiplier = 1.0;
+    private long simulatedTime; // Internal clock for the simulation
+
     public SimulatedFlightDataProvider(
             AttitudeSimulatorService attitudeSim,
             AltitudeSimulatorService altitudeSim,
@@ -22,6 +26,7 @@ public class SimulatedFlightDataProvider implements FlightDataProvider {
         this.attitudeSim = attitudeSim;
         this.altitudeSim = altitudeSim;
         this.speedSim = speedSim;
+        this.simulatedTime = System.currentTimeMillis();
     }
 
     @Override
@@ -42,7 +47,7 @@ public class SimulatedFlightDataProvider implements FlightDataProvider {
     @Override
     public FlightSnapshot getCurrentSnapshot() {
         return new FlightSnapshot(
-                System.currentTimeMillis(),
+                simulatedTime, // Use our internal simulation clock, not the real clock!
                 getAttitude(),
                 getAltitude(),
                 getSpeed()
@@ -51,9 +56,25 @@ public class SimulatedFlightDataProvider implements FlightDataProvider {
 
     @Override
     public void tick() {
-        // Trigger the heartbeat for all internal simulators
-        attitudeSim.tick();
-        altitudeSim.tick();
-        speedSim.tick();
+        if (paused) {
+            return;
+        }
+
+        // Advance the simulation clock by the standard tick (50ms) scaled by speed
+        simulatedTime += (long) (50 * speedMultiplier);
+
+        attitudeSim.tick(speedMultiplier);
+        altitudeSim.tick(speedMultiplier);
+        speedSim.tick(speedMultiplier);
+    }
+
+    @Override
+    public void setPaused(boolean paused) {
+        this.paused = paused;
+    }
+
+    @Override
+    public void setSpeedMultiplier(double multiplier) {
+        this.speedMultiplier = multiplier;
     }
 }

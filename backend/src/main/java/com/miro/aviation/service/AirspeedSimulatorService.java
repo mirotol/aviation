@@ -18,9 +18,9 @@ public class AirspeedSimulatorService {
     private final double maxSpeed = 180; // maximum speed in kt
     private double currentSpeed = 60;    // start near min speed
 
-    public void tick() {
-        // simulate smooth changes
-        double change = (random.nextDouble() - 0.5) * 5; // small random change ±2.5 kt
+    public void tick(double deltaTime) {
+        // simulate smooth changes scaled by deltaTime
+        double change = ((random.nextDouble() - 0.5) * 5) * deltaTime; 
         currentSpeed += change;
 
         // Clamp to min/max

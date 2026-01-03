@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import Cockpit from './components/cockpit/Cockpit';
 import InfoPanel from './components/infopanel/InfoPanel';
+import { PlaybackControls } from './components/playback/PlaybackControls';
+
 import './App.css';
 
 function App() {
@@ -43,6 +45,7 @@ function App() {
         >
           {showInfo ? 'Hide Telemetry' : 'Show Telemetry'}
         </button>
+        <PlaybackControls />
       </div>
 
       {/* Side Data Panel */}

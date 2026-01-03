@@ -51,9 +51,44 @@ class SimulatedFlightDataProviderTest {
     void tickShouldAdvanceAllSubSimulators() {
         provider.tick();
 
-        // Tick should advance all simulator services once
-        verify(attitudeSim, times(1)).tick();
-        verify(altitudeSim, times(1)).tick();
-        verify(speedSim, times(1)).tick();
+        // Tick should advance all simulator services once with default multiplier 1.0
+        verify(attitudeSim, times(1)).tick(1.0);
+        verify(altitudeSim, times(1)).tick(1.0);
+        verify(speedSim, times(1)).tick(1.0);
+    }
+
+    @Test
+    void tickShouldRespectPause() {
+        provider.setPaused(true);
+        provider.tick();
+
+        // Sub-simulators should NOT be ticked when paused
+        verify(attitudeSim, never()).tick(anyDouble());
+        verify(altitudeSim, never()).tick(anyDouble());
+        verify(speedSim, never()).tick(anyDouble());
+    }
+
+    @Test
+    void tickShouldRespectSpeedMultiplier() {
+        double customSpeed = 4.0;
+        provider.setSpeedMultiplier(customSpeed);
+        provider.tick();
+
+        // Tick should pass the multiplier as deltaTime
+        verify(attitudeSim).tick(customSpeed);
+        verify(altitudeSim).tick(customSpeed);
+        verify(speedSim).tick(customSpeed);
+    }
+
+    @Test
+    void timestampShouldStopAdvancingWhenPaused() {
+        FlightSnapshot snap1 = provider.getCurrentSnapshot();
+        
+        provider.setPaused(true);
+        provider.tick();
+        
+        FlightSnapshot snap2 = provider.getCurrentSnapshot();
+        
+        assertEquals(snap1.getTimestamp(), snap2.getTimestamp(), "Timestamp should not advance while paused");
     }
 }

@@ -30,7 +30,7 @@ class AirspeedSimulatorServiceTest {
         AirspeedSimulatorService service = new AirspeedSimulatorService();
         double initial = service.getCurrentAirSpeed().getSpeed();
 
-        service.tick();
+        service.tick(1.0);
         double afterTick = service.getCurrentAirSpeed().getSpeed();
 
         assertNotEquals(initial, afterTick, "Speed should evolve after a tick");
@@ -44,7 +44,7 @@ class AirspeedSimulatorServiceTest {
         
         // Tick many times to hit limits
         for (int i = 0; i < 500; i++) {
-            service.tick();
+            service.tick(1.0);
             double speed = service.getCurrentAirSpeed().getSpeed();
             assertTrue(speed >= 40.0 && speed <= 180.0, "Speed " + speed + " out of bounds");
         }

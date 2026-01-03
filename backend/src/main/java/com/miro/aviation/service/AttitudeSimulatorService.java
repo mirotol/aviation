@@ -17,11 +17,11 @@ public class AttitudeSimulatorService {
     private double currentRoll = 0;
     private double currentYaw = 0;
 
-    public void tick() {
+    public void tick(double deltaTime) {
 
-        double maxPitchChange = 0.5;
-        double maxRollChange = 1.0;
-        double maxYawChange = 0.2;
+        double maxPitchChange = 0.5 * deltaTime;
+        double maxRollChange = 1.0 * deltaTime;
+        double maxYawChange = 0.2 * deltaTime;
 
         currentPitch += (random.nextDouble() * 2 - 1) * maxPitchChange;
         currentRoll  += (random.nextDouble() * 2 - 1) * maxRollChange;
