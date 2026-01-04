@@ -2,11 +2,11 @@
   width: 100%;
   height: 100%;
   background-color: #000;
-  border: 2px solid #444;
+  border: 2px solid var(--bezel-dark);
   border-radius: 4px;
   position: relative;
   overflow: hidden;
-  color: #fff;
+  color: var(--text-bright);
   font-family: 'Inter', 'Roboto', 'Helvetica Neue', sans-serif;
 }
 
@@ -42,7 +42,7 @@
   background: rgba(0, 0, 0, 0.75); /* Dark background for contrast */
   padding: 10px 15px;
   border-radius: 4px;
-  border-left: 4px solid #00ff00; /* Aviation Green accent */
+  border-left: 4px solid var(--aviation-green); /* Aviation Green accent */
   z-index: 10;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
   /* Reduced from 140px to 120px */
@@ -54,7 +54,7 @@
   letter-spacing: 0.5px;
   text-transform: uppercase;
   font-size: 14px;
-  color: #00ff00;
+  color: var(--aviation-green);
   font-weight: bold;
   margin-bottom: 5px;
   display: flex;
@@ -63,7 +63,7 @@
 }
 
 .stat .value {
-  color: #ffffff;
+  color: var(--text-bright);
   margin-left: 8px;
   /* Monospaced but modern */
   font-family: 'Consolas', 'Monaco', 'Lucida Console', monospace;
@@ -92,8 +92,8 @@
 
 .range-controls button {
   background: #222;
-  border: 1px solid #444;
-  color: #00ff00;
+  border: 1px solid var(--bezel-dark);
+  color: var(--aviation-green);
   padding: 8px 12px;
   font-family: 'Segoe UI', sans-serif;
   font-weight: bold;
@@ -104,11 +104,11 @@
 }
 
 .range-controls button:hover:not(:disabled) {
-  background: #333;
+  background: var(--bezel-light);
 }
 
 .range-controls button:active:not(:disabled) {
-  background: #00ff00;
+  background: var(--aviation-green);
   color: #000;
 }
 
@@ -121,7 +121,7 @@
   position: absolute;
   bottom: 20px;
   left: 20px; /* Anchored to bottom-left to clear the buttons on the right */
-  color: #00ff00;
+  color: var(--aviation-green);
   font-weight: bold;
   background: rgba(0, 0, 0, 0.7);
   padding: 6px 10px;
@@ -168,7 +168,7 @@
 }
 
 .compass-tick {
-  stroke: #ffffff;
+  stroke: var(--text-bright);
   stroke-width: 1.5;
 }
 
@@ -177,7 +177,7 @@
 }
 
 .compass-label {
-  fill: #ffffff;
+  fill: var(--text-bright);
   font-family: 'Inter', 'Segoe UI Bold', sans-serif;
   font-weight: 800;
   font-size: 16px;
@@ -193,7 +193,7 @@
 }
 
 .north-label {
-  fill: #ffffff; /* Modern displays often use white for N to keep it clean */
+  fill: var(--text-bright); /* Modern displays often use white for N to keep it clean */
 }
 
 .degree-label,
@@ -206,7 +206,7 @@
   height: 0;
   border-left: 8px solid transparent;
   border-right: 8px solid transparent;
-  border-top: 12px solid #ffffff;
+  border-top: 12px solid var(--text-bright);
   transform: translate(-50%, -248px); /* Positioned exactly above the ring */
   z-index: 15;
   filter: drop-shadow(0 0 2px rgba(0, 0, 0, 1));
@@ -218,7 +218,7 @@
   left: 50%;
   font-weight: 900;
   font-size: 20px;
-  color: #ffffff;
+  color: var(--text-bright);
   font-weight: 800;
   text-align: center;
   /* Critical: Thick text shadow for visibility on bright tiles */
@@ -236,7 +236,7 @@
   left: 50%;
   width: 2px;
   height: 12px;
-  background: #ffffff;
+  background: var(--text-bright);
   /* Outline for the tick itself */
   box-shadow:
     -1px 0 0 #000,

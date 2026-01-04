@@ -59,7 +59,7 @@
 }
 
 .control-btn:hover {
-  background: #2d3238;
+  background: var(--border-color);
   color: var(--text-bright);
 }
 

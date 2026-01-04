@@ -31,7 +31,7 @@
 }
 
 .read-the-docs {
-  color: #888;
+  color: var(--text-muted);
 }
 
 .telemetry-toggle {
@@ -55,7 +55,7 @@
 }
 
 .telemetry-toggle:hover {
-  background: #252a30;
+  background: var(--bezel-gray);
   border-color: var(--text-dim);
 }
 
@@ -71,7 +71,7 @@
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  background-color: #050505;
+  background-color: var(--bg-black);
   overflow: hidden;
 }
 
@@ -93,7 +93,7 @@
   top: 0;
   bottom: 0;
   width: 350px;
-  background-color: rgba(20, 22, 25, 0.95); /* Semi-transparent glass cockpit look */
+  background-color: var(--bg-dark); /* Using dark background variable */
   border-left: 1px solid var(--border-color);
   padding: 80px 24px 24px;
   overflow-y: auto;
