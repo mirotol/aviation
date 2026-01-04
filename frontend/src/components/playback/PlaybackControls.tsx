@@ -8,8 +8,15 @@ const SPEED_OPTIONS = [0.25, 0.5, 1, 2, 4, 8, 16];
 export const PlaybackControls: React.FC = () => {
   const { snapshot, isPaused, speed, setPaused, setSpeed, seek, activeProvider } = useWebSocket();
 
-  // Local state to prevent the slider from "snapping" back while dragging
+  // Local state for the timeline dragging
   const [localPercentage, setLocalPercentage] = useState<number | null>(null);
+  // Local state for the speed selection to prevent "flashing" while backend updates
+  const [pendingSpeed, setPendingSpeed] = useState<number | null>(null);
+
+  // Sync pendingSpeed with actual speed once the update arrives from backend
+  if (pendingSpeed !== null && speed === pendingSpeed) {
+    setPendingSpeed(null);
+  }
 
   if (activeProvider !== 'recorded' && activeProvider !== 'simulated') {
     return null;
@@ -30,6 +37,13 @@ export const PlaybackControls: React.FC = () => {
   // Calculate the percentage string for CSS
   const progressPercent = (displayPercentage * 100).toFixed(2);
 
+  const handleSpeedChange = (newSpeed: number) => {
+    setPendingSpeed(newSpeed);
+    setSpeed(newSpeed);
+  };
+
+  const currentActiveSpeed = pendingSpeed !== null ? pendingSpeed : speed;
+
   return (
     <div className="playback-controls-container">
       {/* Timeline Section */}
@@ -46,7 +60,7 @@ export const PlaybackControls: React.FC = () => {
               type="range"
               className="timeline-slider"
               style={{
-                background: `linear-gradient(to right, #3498db ${progressPercent}%, #222 ${progressPercent}%)`,
+                background: `linear-gradient(to right, var(--primary-color) ${progressPercent}%, #222 ${progressPercent}%)`,
               }}
               min="0"
               max="1"
@@ -87,8 +101,8 @@ export const PlaybackControls: React.FC = () => {
             {SPEED_OPTIONS.map((s) => (
               <button
                 key={s}
-                className={`speed-btn ${speed === s ? 'active' : ''}`}
-                onClick={() => setSpeed(s)}
+                className={`speed-btn ${currentActiveSpeed === s ? 'engaged' : ''}`}
+                onClick={() => handleSpeedChange(s)}
               >
                 {s}X
               </button>

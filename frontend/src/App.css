@@ -33,3 +33,80 @@
 .read-the-docs {
   color: #888;
 }
+
+.telemetry-toggle {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  z-index: 100;
+
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  padding: 8px 16px;
+  min-width: 160px;
+
+  font-size: 0.7rem;
+  letter-spacing: 1.5px;
+  font-weight: 700;
+  color: var(--text-dim);
+
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+  transition: all 0.2s ease;
+}
+
+.telemetry-toggle:hover {
+  background: #252a30;
+  border-color: var(--text-dim);
+}
+
+.telemetry-toggle.active {
+  color: var(--primary-color);
+  border-color: var(--primary-color);
+  background: rgba(74, 144, 226, 0.05);
+  box-shadow: var(--glow-box);
+  text-shadow: var(--glow-text);
+}
+
+.app-container {
+  display: flex;
+  flex-direction: row;
+  height: 100vh; /* Changed from minHeight to height to force full screen */
+  width: 100vw;
+  overflow: hidden;
+  background-color: var(--bg-black);
+}
+
+.main-flight-deck {
+  flex-grow: 1;
+  display: flex;
+  position: relative;
+  width: 100%;
+  height: 100%; /* Force it to fill the app-container */
+  
+  /* Critical for centering the Cockpit vertically and horizontally */
+  align-items: center;
+  justify-content: center;
+}
+
+.side-data-panel {
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 350px;
+  background-color: rgba(20, 22, 25, 0.95); /* Semi-transparent glass cockpit look */
+  border-left: 1px solid var(--border-color);
+  padding: 80px 24px 24px;
+  overflow-y: auto;
+  box-shadow: -10px 0 30px rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(10px); /* Hardware glass effect */
+  z-index: 50;
+  
+  /* The Magic: Smooth Slide */
+  transform: translateX(100%);
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.side-data-panel.open {
+  transform: translateX(0);
+}

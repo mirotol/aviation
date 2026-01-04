@@ -1,69 +1,90 @@
 :root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
+  /* Core Brand Colors */
+  --primary-color: #4a90e2; 
+  /* Navigation / Active Blue */
+  --accent-color: #f5a623; /* Caution / Warning Amber */
+  --success-color: #2ecc71; /* System OK Green */
+  --danger-color: #e74c3c; /* Critical Red */
 
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+  /* Glow Effects (Aviation Lighting) */
+  --glow-box: 0 0 10px rgba(74, 144, 226, 0.2);
+  --glow-text: 0 0 2px rgba(74, 144, 226, 0.5);
+  --glow-success: 0 0 15px rgba(46, 204, 113, 0.2);
 
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
+  /* Dark Mode Palette (Glass Cockpit Style) */
+  --bg-black: #0a0b0d; /* Deepest shadows */
+  --bg-dark: #141619; /* Main panel background */
+  --bg-surface: #1c1f24; /* Card / Component background */
+  --border-color: #2d3238; /* Subtle panel borders */
 
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-a:hover {
-  color: #535bf2;
+  /* Typography */
+  --text-main: #e1e1e1; /* Off-white to reduce eye strain */
+  --text-dim: #7f8c8d; /* Labels / Non-interactive text */
+  --text-bright: #ffffff; /* Headers / Critical values */
+
+  font-family:
+    'Inter',
+    system-ui,
+    -apple-system,
+    sans-serif;
+  color: var(--text-main);
+  background-color: var(--bg-black);
 }
 
 body {
   margin: 0;
   padding: 0;
-  display: block;
-  place-items: center;
-  min-width: 100vw;
-  min-height: 100vh;
+  background-color: var(--bg-black);
+  color: var(--text-main);
+  overflow: hidden;
 }
 
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
-}
-
+/* Global Instrument Button Style */
 button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  color: var(--text-dim);
+  border-radius: 4px;
+  padding: 8px 16px;
   cursor: pointer;
-  transition: border-color 0.25s;
-}
-button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+  font-family: inherit;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  transition: all 0.2s ease;
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
-  }
+button:hover {
+  border-color: var(--text-dim);
+  color: var(--text-main);
+  background: #252a30;
+}
+
+/* Common "Active/Engaged" State */
+.engaged {
+  color: var(--primary-color) !important;
+  border-color: var(--primary-color) !important;
+  background: rgba(74, 144, 226, 0.1) !important;
+  box-shadow: var(--glow-box);
+  text-shadow: var(--glow-text);
+}
+
+/* Global Scrollbar (Cockpit Style) */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-black);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-dim);
 }
