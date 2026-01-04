@@ -31,10 +31,10 @@ export default function AltimeterTape() {
 
       <div className="tape-window">
         <div
-          className="tape-scale" 
-          style={{ 
+          className="tape-scale"
+          style={{
             transform: `translateY(${tapeOffset}px)`,
-            transition: 'transform 0.1s linear' 
+            transition: 'transform 0.1s linear',
           }}
         >
           {ticks.map((t) => (

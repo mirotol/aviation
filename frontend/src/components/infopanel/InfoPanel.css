@@ -1,6 +1,6 @@
 .info-panel-container {
   color: #eee;
-  font-family: "Inter", "Segoe UI", sans-serif;
+  font-family: 'Inter', 'Segoe UI', sans-serif;
 }
 
 .info-panel-header {
@@ -23,7 +23,6 @@
 .status-dot {
   width: 8px;
   height: 8px;
-  borderRadius: 50%;
   transition: background-color 0.3s ease;
 }
 

@@ -43,7 +43,7 @@ export default function AttitudeIndicator() {
         className="horizon-layer"
         style={{
           transform: `rotate(${-roll}deg) translateY(${pitchOffset}px)`,
-          transition: 'transform 0.1s linear' // Add this
+          transition: 'transform 0.1s linear', // Add this
         }}
       >
         <div className="sky" />

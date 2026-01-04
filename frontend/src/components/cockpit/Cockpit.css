@@ -2,7 +2,7 @@
   flex-grow: 1;
   display: flex;
   /* Shift from center to flex-start with top padding to move the panel up */
-  align-items: flex-start; 
+  align-items: flex-start;
   justify-content: center;
   background: radial-gradient(circle at top, #1a1a1a 0%, #050505 100%);
   padding: 200px 40px 40px 40px; /* Increased top padding to 80px */
@@ -18,12 +18,12 @@
   /* Mechanical bezel feel */
   border: 4px solid #222;
   border-top: 4px solid #333; /* Simulated light from above */
-  
+
   /* Deep shadows and an outer glow to make the panel stand out */
-  box-shadow: 
+  box-shadow:
     0 100px 150px rgba(0, 0, 0, 0.9),
-    0 0 100px rgba(0, 0, 0, 0.5), /* Ambient glow */
-    inset 0 1px 1px rgba(255, 255, 255, 0.1);
+    0 0 100px rgba(0, 0, 0, 0.5),
+    /* Ambient glow */ inset 0 1px 1px rgba(255, 255, 255, 0.1);
   position: relative;
 }
 
