@@ -1,23 +1,24 @@
 # Aviation Project - Frontend
 
-This is the frontend application for the Aviation Project, built with React, TypeScript, and Vite. It provides a real-time cockpit dashboard interface for tracking and managing flight telemetry data.
+The frontend for the Aviation project is a React-based simulation of a modern Primary Flight Display (PFD). It is built with a focus on precision, performance, and professional aviation design standards.
 
 ## Current Features
 
-- **Real-time Flight Instruments:** High-fidelity, reactive dashboard including:
-  - **Attitude Indicator:** Visual representation of aircraft pitch and roll.
-  - **Altimeter:** Real-time altitude monitoring with Kollsman pressure sync.
-  - **Airspeed Indicator:** Velocity tracking with smooth signal interpolation.
-- **Simulation Control Panel:** Floating "Glass Cockpit" style controls for simulation manipulation:
-  - **Universal Pause/Play**: Instantly freeze simulation telemetry.
-  - **Precision Speed Control**: Integrated segmented controller for speeds ranging from **0.25x** (Analysis) to **16x** (Travel).
-- **Unified WebSocket Management:** Robust STOMP integration with automatic state synchronization on reconnection.
+- **Primary Flight Display (PFD):** A unified glass cockpit dashboard including:
+    - **Attitude Indicator:** High-precision SVG-based artificial horizon with synchronized bank scale and sky-pointer.
+    - **Altimeter Tape:** Performance-optimized vertical sliding scale for altitude tracking.
+    - **Airspeed Tape:** Responsive vertical velocity tape with signal-dampened movement.
+- **Simulation Control Panel:** "Quiet Dark Cockpit" style hardware controls:
+    - **Master Toggle:** Smoothly animated "Data Link" panel for deep telemetry monitoring.
+    - **Precision Playback**: Integrated segmented controller for deterministic simulation speeds (0.25x to 16x).
+- **Unified WebSocket Management:** Robust STOMP integration with automatic state synchronization.
 
 ## Architecture
 
-- **Context-Driven State**: The application uses a centralized `WebSocketContext` to manage both telemetry snapshots and simulation control state.
-- **Signal Interpolation**: Instruments use internal timers and interpolation factors to ensure needle movement remains fluid even at low data frequencies or in slow motion.
-- **Optimistic UI**: Control actions (Pause, Speed) are reflected immediately in the UI while synchronization with the backend happens asynchronously via WebSockets.
+- **Aviation Design System**: Centralized color palette and "electronic glow" variables in `index.css` following the "Quiet Dark Cockpit" standard.
+- **Performance Optimized Tapes**: Airspeed and Altimeter tapes utilize visible-only tick rendering to ensure smooth performance even at high simulation speeds.
+- **SVG Synchronicity**: The bank scale and sky-pointer are integrated into a single SVG coordinate system for mathematical precision.
+- **Dampened Transitions**: All instrument movements and panel transitions use dampened linear interpolation for a "mechanical hardware" feel.
 
 ## Project Structure
 
@@ -29,12 +30,12 @@ This is the frontend application for the Aviation Project, built with React, Typ
 
 ## Project Structure
 
-- `src/components/cockpit`: Main entry point for the cockpit interface.
-- `src/components/attitudeindicator`: Logic and styles for the artificial horizon.
-- `src/components/altimeter`: Vertical flight data visualization.
-- `src/components/airspeed`: Velocity data visualization.
-- `src/components/infopanel`: Supplemental flight and system information.
-- `src/components/playback`: Unified simulation controls and timeline management.
+- `src/components/attitudeindicator`: The ADI (Attitude Director Indicator) core.
+- `src/components/altimeter`: The Altimeter Tape module.
+- `src/components/airspeed`: The AirSpeed Tape module.
+- `src/components/cockpit`: The unified PFD assembly and layout.
+- `src/components/playback`: High-fidelity simulation controls.
+- `src/components/infopanel`: The "Data Link" telemetry sidebar.
 - `src/contexts`: Global state management including `WebSocketContext`.
 - `src/hooks`: Custom hooks for telemetry consumption and playback state.
 

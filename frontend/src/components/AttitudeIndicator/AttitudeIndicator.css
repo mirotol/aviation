@@ -1,0 +1,197 @@
+.attitude-container {
+  position: relative;
+  width: 700px;
+  height: 550px;
+  background: var(--bg-black);
+  border: 1px solid var(--border-color);
+  overflow: hidden;
+}
+
+.horizon-layer {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 1000px; /* Over-sized to handle rotations without gaps */
+  height: 1000px;
+  margin-top: -500px;
+  margin-left: -500px;
+  transition: transform 0.1s linear;
+}
+
+.sky {
+  height: 50%;
+  background: linear-gradient(to bottom, var(--sky-color-top), var(--sky-color-bottom));
+}
+
+.ground {
+  height: 50%;
+  background: linear-gradient(to bottom, var(--ground-color-top), var(--ground-color-bottom));
+}
+
+.horizon-line {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: var(--text-bright);
+}
+
+.pitch-ladder {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  z-index: 15;
+}
+
+.pitch-line {
+  position: absolute;
+  left: 0;
+  width: 0;
+  height: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.pitch-line-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 25px; /* Wider gap for larger numbers */
+  width: 500px;
+}
+
+.line-bar {
+  background-color: var(--text-bright) !important;
+  height: 2px;
+  box-shadow: 0 0 2px rgba(0, 0, 0, 0.8);
+}
+
+.major .line-bar {
+  width: 150px;
+  height: 3px;
+}
+.mid .line-bar {
+  width: 80px;
+  height: 3px;
+}
+.minor .line-bar {
+  width: 40px;
+  height: 2px;
+}
+
+.line-label {
+  color: var(--text-bright);
+  font-size: 1.1rem;
+  font-weight: 900;
+  font-family: 'JetBrains Mono', monospace;
+  width: 30px; /* Fixed width so numbers don't push the lines */
+  text-align: center;
+  line-height: 1;
+}
+
+.line-label.left {
+  text-align: right;
+}
+.line-label.right {
+  text-align: left;
+}
+
+.aircraft-symbol {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  z-index: 20;
+}
+
+.wing-left,
+.wing-right {
+  width: 80px;
+  height: 6px;
+  background: var(--instrument-yellow);
+  border: 1px solid var(--bg-black);
+}
+
+.center-dot {
+  width: 6px;
+  height: 6px;
+  background: var(--instrument-yellow);
+  border-radius: 50%;
+  border: 1px solid var(--bg-black);
+}
+
+.roll-indicator {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 200px;
+  height: 40px;
+  z-index: 30;
+}
+
+/* Center the roll scale and pointer around the absolute center of the display */
+.roll-scale {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%); /* Crucial: center the container itself */
+  width: 600px;
+  height: 600px;
+  z-index: 30;
+  pointer-events: none;
+}
+
+.roll-scale-svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+/* The Sky Pointer needs to match the same radius (140px) */
+.roll-pointer-container {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  z-index: 40;
+  transition: transform 0.1s linear;
+}
+
+/* SVG styling using variables */
+.roll-arc-path,
+.roll-tick-line {
+  stroke: var(--text-bright);
+}
+
+.zero-index-triangle {
+  fill: var(--text-bright);
+}
+
+.sky-pointer-triangle {
+  stroke: var(--instrument-yellow);
+}
+
+/* Ensure the horizon line is also visible */
+.horizon-line {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: var(--text-bright);
+  z-index: 5;
+}
+
+/* Pitch Ladder Lines */
+.line-bar {
+  background: var(--text-bright) !important; /* Force the variable */
+}
