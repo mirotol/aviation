@@ -10,6 +10,15 @@ import org.springframework.stereotype.Component;
 import java.time.Clock;
 import java.util.List;
 
+/**
+ * Implementation of FlightDataProvider that plays back historical flight data from a CSV source.
+ * 
+ * This provider uses a "Time Anchoring" strategy to ensure smooth playback:
+ * 1. It maintains a 'lastAdvanceTime' (the real-world timestamp when the current row was activated).
+ * 2. It calculates a 'nextAdvanceTime' (the real-world timestamp when we should move to the next row).
+ * 3. The distance between these two anchors is derived from the CSV's delta-timestamps, 
+ *    scaled by the 'speedMultiplier'.
+ */
 @Component
 @Scope("prototype") // Create new instance for each client
 public class RecordedFlightDataProvider implements FlightDataProvider {
@@ -21,7 +30,7 @@ public class RecordedFlightDataProvider implements FlightDataProvider {
     private int index = 0;
     private long lastAdvanceTime = 0;
     private long nextAdvanceTime = 0;
-    private long lastTickTime = 0; // Track the last time tick() was processed
+    private long lastTickTime = 0;
     private double speedMultiplier = 1.0;
     private boolean paused = false;
 
@@ -99,6 +108,15 @@ public class RecordedFlightDataProvider implements FlightDataProvider {
         }
     }
 
+    /**
+     * Advances the internal playback index based on the elapsed real-world time.
+     * 
+     * If the current system time has passed 'nextAdvanceTime', the provider increments 
+     * the row index and recalculates the next anchor points.
+     * 
+     * When paused, it continuously slides the schedule forward to 'freeze' the 
+     * relative progress within the current sample interval.
+     */
     public void tick() {
         if (flightData.isEmpty() || index >= flightData.size() - 1) return;
 
@@ -121,6 +139,11 @@ public class RecordedFlightDataProvider implements FlightDataProvider {
         }
     }
 
+    /**
+     * Calculates when the next sample should be displayed.
+     * 
+     * Logic: nextAnchor = lastAnchor + (csvDelta / multiplier)
+     */
     private void calculateNextAdvanceTime() {
         if (index >= flightData.size() - 1) return;
 
@@ -145,7 +168,11 @@ public class RecordedFlightDataProvider implements FlightDataProvider {
 
     /**
      * Jumps to a specific position in the flight.
-     * @param percentage Value between 0.0 and 1.0
+     * 
+     * To prevent "time travel" bugs where the simulation tries to catch up with 
+     * the missed time, this method re-anchors the internal clocks to the current 'now'.
+     * 
+     * @param percentage Value between 0.0 and 1.0 representing flight progress.
      */
     @Override
     public void setSeek(double percentage) {
@@ -155,7 +182,7 @@ public class RecordedFlightDataProvider implements FlightDataProvider {
         int newIndex = (int) (percentage * (flightData.size() - 1));
         this.index = Math.max(0, Math.min(flightData.size() - 1, newIndex));
 
-        // 2. Re-anchor the clocks to current time
+        // 2. Re-anchor the clocks to the current time
         long now = clock.millis();
         this.lastTickTime = now;
         this.lastAdvanceTime = now;
@@ -166,6 +193,12 @@ public class RecordedFlightDataProvider implements FlightDataProvider {
         logger.info("Seek performed to index {} ({})", index, percentage);
     }
 
+    /**
+     * Updates the playback speed and re-calculates scheduled event times.
+     * 
+     * If playback is active, it re-anchors 'lastAdvanceTime' to preserve the 
+     * current relative progress within the active sample interval at the new speed.
+     */
     public void setSpeedMultiplier(double multiplier) {
         if (!flightData.isEmpty() && index < flightData.size() - 1) {
             long now = clock.millis();

@@ -26,6 +26,13 @@ class SimulatedFlightDataProviderTest {
     }
 
     @Test
+    void shouldReturnNullProgressForSimulatedFlight() {
+        // Simulated flights are continuous and don't have a "length",
+        // so they should return null for progress metadata.
+        assertNull(provider.getProgress(), "Simulated flights should not provide playback progress");
+    }
+
+    @Test
     void shouldReturnSnapshotWithDataFromSimulators() {
         Attitude expectedAttitude = new Attitude(1.0, 2.0, 3.0);
         Altitude expectedAltitude = new Altitude(10000.0, 29.92);

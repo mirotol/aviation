@@ -29,7 +29,41 @@ class RecordedFlightDataProviderTest {
         FlightSnapshot snapshot = provider.getCurrentSnapshot();
 
         assertNotNull(snapshot);
-        assertEquals(100, snapshot.getAirSpeed().getSpeed(), "Should start with the first row's speed");
+        assertEquals(100, snapshot.getAirSpeed().getSpeed());
+        
+        // Ensure position data is carried through to the snapshot
+        assertNotNull(snapshot.getPosition());
+        assertEquals(60.3172, snapshot.getPosition().getLatitude());
+    }
+
+    @Test
+    void shouldReturnCorrectPlaybackProgress() {
+        provider.initialize(TEST_CSV); // 3 rows
+        
+        // Row 1 (Index 0)
+        var progress1 = provider.getProgress();
+        assertEquals(0.0, progress1.percentage());
+        assertEquals(0, progress1.currentIndex());
+        assertEquals(3, progress1.totalSamples());
+
+        // Seek to Row 2 (Index 1)
+        provider.setSeek(0.5);
+        var progress2 = provider.getProgress();
+        assertEquals(0.5, progress2.percentage());
+        assertEquals(1, progress2.currentIndex());
+    }
+
+    @Test
+    void seekShouldHandleOutOfBoundsGracefully() {
+        provider.initialize(TEST_CSV);
+        
+        // Seek to 200% -> should cap at last row
+        provider.setSeek(2.0);
+        assertEquals(300, provider.getCurrentSnapshot().getAirSpeed().getSpeed());
+        
+        // Seek to -50% -> should cap at first row
+        provider.setSeek(-0.5);
+        assertEquals(100, provider.getCurrentSnapshot().getAirSpeed().getSpeed());
     }
 
     @Test
@@ -193,5 +227,48 @@ class RecordedFlightDataProviderTest {
         // 3. Verify it moved to index 1
         assertEquals(200, provider.getCurrentSnapshot().getAirSpeed().getSpeed(), 
             "Should advance to row 2 normally after seeking to row 1");
+    }
+
+    @Test
+    void shouldUpdateSpeedMultiplierEvenIfDataIsEmpty() {
+        // 1. Initially, flightData is empty. 
+        // Calling this hits the 'else' branch in RecordedFlightDataProvider.
+        provider.setSpeedMultiplier(4.0);
+        
+        // 2. Now initialize with the CSV
+        provider.initialize(TEST_CSV);
+        
+        // 3. Advance time by only 300ms.
+        // At 1.0x speed, it wouldn't advance (needs 1000ms).
+        // At 4.0x speed, the threshold is 250ms (1000ms / 4.0).
+        testClock.advance(Duration.ofMillis(300));
+        provider.tick();
+        
+        // 4. Verify we advanced to the second row (Speed 200)
+        assertEquals(200.0, provider.getCurrentSnapshot().getAirSpeed().getSpeed(), 
+            "Playback multiplier should have been preserved from the pre-initialization call");
+    }
+
+    @Test
+    void shouldUpdateSpeedMultiplierEvenIfAtEnd() {
+        provider.initialize(TEST_CSV);
+        
+        // 1. Seek to the very last record (Index 2)
+        provider.setSeek(1.0); 
+        
+        // 2. Change playback speed to 2.0x.
+        // This hits the 'else' branch because we are at the last index.
+        provider.setSpeedMultiplier(2.0);
+        
+        // 3. Restart playback
+        provider.reset();
+        
+        // 4. Advance 600ms (more than the 500ms threshold for 2x speed)
+        testClock.advance(Duration.ofMillis(600));
+        provider.tick();
+        
+        // 5. Verify we advanced
+        assertEquals(200.0, provider.getCurrentSnapshot().getAirSpeed().getSpeed(), 
+            "Playback multiplier should have been preserved from when we were at the end of the flight");
     }
 }
