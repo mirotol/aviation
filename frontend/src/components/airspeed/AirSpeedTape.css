@@ -1,6 +1,9 @@
 /* Unique styles for Airspeed Tape (Right-Aligned) */
 .airspeed-tape-container {
-  width: 120px;
+  width: 125px; /* Slightly wider */
+  height: 600px;
+  position: relative;
+  background: var(--bg-black);
 }
 
 /* Ensure Airspeed uses the Blue theme for its header specifically */
@@ -9,7 +12,11 @@
 }
 
 .airspeed-tape-container .readout-pointer {
+  position: absolute;
+  top: 300px; /* Exact center of the 600px container */
+  transform: translateY(-50%);
   right: 0px;
+  z-index: 30;
 }
 
 .airspeed-tape-container .pointer-box {
@@ -20,20 +27,17 @@
 
 .airspeed-tape-container .tape-window {
   position: absolute;
-  /* Shift the window down so it doesn't start under the header */
   top: 45px; 
   left: 0;
   right: 0;
-  bottom: 0;
+  bottom: 20px; /* Leave room for footer */
   overflow: hidden;
 }
 
 .airspeed-tape-container .tape-scale {
   position: absolute;
-  /* The anchor point for the 'bottom' offset must be the absolute center */
-  /* Window height is 505px (550 - 45). Center is at 275px from top of container. */
-  /* Distance from bottom of window: 550 - 275 = 275px */
-  bottom: 275px; 
+  /* (600 total / 2) - 20 footer = 280px */
+  bottom: 280px; 
   left: 0;
   width: 100%;
   transition: transform 0.1s linear;

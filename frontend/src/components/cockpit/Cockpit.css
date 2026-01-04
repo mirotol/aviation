@@ -1,24 +1,64 @@
 .cockpit-main {
   flex-grow: 1;
   display: flex;
-  flex-direction: column;
-  align-items: center;
+  /* Shift from center to flex-start with top padding to move the panel up */
+  align-items: flex-start; 
   justify-content: center;
-  padding: 40px;
-  position: relative;
-  background-color: var(--bg-black);
+  background: radial-gradient(circle at top, #1a1a1a 0%, #050505 100%);
+  padding: 200px 40px 40px 40px; /* Increased top padding to 80px */
+  min-height: 100vh;
 }
 
 .instrument-panel {
   display: flex;
-  align-items: stretch; /* Ensure all components have the same height */
-  gap: 2px; /* Tiny mechanical gap between screens */
-  background: var(--bg-dark);
-  padding: 15px;
-  border-radius: 8px;
-  border: 4px solid var(--border-color);
+  gap: 20px;
+  background: #111111; /* Even darker panel */
+  padding: 30px;
+  border-radius: 15px;
+  /* Mechanical bezel feel */
+  border: 4px solid #222;
+  border-top: 4px solid #333; /* Simulated light from above */
+  
+  /* Deep shadows and an outer glow to make the panel stand out */
   box-shadow: 
-    0 40px 100px rgba(0, 0, 0, 0.9),
-    inset 0 1px 2px rgba(255, 255, 255, 0.1);
-  position: relative; /* Keep relative for future functional overlays */
+    0 100px 150px rgba(0, 0, 0, 0.9),
+    0 0 100px rgba(0, 0, 0, 0.5), /* Ambient glow */
+    inset 0 1px 1px rgba(255, 255, 255, 0.1);
+  position: relative;
+}
+
+/* Add a "Panel Label" or detail for flavor */
+.instrument-panel::after {
+  content: 'AVIONICS SUITE v1.0';
+  position: absolute;
+  bottom: 5px;
+  right: 20px;
+  font-family: sans-serif;
+  font-size: 8px;
+  color: #333;
+  letter-spacing: 1px;
+}
+
+.pfd-section {
+  display: flex;
+  align-items: stretch;
+  gap: 2px;
+  height: 600px; /* Match MFD height */
+}
+
+/* Ensure the instruments fill the 600px height */
+.pfd-section > * {
+  height: 100%;
+}
+
+.mfd-section {
+  display: flex;
+  width: 600px;
+  height: 600px;
+}
+
+.efis-container {
+  display: flex;
+  gap: 15px; /* Tighter gap between screens inside the panel */
+  align-items: center;
 }

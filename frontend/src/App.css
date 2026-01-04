@@ -69,11 +69,10 @@
 
 .app-container {
   display: flex;
-  flex-direction: row;
-  height: 100vh; /* Changed from minHeight to height to force full screen */
-  width: 100vw;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: #050505;
   overflow: hidden;
-  background-color: var(--bg-black);
 }
 
 .main-flight-deck {
