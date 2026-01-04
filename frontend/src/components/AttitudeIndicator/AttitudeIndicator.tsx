@@ -1,153 +1,123 @@
-import React, { useState, useEffect } from 'react';
-import InstrumentContainer from '../common/InstrumentContainer';
+import React from 'react';
 import { useFlightData } from '../../hooks/useFlightData';
+import './AttitudeIndicator.css';
 
-interface AttitudeIndicatorProps {
-  width?: string | number;
-  height?: string | number;
-}
+// Scaled up constants for a larger display
+const RADIUS = 220; // Was 140
+const TICK_MAX_ANGLE = 60;
+const ARC_EXTENSION = 0.27;
 
-export default function AttitudeIndicator({ width = 400, height = 400 }: AttitudeIndicatorProps) {
+export default function AttitudeIndicator() {
   const snapshot = useFlightData();
   const pitch = snapshot?.attitude.pitch ?? 0;
   const roll = snapshot?.attitude.roll ?? 0;
 
-  const [displayPitch, setDisplayPitch] = useState(0);
-  const [displayRoll, setDisplayRoll] = useState(0);
+  // Helper to convert polar angles to SVG coordinates
+  const getCoords = (angleInDegrees: number) => {
+    const rad = ((angleInDegrees - 90) * Math.PI) / 180;
+    return {
+      x: RADIUS * Math.cos(rad),
+      y: RADIUS * Math.sin(rad),
+    };
+  };
 
-  // Smooth interpolation using primitive dependencies
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setDisplayPitch((prev) => prev + (pitch - prev) * 0.1);
-      setDisplayRoll((prev) => prev + (roll - prev) * 0.1);
-    }, 16);
-    return () => clearInterval(interval);
-  }, [pitch, roll]);
+  const startCoords = getCoords(-TICK_MAX_ANGLE - ARC_EXTENSION);
+  const endCoords = getCoords(TICK_MAX_ANGLE + ARC_EXTENSION);
 
-  const pitchOffset = displayPitch * 2;
+  const arcPath = `M ${startCoords.x} ${startCoords.y} A ${RADIUS} ${RADIUS} 0 0 1 ${endCoords.x} ${endCoords.y}`;
 
-  // Roll tick marks
-  const rollTicks = [-60, -45, -30, -20, -10, 0, 10, 20, 30, 45, 60];
+  const pitchPixelsPerDegree = 16; // Was 10
+  const pitchOffset = pitch * pitchPixelsPerDegree;
 
-  // Pitch markers (lines across horizon)
-  const pitchMarkers = [30, 20, 10, -10, -20, -30];
+  // Pro-grade markers: Every 2.5 degrees from -30 to 30
+  const pitchMarkers = [];
+  for (let i = 30; i >= -30; i -= 2.5) {
+    if (i !== 0) pitchMarkers.push(i);
+  }
+
+  const rollTicks = [-60, -45, -30, -20, -10, 10, 20, 30, 45, 60];
 
   return (
-    <InstrumentContainer>
-      <svg width={width} height={height} viewBox="-125 -125 250 250">
-        <defs>
-          <clipPath id="circleClip">
-            <circle cx="0" cy="0" r="100" />
-          </clipPath>
-          <linearGradient id="skyGrad" x1="0" y1="-100" x2="0" y2="0">
-            <stop offset="0%" stopColor="#87CEEB" />
-            <stop offset="100%" stopColor="#4682B4" />
-          </linearGradient>
-          <linearGradient id="groundGrad" x1="0" y1="0" x2="0" y2="100">
-            <stop offset="0%" stopColor="#a0512db2" />
-            <stop offset="100%" stopColor="#8B4513" />
-          </linearGradient>
-        </defs>
+    <div className="attitude-container">
+      {/* The Horizon and Pitch Ladder (Rotates and Slides) */}
+      <div
+        className="horizon-layer"
+        style={{
+          transform: `rotate(${-roll}deg) translateY(${pitchOffset}px)`,
+        }}
+      >
+        <div className="sky" />
+        <div className="ground" />
+        <div className="horizon-line" />
 
-        {/* Background circle */}
-        <circle cx="0" cy="0" r="100" fill="black" />
+        {/* Pitch Ladder */}
+        <div className="pitch-ladder">
+          {pitchMarkers.map((deg) => {
+            const isMajor = deg % 10 === 0;
+            const isMid = deg % 5 === 0 && !isMajor;
+            const type = isMajor ? 'major' : isMid ? 'mid' : 'minor';
 
-        {/* Horizon + pitch group */}
-        <g clipPath="url(#circleClip)" transform={`rotate(${-displayRoll})`}>
-          {/* Sky and ground */}
-          <rect x={-125} y={-125 + pitchOffset} width={250} height={125} fill="url(#skyGrad)" />
-          <rect x={-125} y={pitchOffset} width={250} height={125} fill="url(#groundGrad)" />
-          {/* Horizon line */}
-          <line
-            x1={-125}
-            y1={pitchOffset}
-            x2={125}
-            y2={pitchOffset}
-            stroke="white"
-            strokeWidth={2}
-          />
-          {/* Pitch tick marks */}
-          {pitchMarkers.map((deg) => (
-            <g key={deg}>
-              <line
-                x1={-20}
-                y1={pitchOffset - deg * 2}
-                x2={20}
-                y2={pitchOffset - deg * 2}
-                stroke="white"
-                strokeWidth={1.5}
-              />
-              <text
-                x={25}
-                y={pitchOffset - deg * 2 + 3}
-                fill="white"
-                fontSize="10"
-                fontFamily="monospace"
-              >
-                {deg}°
-              </text>
-            </g>
-          ))}
-          {/* Roll arc */}
-          {rollTicks.map((deg) => {
-            const rad = (deg * Math.PI) / 180;
-            const rOuter = 90;
-            const rInner = deg % 30 === 0 ? 80 : 85;
-            const x1 = Math.sin(rad) * rOuter;
-            const y1 = -Math.cos(rad) * rOuter;
-            const x2 = Math.sin(rad) * rInner;
-            const y2 = -Math.cos(rad) * rInner;
             return (
-              <line key={deg} x1={x1} y1={y1} x2={x2} y2={y2} stroke="white" strokeWidth={2} />
+              <div
+                key={deg}
+                className={`pitch-line ${type}`}
+                style={{ top: `${-deg * pitchPixelsPerDegree}px` }}
+              >
+                <div className="pitch-line-content">
+                  {isMajor && <span className="line-label left">{Math.abs(deg)}</span>}
+                  <div className="line-bar" />
+                  {isMajor && <span className="line-label right">{Math.abs(deg)}</span>}
+                </div>
+              </div>
             );
           })}
-        </g>
+        </div>
+      </div>
 
-        {/* Fixed aircraft reference symbol */}
-        <g fill="none">
-          {/* ORANGE WINGS */}
-          <line
-            x1={-50}
-            y1={0}
-            x2={-18}
-            y2={0}
-            stroke="orange"
-            strokeWidth={4}
-            strokeLinecap="round"
-          />
-          <line
-            x1={50}
-            y1={0}
-            x2={17}
-            y2={0}
-            stroke="orange"
-            strokeWidth={4}
-            strokeLinecap="round"
-          />
-          {/* === DOWNWARD SEMICIRCLE WITH LARGER GRAY SECTION === */}
-          {/* Short left orange arc */}
-          <path d="M -17 0 A 30 15 0 0 0 -17 6" stroke="orange" strokeWidth={3} fill="none" />
-          {/* Short right orange arc */}
-          <path d="M 17 6 A 30 15 0 0 0 17 0" stroke="orange" strokeWidth={3} fill="none" />
-          {/* **Large middle gray arc** */}
-          <path d="M -17 6 A 18 15 0 0 0 17 6" stroke="#b0a899" strokeWidth={3} fill="none" />
-          {/* CENTER VERTICAL BAR */}
-          <line x1={0} y1={0} x2={0} y2={15} stroke="#b0a899" strokeWidth={3} />
-          <line
-            x1={0}
-            y1={15}
-            x2={0}
-            y2={30}
-            stroke="#b0a899"
-            strokeWidth={6}
-            strokeLinecap="round"
-          />
-          {/* ORANGE CENTER DOT */}
-          <circle cx={0} cy={0} r={3} fill="orange" />
-          {/* BANK POINTER CHEVRON, ORANGE TRIANGLE */}
-          <polygon points="-5,-70 0,-78 5,-70" fill="none" stroke="orange" strokeWidth="2" />
-        </g>
-      </svg>
-    </InstrumentContainer>
+      <div className="roll-scale">
+        <svg className="roll-scale-svg" viewBox="-300 -300 600 600">
+          <path className="roll-arc-path" d={arcPath} fill="none" strokeWidth="3" />
+
+          {/* Scaled Static White Center Triangle */}
+          <polygon points="-15,-240 0,-220 15,-240" className="zero-index-triangle" />
+
+          {/* Scaled Moving Yellow Sky Pointer */}
+          <g transform={`rotate(${-roll})`}>
+            <polygon
+              points="-15,-200 0,-215 15,-200"
+              fill="none"
+              className="sky-pointer-triangle"
+              strokeWidth="3"
+            />
+          </g>
+
+          {rollTicks.map((deg) => {
+            const isMajor = Math.abs(deg) === 30;
+            const length = isMajor ? 30 : 15; // Longer ticks for larger display
+            const coords = getCoords(deg);
+            const rad = ((deg - 90) * Math.PI) / 180;
+
+            return (
+              <line
+                key={deg}
+                className={`roll-tick-line ${isMajor ? 'major' : ''}`}
+                x1={coords.x}
+                y1={coords.y}
+                x2={(RADIUS + length) * Math.cos(rad)}
+                y2={(RADIUS + length) * Math.sin(rad)}
+                strokeWidth={isMajor ? 4 : 2}
+              />
+            );
+          })}
+        </svg>
+      </div>
+
+      {/* Fixed Aircraft Reference */}
+      <div className="aircraft-symbol">
+        <div className="wing-left" />
+        <div className="center-dot" />
+        <div className="wing-right" />
+      </div>
+    </div>
   );
 }
