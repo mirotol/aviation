@@ -10,9 +10,12 @@ export default function AirSpeedTape() {
   const pixelsPerKnot = 6;
   const tapeOffset = speed * pixelsPerKnot;
 
-  // Generate tick marks (e.g., from 0 to 300 knots)
+  // Optimization: Only render visible ticks (+/- 60 knots around current speed)
   const ticks = [];
-  for (let i = 0; i <= 800; i += 10) {
+  const minVisible = Math.max(0, Math.floor((speed - 60) / 10) * 10);
+  const maxVisible = Math.floor((speed + 60) / 10) * 10;
+
+  for (let i = minVisible; i <= maxVisible; i += 10) {
     ticks.push(i);
   }
 
@@ -23,7 +26,14 @@ export default function AirSpeedTape() {
         <span className="unit">KT</span>
       </div>
       <div className="tape-window">
-        <div className="tape-scale" style={{ transform: `translateY(${tapeOffset}px)` }}>
+        {/* Added transition for buttery smooth movement */}
+        <div 
+          className="tape-scale" 
+          style={{ 
+            transform: `translateY(${tapeOffset}px)`,
+            transition: 'transform 0.1s linear' 
+          }}
+        >
           {ticks.map((t) => (
             <div key={t} className="tape-tick" style={{ bottom: `${t * pixelsPerKnot}px` }}>
               <span className="tick-label">{t}</span>

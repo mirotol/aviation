@@ -10,9 +10,12 @@ export default function AltimeterTape() {
   const pixelsPerFoot = 0.6;
   const tapeOffset = altitude * pixelsPerFoot;
 
-  // Generate tick marks from 0 to 40,000 feet
+  // Optimization: Only render visible ticks (+/- 1000 feet around current altitude)
   const ticks = [];
-  for (let i = 0; i <= 40000; i += 100) {
+  const minVisible = Math.max(0, Math.floor((altitude - 1000) / 100) * 100);
+  const maxVisible = Math.floor((altitude + 1000) / 100) * 100;
+
+  for (let i = minVisible; i <= maxVisible; i += 100) {
     ticks.push(i);
   }
 
@@ -22,8 +25,15 @@ export default function AltimeterTape() {
         <span className="mode">ALT</span>
         <span className="unit">FT</span>
       </div>
+
       <div className="tape-window">
-        <div className="tape-scale" style={{ transform: `translateY(${tapeOffset}px)` }}>
+        <div
+          className="tape-scale" 
+          style={{ 
+            transform: `translateY(${tapeOffset}px)`,
+            transition: 'transform 0.1s linear' 
+          }}
+        >
           {ticks.map((t) => (
             <div key={t} className="tape-tick" style={{ bottom: `${t * pixelsPerFoot}px` }}>
               <div className="tick-line" />
@@ -32,6 +42,7 @@ export default function AltimeterTape() {
           ))}
         </div>
       </div>
+
       <div className="readout-pointer">
         <div className="pointer-box">{altitude.toFixed(0)}</div>
       </div>

@@ -2,8 +2,7 @@ import React from 'react';
 import { useFlightData } from '../../hooks/useFlightData';
 import './AttitudeIndicator.css';
 
-// Scaled up constants for a larger display
-const RADIUS = 220; // Was 140
+const RADIUS = 220;
 const TICK_MAX_ANGLE = 60;
 const ARC_EXTENSION = 0.27;
 
@@ -29,7 +28,7 @@ export default function AttitudeIndicator() {
   const pitchPixelsPerDegree = 16; // Was 10
   const pitchOffset = pitch * pitchPixelsPerDegree;
 
-  // Pro-grade markers: Every 2.5 degrees from -30 to 30
+  // Every 2.5 degrees from -30 to 30
   const pitchMarkers = [];
   for (let i = 30; i >= -30; i -= 2.5) {
     if (i !== 0) pitchMarkers.push(i);
@@ -44,6 +43,7 @@ export default function AttitudeIndicator() {
         className="horizon-layer"
         style={{
           transform: `rotate(${-roll}deg) translateY(${pitchOffset}px)`,
+          transition: 'transform 0.1s linear' // Add this
         }}
       >
         <div className="sky" />
@@ -82,7 +82,7 @@ export default function AttitudeIndicator() {
           <polygon points="-15,-240 0,-220 15,-240" className="zero-index-triangle" />
 
           {/* Scaled Moving Yellow Sky Pointer */}
-          <g transform={`rotate(${-roll})`}>
+          <g transform={`rotate(${-roll})`} style={{ transition: 'transform 0.1s linear' }}>
             <polygon
               points="-15,-200 0,-215 15,-200"
               fill="none"
@@ -93,7 +93,7 @@ export default function AttitudeIndicator() {
 
           {rollTicks.map((deg) => {
             const isMajor = Math.abs(deg) === 30;
-            const length = isMajor ? 30 : 15; // Longer ticks for larger display
+            const length = isMajor ? 30 : 15;
             const coords = getCoords(deg);
             const rad = ((deg - 90) * Math.PI) / 180;
 
@@ -112,7 +112,6 @@ export default function AttitudeIndicator() {
         </svg>
       </div>
 
-      {/* Fixed Aircraft Reference */}
       <div className="aircraft-symbol">
         <div className="wing-left" />
         <div className="center-dot" />
