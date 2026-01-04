@@ -1,0 +1,173 @@
+.info-panel-container {
+  color: #eee;
+  font-family: "Inter", "Segoe UI", sans-serif;
+}
+
+.info-panel-header {
+  margin-bottom: 30px;
+}
+
+.info-panel-header h2 {
+  font-size: 1.2rem;
+  margin: 0 0 10px 0;
+  letter-spacing: 1px;
+}
+
+.status-indicator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.8rem;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  borderRadius: 50%;
+  transition: background-color 0.3s ease;
+}
+
+.status-dot.online {
+  background-color: var(--success-color);
+  box-shadow: 0 0 10px var(--success-color);
+}
+
+.status-dot.offline {
+  background-color: var(--danger-color);
+  box-shadow: 0 0 10px var(--danger-color);
+}
+
+.status-text {
+  color: #888;
+}
+
+.status-text.offline {
+  color: var(--danger-color);
+  font-weight: bold;
+}
+
+.reconnect-timer {
+  color: #666;
+  font-size: 0.7rem;
+  margin-left: auto;
+}
+
+.section-label {
+  font-size: 0.8rem;
+  color: #666;
+  margin-bottom: 10px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.source-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+.source-btn {
+  flex: 1;
+  padding: 10px;
+  background-color: #2a2a2a;
+  color: #888;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.75rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  transition: all 0.2s ease;
+}
+
+.source-btn.active {
+  background-color: var(--primary-color);
+  color: #fff;
+  border-color: var(--primary-color);
+}
+
+.flight-select {
+  width: 100%;
+  margin-top: 10px;
+  padding: 8px;
+  background-color: var(--bg-black);
+  color: #eee;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  font-size: 0.8rem;
+  outline: none;
+}
+
+.telemetry-card {
+  background-color: #111;
+  padding: 10px 20px;
+  border-radius: 8px;
+  border: 1px solid #222;
+}
+
+.data-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border-color);
+  font-size: 1rem;
+  color: #aaa;
+}
+
+.data-row:last-child {
+  border-bottom: none;
+}
+
+.data-value {
+  color: var(--primary-color);
+  font-size: 1.1rem;
+  font-family: monospace;
+}
+
+.empty-state {
+  color: #555;
+  font-style: italic;
+  font-size: 0.8rem;
+}
+
+.json-toggle {
+  cursor: pointer;
+  font-size: 0.75rem;
+  color: var(--accent-color); /* Amber feels more like a "diagnostic" tool */
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  user-select: none;
+}
+
+.json-raw {
+  margin-top: 15px;
+  padding: 12px;
+  background-color: var(--bg-black);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  font-size: 0.9rem; /* Slightly smaller for more data density */
+  color: var(--primary-color);
+  overflow-y: auto;
+  max-height: 450px; /* ~20 lines of telemetry */
+  line-height: 1.4;
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+}
+
+/* Custom scrollbar for that sleek aviation look */
+.json-raw::-webkit-scrollbar {
+  width: 6px;
+}
+
+.json-raw::-webkit-scrollbar-track {
+  background: var(--bg-black);
+}
+
+.json-raw::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 3px;
+}
+
+.json-raw::-webkit-scrollbar-thumb:hover {
+  background: var(--text-dim);
+}
