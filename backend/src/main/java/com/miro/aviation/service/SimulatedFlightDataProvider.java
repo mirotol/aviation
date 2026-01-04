@@ -58,12 +58,12 @@ public class SimulatedFlightDataProvider implements FlightDataProvider {
     @Override
     public FlightSnapshot getCurrentSnapshot() {
         return new FlightSnapshot(
-                simulatedTime, // Use our internal simulation clock, not the real clock!
+                simulatedTime, // Use internal simulation clock
                 getAttitude(),
                 getAltitude(),
                 getSpeed(),
-                null, // No playback progress for simulated
-                getPosition() // Added position
+                null, // No playback progress for simulated flight data
+                getPosition()
         );
     }
 

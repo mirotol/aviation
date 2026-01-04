@@ -1,4 +1,4 @@
-Timestamp,Altitude,Speed,Direction
-1,1000,100,90
-2,5000,200,180
-3,10000,300,270
+Timestamp,Altitude,Speed,Direction,Position
+1,1000,100,0,"60.3172, 24.9633"
+2,2000,200,90,"60.3180, 24.9640"
+3,3000,300,180,"60.3190, 24.9650"
