@@ -1,7 +1,6 @@
 # Aviation Project
 
-A full-stack application for real-time flight telemetry visualization. This project features a Spring Boot backend that streams flight data via WebSockets and a React-based frontend cockpit dashboard.
-
+A high-fidelity Primary Flight Display (PFD) simulation system. This project features a Spring Boot backend that streams real-time telemetry via WebSockets to a React-based "Glass Cockpit" dashboard.
 
 ## UI Preview
 
@@ -21,15 +20,19 @@ The **Aviation Project** provides a real-time cockpit interface with live flight
 
 ## Key Features
 
-- **Live Flight Instruments**: Visual Attitude Indicator (Pitch/Roll), Altimeter, and Airspeed Indicator.
-- **WebSocket Streaming**: Low-latency data delivery using STOMP over SockJS.
-- **Data Flexibility**: Ability to switch between live simulations and recorded CSV data.
-- **Simulation & Playback Control**: 
-    - **Pause/Resume**: Instantly freeze simulation state across both live and recorded providers.
-    - **Variable Time Scale**: Analysis-grade speeds from **0.25x** (for landing analysis) up to **16x** (for rapid transitions).
-    - **Time-Deterministic Engine**: Backend services utilize a scaled `deltaTime` architecture for smooth movement at any speed.
+- **Primary Flight Display (PFD)**: High-fidelity instrumentation including:
+  - **Airspeed & Altitude Tapes**: Optimized vertical sliding scales with 2.5° precision.
+  - **Attitude Indicator**: SVG-based artificial horizon with synchronized sky-pointer bank scale.
+- **Quiet Dark Cockpit Philosophy**: Professional UI design where buttons only "light up" when active, reducing pilot distraction.
+- **Universal Simulation Control**: 
+  - **Dampened Playback**: Pause/Play and variable time scaling (0.25x to 16x) with a time-deterministic `deltaTime` engine.
+  - **Data Flexibility**: Instant switching between live simulations and historical CSV playback.
+- **Low-Latency Streaming**: STOMP over WebSockets broadcasting telemetry at 20Hz.
 
 ## Project Structure
+
+- **`/backend`**: Spring Boot application handling telemetry logic, CSV parsing, and WebSocket broadcasting.
+- **`/frontend`**: React/TypeScript application providing the visual cockpit dashboard and high-performance instrumentation.
 
 This project uses GitHub Actions to automate testing and quality assurance:
 
