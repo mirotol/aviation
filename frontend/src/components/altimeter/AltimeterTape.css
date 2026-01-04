@@ -1,0 +1,38 @@
+.altimeter-tape-container {
+  width: 150px;
+}
+
+.altimeter-tape-container .readout-pointer {
+  left: 0px;
+}
+
+.altimeter-tape-container .pointer-box {
+  width: 110px;
+}
+
+.altimeter-tape-container .tape-tick {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: 2px;
+}
+
+.altimeter-tape-container .tick-line {
+  position: absolute;
+  left: 0;
+  width: 25px;
+  height: 2px;
+  background: var(--text-dim);
+}
+
+.altimeter-tape-container .tick-label {
+  position: absolute;
+  left: 35px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  color: var(--text-main);
+  line-height: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  text-align: left;
+}
