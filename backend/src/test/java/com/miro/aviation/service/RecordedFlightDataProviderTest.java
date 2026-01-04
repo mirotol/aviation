@@ -158,4 +158,40 @@ class RecordedFlightDataProviderTest {
         @Override public ZoneId getZone() { return ZoneId.of("UTC"); }
         @Override public Clock withZone(ZoneId zone) { return this; }
     }
+
+    @Test
+    void shouldSeekToSpecificPercentage() {
+        provider.initialize(TEST_CSV); // Assumes test_flight.csv has 3 rows (indices 0, 1, 2)
+        
+        // Seek to 50% (should be index 1 if there are 3 rows: 0.5 * 2 = 1.0)
+        provider.setSeek(0.5);
+        assertEquals(200, provider.getCurrentSnapshot().getAirSpeed().getSpeed(), 
+            "Should have jumped to middle row (200 speed)");
+            
+        // Seek to 100% (index 2)
+        provider.setSeek(1.0);
+        assertEquals(300, provider.getCurrentSnapshot().getAirSpeed().getSpeed(), 
+            "Should have jumped to last row (300 speed)");
+
+        // Seek back to 0% (index 0)
+        provider.setSeek(0.0);
+        assertEquals(100, provider.getCurrentSnapshot().getAirSpeed().getSpeed(), 
+            "Should have jumped back to first row (100 speed)");
+    }
+
+    @Test
+    void shouldContinuePlaybackNormallyAfterSeek() {
+        provider.initialize(TEST_CSV);
+        
+        // 1. Seek to index 0 (Start)
+        provider.setSeek(0.0);
+        
+        // 2. Advance time by 1100ms (threshold for Row 2 is 1000ms)
+        testClock.advance(Duration.ofMillis(1100));
+        provider.tick();
+        
+        // 3. Verify it moved to index 1
+        assertEquals(200, provider.getCurrentSnapshot().getAirSpeed().getSpeed(), 
+            "Should advance to row 2 normally after seeking to row 1");
+    }
 }
