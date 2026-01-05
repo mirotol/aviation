@@ -1,13 +1,13 @@
 .navigation-display {
   width: 100%;
   height: 100%;
-  background-color: #000;
-  border: 2px solid var(--bezel-dark);
+  background-color: var(--bg-black);
+  border: 2px solid var(--border-color);
   border-radius: 4px;
   position: relative;
   overflow: hidden;
   color: var(--text-bright);
-  font-family: 'Inter', 'Roboto', 'Helvetica Neue', sans-serif;
+  font-family: var(--font-family);
 }
 
 .map-canvas {
@@ -32,6 +32,17 @@
   width: 50px;
   height: 50px;
   z-index: 10;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Control the scale of the ownship symbol */
+.ownship-symbol svg {
+  width: 70%;
+  height: 70%;
+  fill: var(--ownship-color);
 }
 
 .map-overlay {
@@ -39,37 +50,32 @@
   top: 10px;
   left: 10px;
   pointer-events: none;
-  background: rgba(0, 0, 0, 0.75); /* Dark background for contrast */
+  background: rgba(0, 0, 0, 0.75);
   padding: 10px 15px;
   border-radius: 4px;
-  border-left: 4px solid var(--aviation-green); /* Aviation Green accent */
+  border-left: 4px solid var(--aviation-green);
   z-index: 10;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
-  /* Reduced from 140px to 120px */
   min-width: 120px;
 }
 
 .stat {
-  font-family: 'Inter', 'Roboto', sans-serif;
-  letter-spacing: 0.5px;
-  text-transform: uppercase;
+  font-family: var(--font-family);
   font-size: 14px;
   color: var(--aviation-green);
   font-weight: bold;
   margin-bottom: 5px;
   display: flex;
-  justify-content: space-between; /* Align labels left and values right */
+  justify-content: space-between;
   align-items: center;
 }
 
 .stat .value {
   color: var(--text-bright);
   margin-left: 8px;
-  /* Monospaced but modern */
-  font-family: 'Consolas', 'Monaco', 'Lucida Console', monospace;
+  font-family: 'JetBrains Mono', 'Courier New', Courier, monospace;
   font-size: 18px;
   display: inline-block;
-  /* Reduced from 75px to 60px - enough for '000 KT' or '360°' */
   min-width: 60px;
   text-align: right;
 }
@@ -91,11 +97,11 @@
 }
 
 .range-controls button {
-  background: #222;
-  border: 1px solid var(--bezel-dark);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
   color: var(--aviation-green);
   padding: 8px 12px;
-  font-family: 'Segoe UI', sans-serif;
+  font-family: var(--font-family);
   font-weight: bold;
   cursor: pointer;
   border-radius: 4px;
@@ -105,11 +111,12 @@
 
 .range-controls button:hover:not(:disabled) {
   background: var(--bezel-light);
+  color: var(--text-bright);
 }
 
 .range-controls button:active:not(:disabled) {
   background: var(--aviation-green);
-  color: #000;
+  color: var(--bg-black);
 }
 
 .range-controls button:disabled {
@@ -128,8 +135,7 @@
   border-radius: 4px;
   border: 1px solid rgba(0, 255, 0, 0.3);
   z-index: 15;
-  font-family: 'Consolas', monospace;
-  letter-spacing: 1px;
+  font-family: 'JetBrains Mono', monospace;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
 }
 
@@ -178,12 +184,11 @@
 
 .compass-label {
   fill: var(--text-bright);
-  font-family: 'Inter', 'Segoe UI Bold', sans-serif;
-  font-weight: 800;
+  font-family: var(--font-family);
+  font-weight: 700;
   font-size: 16px;
   text-anchor: middle;
   dominant-baseline: middle;
-  /* Shadow for legibility over map */
   filter: drop-shadow(0 0 2px rgba(0, 0, 0, 1));
 }
 
@@ -272,6 +277,34 @@
   width: 50px;
   height: 50px;
   z-index: 10;
-  /* Cleaner shadow */
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.8));
+}
+
+.range-rings {
+  pointer-events: none;
+}
+
+.range-ring {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.7);
+  stroke-width: 1.5;
+  filter: drop-shadow(0 0 2px rgba(0, 0, 0, 0.8));
+}
+
+.range-ring.inner {
+  stroke-dasharray: 8 10;
+}
+
+.range-ring.outer {
+  stroke: rgba(255, 255, 255, 0.8);
+}
+
+.range-ring-label {
+  fill: var(--text-bright);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 14px; /* Slightly larger */
+  text-anchor: middle;
+  font-weight: 900;
+  /* Stronger shadow for the label */
+  filter: drop-shadow(0 0 3px rgba(0, 0, 0, 1));
 }

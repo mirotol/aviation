@@ -93,6 +93,15 @@ export default function InfoPanel() {
               <span>Roll</span>
               <span className="data-value">{snapshot.attitude.roll.toFixed(1)}°</span>
             </div>
+            <div className="data-row">
+              <span>Position</span>
+              <span className="data-value">
+                {snapshot.position.latitude >= 0 ? 'N' : 'S'}
+                {Math.abs(snapshot.position.latitude).toFixed(2)}°{' '}
+                {snapshot.position.longitude >= 0 ? 'E' : 'W'}
+                {Math.abs(snapshot.position.longitude).toFixed(2)}°
+              </span>
+            </div>
           </div>
         ) : (
           <div className="empty-state">Awaiting telemetry stream...</div>

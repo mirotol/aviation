@@ -39,6 +39,15 @@
   --instrument-yellow: #ffff00; /* Standard Garmin/Aviation Yellow */
   --horizon-line: rgba(255, 255, 255, 0.9);
 
+  /* Map Icon Colors*/
+  --ownship-color: #00eeff;
+  --large-airport-color: #ff00ff;
+  --vor-color: #0000ff;
+  --default-waypoint-color: #00ffff;
+  --waypoint-stroke-color: #000000;
+  --waypoint-label-color: #ffffff;
+  --waypoint-label-halo: #000000;
+
   font-family:
     'Inter',
     system-ui,
