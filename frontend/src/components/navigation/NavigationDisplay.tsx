@@ -5,6 +5,7 @@ import { useFlightData } from '../../hooks/useFlightData';
 import { useFlightPlan } from '../../hooks/useFlightPlan';
 import { useNearbyNavData } from '../../hooks/useNearbyNavData';
 import { flightPlanToGeoJSON } from '../../utils/navDataUtils';
+import { shouldShowNavPoint } from '../../utils/navDisplayPolicy';
 import './NavigationDisplay.css';
 import mapStyleJson from '../../styles/mapStyle.json';
 import type { StyleSpecification, VectorSourceSpecification } from 'maplibre-gl';
@@ -14,10 +15,12 @@ const mapStyle: StyleSpecification = JSON.parse(JSON.stringify(mapStyleJson));
 
 // Get API key from .env
 const apiKey = import.meta.env.VITE_MAPTILER_API_KEY || '';
-console.log(apiKey);
 
 // Replace vector tile source URL safely
-const source = mapStyle.sources?.openmaptiles as VectorSourceSpecification | undefined;
+const source =
+  mapStyle.sources && 'openmaptiles' in mapStyle.sources
+    ? (mapStyle.sources.openmaptiles as VectorSourceSpecification)
+    : undefined;
 if (source?.url) {
   source.url = source.url.replace('{MAPTILER_API_KEY}', apiKey);
 }
@@ -27,8 +30,6 @@ if (mapStyle.glyphs) {
   mapStyle.glyphs = mapStyle.glyphs.replace('{MAPTILER_API_KEY}', apiKey);
 }
 
-console.log(mapStyle);
-
 interface NavigationDisplayProps {
   initialRangeNM?: number;
 }
@@ -37,30 +38,55 @@ interface NavigationDisplayProps {
 const getCssVar = (varName: string): string =>
   getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
 
-// Mapbox colors
-const universalMagenta = getCssVar('--universal-magenta');
-const vorColor = getCssVar('--vor-color');
-const defaultWaypointColor = getCssVar('--default-waypoint-color');
-const strokeColor = getCssVar('--waypoint-stroke-color');
-const labelColor = getCssVar('--waypoint-label-color');
-const labelHalo = getCssVar('--waypoint-label-halo');
-
 // Predefined range options in nautical miles
 const RANGES = [2, 5, 10, 20, 40, 80, 160, 320];
 
 const NavigationDisplay: React.FC<NavigationDisplayProps> = ({ initialRangeNM = 20 }) => {
   const snapshot = useFlightData();
   const { flightPlan } = useFlightPlan();
-  const [rangeIndex, setRangeIndex] = useState(RANGES.indexOf(initialRangeNM) || 2);
+
+  const initialIndex = RANGES.indexOf(initialRangeNM);
+  const [rangeIndex, setRangeIndex] = useState(initialIndex >= 0 ? initialIndex : 2);
   const [brightness, setBrightness] = useState(75);
   const rangeNM = RANGES[rangeIndex];
 
-  const navData = useNearbyNavData(Math.max(rangeNM, 100));
+  // Mapbox colors
+  const colors = useMemo(
+    () => ({
+      universalMagenta: getCssVar('--universal-magenta'),
+      vorColor: getCssVar('--vor-color'),
+      defaultWaypointColor: getCssVar('--default-waypoint-color'),
+      strokeColor: getCssVar('--waypoint-stroke-color'),
+      labelColor: getCssVar('--waypoint-label-color'),
+      labelHalo: getCssVar('--waypoint-label-halo'),
+    }),
+    []
+  );
+
+  // Dynamic fetch radius based on MFD range
+  const fetchRadiusNM = useMemo(() => {
+    if (rangeNM <= 10) return 20;
+    if (rangeNM <= 40) return 60;
+    if (rangeNM <= 80) return 120;
+    return 200;
+  }, [rangeNM]);
+
+  const rawNavData = useNearbyNavData(fetchRadiusNM);
+
+  // Filter nav points based on MFD range
+  const navData = useMemo(() => {
+    if (!rawNavData) return null;
+    return {
+      ...rawNavData,
+      features: rawNavData.features.filter((feature) =>
+        shouldShowNavPoint(feature.properties, rangeNM)
+      ),
+    };
+  }, [rawNavData, rangeNM]);
 
   // Compute flight plan GeoJSON
   const flightPlanGeoJSON = useMemo(() => {
     if (!flightPlan || flightPlan.length < 2 || !snapshot) return null;
-
     return flightPlanToGeoJSON(
       {
         activeLegIndex: snapshot.activeWaypointIndex,
@@ -101,9 +127,7 @@ const NavigationDisplay: React.FC<NavigationDisplayProps> = ({ initialRangeNM = 
    * These zoom levels are used to control layer visibility via
    * minzoom / maxzoom in the map style (airports, runways, airways, etc).
    */
-  const zoom = useMemo(() => {
-    return Math.log2(21600 / rangeNM) - 1;
-  }, [rangeNM]);
+  const zoom = Math.log2(21600 / rangeNM) - 1;
 
   const handleRangeChange = (delta: number) => {
     setRangeIndex((prev) => Math.min(Math.max(prev + delta, 0), RANGES.length - 1));
@@ -113,22 +137,27 @@ const NavigationDisplay: React.FC<NavigationDisplayProps> = ({ initialRangeNM = 
     setBrightness((prev) => Math.min(Math.max(prev + delta, 20), 100));
   };
 
+  const latitude = snapshot?.position?.latitude ?? 0;
+  const longitude = snapshot?.position?.longitude ?? 0;
+  const track = snapshot?.attitude?.yaw ?? 0;
+  const mapBearing = -track;
+
+  const viewState = useMemo(
+    () => ({
+      latitude,
+      longitude,
+      zoom,
+      bearing: mapBearing,
+      pitch: 0,
+      padding: { top: 0, bottom: 0, left: 0, right: 0 },
+    }),
+    [latitude, longitude, zoom, mapBearing]
+  );
+
+  // JSX Rendering — safe to early-return now
   if (!snapshot) {
     return <div className="navigation-display">WAITING FOR GPS...</div>;
   }
-
-  const { latitude, longitude } = snapshot.position;
-  const track = snapshot.attitude.yaw;
-  const mapBearing = -track;
-
-  const viewState = {
-    latitude,
-    longitude,
-    zoom,
-    bearing: mapBearing,
-    pitch: 0,
-    padding: { top: 0, bottom: 0, left: 0, right: 0 },
-  };
 
   return (
     <div className="navigation-display">
@@ -148,7 +177,7 @@ const NavigationDisplay: React.FC<NavigationDisplayProps> = ({ initialRangeNM = 
               filter={['==', ['get', 'role'], 'pastLeg']}
               layout={{ 'line-cap': 'round', 'line-join': 'round' }}
               paint={{
-                'line-color': universalMagenta,
+                'line-color': colors.universalMagenta,
                 'line-width': 3,
                 'line-opacity': 0.3,
                 'line-dasharray': [2, 4],
@@ -161,7 +190,7 @@ const NavigationDisplay: React.FC<NavigationDisplayProps> = ({ initialRangeNM = 
               type="line"
               filter={['==', ['get', 'role'], 'activeLeg']}
               layout={{ 'line-cap': 'round', 'line-join': 'round' }}
-              paint={{ 'line-color': universalMagenta, 'line-width': 5 }}
+              paint={{ 'line-color': colors.universalMagenta, 'line-width': 5 }}
             />
 
             {/* Future Legs */}
@@ -170,49 +199,154 @@ const NavigationDisplay: React.FC<NavigationDisplayProps> = ({ initialRangeNM = 
               type="line"
               filter={['==', ['get', 'role'], 'futureLeg']}
               layout={{ 'line-cap': 'round', 'line-join': 'round' }}
-              paint={{ 'line-color': universalMagenta, 'line-width': 3, 'line-opacity': 0.5 }}
+              paint={{
+                'line-color': colors.universalMagenta,
+                'line-width': 3,
+                'line-opacity': 0.5,
+              }}
             />
           </Source>
         )}
 
+        {/* Navigation Data (Waypoints, VORs, NDBs, etc) */}
         {navData && (
           <Source id="navdata" type="geojson" data={navData}>
             <Layer
-              id="waypoint-icons"
+              id="airport-icons-small"
               type="circle"
+              filter={['==', ['get', 'type'], 'small_airport']}
               paint={{
-                'circle-radius': 5,
-                'circle-color': [
-                  'case',
-                  ['all', ['in', 'airport', ['get', 'type']]],
-                  universalMagenta,
-                  ['==', ['get', 'type'], 'VOR'],
-                  vorColor,
-                  defaultWaypointColor,
-                ],
+                'circle-radius': ['interpolate', ['linear'], ['zoom'], 6, 4, 10, 6],
+                'circle-color': colors.universalMagenta,
                 'circle-stroke-width': 2,
-                'circle-stroke-color': strokeColor,
+                'circle-stroke-color': colors.strokeColor,
+                'circle-opacity': ['interpolate', ['linear'], ['zoom'], 6, 0.7, 9, 1],
               }}
             />
-
             <Layer
-              id="waypoint-labels"
+              id="airport-icons-medium-large"
+              type="circle"
+              filter={['in', ['get', 'type'], ['literal', ['medium_airport', 'large_airport']]]}
+              paint={{
+                'circle-radius': ['interpolate', ['linear'], ['zoom'], 6, 6, 10, 10],
+                'circle-color': colors.universalMagenta,
+                'circle-stroke-width': 2.5,
+                'circle-stroke-color': colors.strokeColor,
+                'circle-opacity': ['interpolate', ['linear'], ['zoom'], 6, 0.8, 9, 1],
+              }}
+            />
+            <Layer
+              id="vor-icons"
+              type="circle"
+              filter={['==', ['get', 'type'], 'VOR']}
+              paint={{
+                'circle-radius': ['interpolate', ['linear'], ['zoom'], 6, 3.5, 10, 5],
+                'circle-color': colors.vorColor,
+                'circle-stroke-width': 1.5,
+                'circle-stroke-color': colors.strokeColor,
+                'circle-opacity': ['interpolate', ['linear'], ['zoom'], 6, 0.7, 9, 1],
+              }}
+            />
+            <Layer
+              id="ndb-icons"
+              type="circle"
+              filter={['==', ['get', 'type'], 'NDB']}
+              paint={{
+                'circle-radius': ['interpolate', ['linear'], ['zoom'], 6, 3, 10, 5],
+                'circle-color': '#00ffff', // cyan-ish
+                'circle-stroke-width': 1.5,
+                'circle-stroke-color': colors.strokeColor,
+                'circle-opacity': ['interpolate', ['linear'], ['zoom'], 6, 0.6, 9, 1],
+              }}
+            />
+            <Layer
+              id="fix-icons"
+              type="circle"
+              filter={['==', ['get', 'type'], 'FIX']}
+              paint={{
+                'circle-radius': ['interpolate', ['linear'], ['zoom'], 8, 2.5, 10, 4],
+                'circle-color': colors.defaultWaypointColor,
+                'circle-stroke-width': 1,
+                'circle-stroke-color': colors.strokeColor,
+                'circle-opacity': ['interpolate', ['linear'], ['zoom'], 8, 0.5, 10, 1],
+              }}
+            />
+            <Layer
+              id="airport-labels-small"
               type="symbol"
+              filter={['==', ['get', 'type'], 'small_airport']}
+              minzoom={8.5}
               layout={{
                 'text-field': ['get', 'ident'],
-                'text-size': 15,
-                'text-font': ['DIN Pro Medium', 'Arial Unicode MS Regular'],
-                'text-letter-spacing': 0.1,
-                'text-offset': [0, 1.2],
+                'text-size': 13,
+                'text-font': ['DIN Pro Medium'],
+                'text-offset': [0, 1.1],
                 'text-anchor': 'top',
-                'text-padding': 2,
                 'text-allow-overlap': false,
               }}
               paint={{
-                'text-color': labelColor,
-                'text-halo-color': labelHalo,
+                'text-color': colors.labelColor,
+                'text-halo-color': colors.labelHalo,
+                'text-halo-width': 2,
+                'text-halo-blur': 0.5,
+                'text-opacity': ['interpolate', ['linear'], ['zoom'], 8.5, 0, 9.2, 1],
+              }}
+            />
+            <Layer
+              id="airport-labels-major"
+              type="symbol"
+              filter={['in', ['get', 'type'], ['literal', ['medium_airport', 'large_airport']]]}
+              minzoom={6}
+              layout={{
+                'text-field': ['get', 'ident'],
+                'text-size': 15,
+                'text-font': ['DIN Pro Bold'],
+                'text-offset': [0, 1.3],
+                'text-anchor': 'top',
+              }}
+              paint={{
+                'text-color': colors.labelColor,
+                'text-halo-color': colors.labelHalo,
                 'text-halo-width': 3,
                 'text-halo-blur': 1,
+              }}
+            />
+            <Layer
+              id="navaid-labels"
+              type="symbol"
+              filter={['in', ['get', 'type'], ['literal', ['VOR', 'NDB']]]}
+              minzoom={7}
+              layout={{
+                'text-field': ['get', 'ident'],
+                'text-size': 14,
+                'text-font': ['DIN Pro Medium'],
+                'text-offset': [0, 1.2],
+                'text-anchor': 'top',
+              }}
+              paint={{
+                'text-color': colors.labelColor,
+                'text-halo-color': colors.labelHalo,
+                'text-halo-width': 2.5,
+                'text-halo-blur': 0.8,
+              }}
+            />
+            <Layer
+              id="fix-labels"
+              type="symbol"
+              filter={['==', ['get', 'type'], 'FIX']}
+              minzoom={10}
+              layout={{
+                'text-field': ['get', 'ident'],
+                'text-size': 12,
+                'text-font': ['DIN Pro Medium'],
+                'text-offset': [0, 1.0],
+                'text-anchor': 'top',
+              }}
+              paint={{
+                'text-color': colors.labelColor,
+                'text-halo-color': colors.labelHalo,
+                'text-halo-width': 2,
+                'text-halo-blur': 0.5,
               }}
             />
           </Source>
