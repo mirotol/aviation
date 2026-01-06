@@ -6,6 +6,9 @@ export default function AltimeterTape() {
   const snapshot = useFlightData();
   const altitude = snapshot?.altitude.altitude ?? 0;
 
+  // Window: 600px - 45px (header) - 20px (footer) = 535px
+  const tapeWindowHeight = 535;
+
   // Each 100 feet = 60 pixels on our tape
   const pixelsPerFoot = 0.6;
   const tapeOffset = altitude * pixelsPerFoot;
@@ -28,10 +31,10 @@ export default function AltimeterTape() {
 
       <div className="tape-window">
         <div
-          className="tape-scale" 
-          style={{ 
+          className="tape-scale"
+          style={{
             transform: `translateY(${tapeOffset}px)`,
-            transition: 'transform 0.1s linear' 
+            transition: 'transform 0.1s linear',
           }}
         >
           {ticks.map((t) => (

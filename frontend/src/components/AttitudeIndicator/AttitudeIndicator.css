@@ -1,20 +1,22 @@
 .attitude-container {
   position: relative;
-  width: 700px;
-  height: 550px;
+  width: 550px; /* Widened from 400px */
+  height: 600px;
   background: var(--bg-black);
   border: 1px solid var(--border-color);
   overflow: hidden;
 }
 
+/* Ensure the horizon layer is wide enough to cover the new container width */
 .horizon-layer {
   position: absolute;
   top: 50%;
   left: 50%;
-  width: 1000px; /* Over-sized to handle rotations without gaps */
-  height: 1000px;
-  margin-top: -500px;
-  margin-left: -500px;
+  width: 1200px;
+  height: 1200px;
+  /* Centering: half of width/height */
+  margin-top: -600px;
+  margin-left: -600px;
   transition: transform 0.1s linear;
 }
 
@@ -41,6 +43,7 @@
   position: absolute;
   top: 50%;
   left: 50%;
+  /* Ensure the container itself has no size so children center relative to the 50%/50% point */
   width: 0;
   height: 0;
   z-index: 15;
@@ -48,9 +51,9 @@
 
 .pitch-line {
   position: absolute;
-  left: 0;
-  width: 0;
-  height: 0;
+  /* Use transform to center the line content based on its own width */
+  left: 50%;
+  transform: translateX(-50%);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -60,7 +63,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 25px; /* Wider gap for larger numbers */
+  gap: 30px; /* Adjusted gap for the new wider display */
   width: 500px;
 }
 

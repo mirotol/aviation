@@ -16,21 +16,37 @@
   --bg-dark: #141619; /* Main panel background */
   --bg-surface: #1c1f24; /* Card / Component background */
   --border-color: #2d3238; /* Subtle panel borders */
+  --panel-gray: #111111;
+  --bezel-gray: #222222;
+  --bezel-light: #333333;
+  --bezel-dark: #444444;
 
   /* Typography */
   --text-main: #e1e1e1; /* Off-white to reduce eye strain */
   --text-dim: #7f8c8d; /* Labels / Non-interactive text */
   --text-bright: #ffffff; /* Headers / Critical values */
+  --text-muted: #888888;
+  --text-dark: #666666;
 
   /* Aviation Environment Palette */
   --sky-color-top: #1e90ff;
   --sky-color-bottom: #4682b4;
   --ground-color-top: #8b4513;
   --ground-color-bottom: #5d2e0c;
+  --aviation-green: #00ff00;
 
   /* Instrument Hardware Colors */
   --instrument-yellow: #ffff00; /* Standard Garmin/Aviation Yellow */
   --horizon-line: rgba(255, 255, 255, 0.9);
+
+  /* Map Icon Colors*/
+  --ownship-color: #00eeff;
+  --universal-magenta: #ff00ff;
+  --vor-color: #0000ff;
+  --default-waypoint-color: #00ffff;
+  --waypoint-stroke-color: #000000;
+  --waypoint-label-color: #ffffff;
+  --waypoint-label-halo: #000000;
 
   font-family:
     'Inter',

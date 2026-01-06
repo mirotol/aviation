@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState, ReactNode, useCallback } from 'react';
 import { Client } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
-import { WebSocketContext, FlightSnapshot } from './WebSocketContext';
+import { WebSocketContext, FlightSnapshot, NavPoint } from './WebSocketContext';
 
 interface WebSocketProviderProps {
   children: ReactNode;
@@ -11,6 +11,7 @@ const RECONNECT_INTERVAL = 5000;
 
 export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
   const [snapshot, setSnapshot] = useState<FlightSnapshot | null>(null);
+  const [flightPlan, setFlightPlan] = useState<NavPoint[] | null>(null);
   const [isConnected, setIsConnected] = useState(false);
   const [activeProvider, setActiveProvider] = useState<'simulated' | 'recorded'>('simulated');
   const [selectedFlight, setSelectedFlight] = useState<string | null>(null);
@@ -61,6 +62,10 @@ export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
 
         client.subscribe('/user/queue/flightData', (message) => {
           setSnapshot(JSON.parse(message.body));
+        });
+
+        client.subscribe('/user/queue/flightPlan', (message) => {
+          setFlightPlan(JSON.parse(message.body));
         });
 
         // Initial sync on connection
@@ -115,6 +120,17 @@ export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
     }
     setActiveProvider(provider);
     if (fileName) setSelectedFlight(fileName);
+    // Clear old flight plan when switching to avoid visual artifacts
+    setFlightPlan(null);
+  }, []);
+
+  const updateFlightPlan = useCallback((waypoints: NavPoint[]) => {
+    if (clientRef.current?.connected) {
+      clientRef.current.publish({
+        destination: '/app/updateFlightPlan',
+        body: JSON.stringify(waypoints),
+      });
+    }
   }, []);
 
   const setPaused = useCallback((paused: boolean) => {
@@ -150,6 +166,8 @@ export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
     <WebSocketContext.Provider
       value={{
         snapshot,
+        flightPlan,
+        updateFlightPlan,
         switchProvider,
         setPaused,
         setSpeed,
