@@ -2,23 +2,105 @@ import React, { useMemo, useState } from 'react';
 import Map, { Source, Layer } from 'react-map-gl/maplibre';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import { useFlightData } from '../../hooks/useFlightData';
+import { useFlightPlan } from '../../hooks/useFlightPlan';
 import { useNearbyNavData } from '../../hooks/useNearbyNavData';
+import { flightPlanToGeoJSON } from '../../utils/navDataUtils';
 import './NavigationDisplay.css';
+import mapStyleJson from '../../styles/mapStyle.json';
+import type { StyleSpecification, VectorSourceSpecification } from 'maplibre-gl';
+
+// Clone JSON so we don't mutate the original import
+const mapStyle: StyleSpecification = JSON.parse(JSON.stringify(mapStyleJson));
+
+// Get API key from .env
+const apiKey = import.meta.env.VITE_MAPTILER_API_KEY || '';
+console.log(apiKey);
+
+// Replace vector tile source URL safely
+const source = mapStyle.sources?.openmaptiles as VectorSourceSpecification | undefined;
+if (source?.url) {
+  source.url = source.url.replace('{MAPTILER_API_KEY}', apiKey);
+}
+
+// Replace glyphs URL safely
+if (mapStyle.glyphs) {
+  mapStyle.glyphs = mapStyle.glyphs.replace('{MAPTILER_API_KEY}', apiKey);
+}
+
+console.log(mapStyle);
 
 interface NavigationDisplayProps {
   initialRangeNM?: number;
 }
 
-const RANGES = [5, 10, 20, 40, 80, 160, 320];
+// Read CSS variables in TS
+const getCssVar = (varName: string): string =>
+  getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
+
+// Mapbox colors
+const universalMagenta = getCssVar('--universal-magenta');
+const vorColor = getCssVar('--vor-color');
+const defaultWaypointColor = getCssVar('--default-waypoint-color');
+const strokeColor = getCssVar('--waypoint-stroke-color');
+const labelColor = getCssVar('--waypoint-label-color');
+const labelHalo = getCssVar('--waypoint-label-halo');
+
+// Predefined range options in nautical miles
+const RANGES = [2, 5, 10, 20, 40, 80, 160, 320];
 
 const NavigationDisplay: React.FC<NavigationDisplayProps> = ({ initialRangeNM = 20 }) => {
   const snapshot = useFlightData();
+  const { flightPlan } = useFlightPlan();
   const [rangeIndex, setRangeIndex] = useState(RANGES.indexOf(initialRangeNM) || 2);
   const [brightness, setBrightness] = useState(75);
   const rangeNM = RANGES[rangeIndex];
 
   const navData = useNearbyNavData(Math.max(rangeNM, 100));
 
+  // Compute flight plan GeoJSON
+  const flightPlanGeoJSON = useMemo(() => {
+    if (!flightPlan || flightPlan.length < 2 || !snapshot) return null;
+
+    return flightPlanToGeoJSON(
+      {
+        activeLegIndex: snapshot.activeWaypointIndex,
+        waypoints: flightPlan,
+      },
+      snapshot.position
+    );
+  }, [flightPlan, snapshot]);
+
+  /**
+   * Convert MFD range (nautical miles) into a MapLibre zoom level.
+   *
+   * This uses a logarithmic scale:
+   *  - Each range step halves/doubles the visible area
+   *  - Zoom decreases by ~1 for every doubling of range
+   *
+   * Formula:
+   *   zoom = log2(21600 / rangeNM) - 1
+   *
+   * Where:
+   *  - rangeNM = selected display range in nautical miles
+   *  - 21600 is a tuning constant representing a full-world scale in NM
+   *  - "-1" is a visual offset to better match avionics-style scaling
+   *
+   * Resulting zoom levels for predefined ranges:
+   *
+   *   Range (NM) → MapLibre Zoom
+   *   -------------------------
+   *     2 NM   → ~12.4
+   *     5 NM   → ~11.1
+   *    10 NM   → ~10.1
+   *    20 NM   → ~ 9.1
+   *    40 NM   → ~ 8.1
+   *    80 NM   → ~ 7.1
+   *   160 NM   → ~ 6.1
+   *   320 NM   → ~ 5.1
+   *
+   * These zoom levels are used to control layer visibility via
+   * minzoom / maxzoom in the map style (airports, runways, airways, etc).
+   */
   const zoom = useMemo(() => {
     return Math.log2(21600 / rangeNM) - 1;
   }, [rangeNM]);
@@ -48,26 +130,51 @@ const NavigationDisplay: React.FC<NavigationDisplayProps> = ({ initialRangeNM = 
     padding: { top: 0, bottom: 0, left: 0, right: 0 },
   };
 
-  // Read CSS variables in TS
-  const getCssVar = (varName: string): string =>
-    getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
-
-  // Mapbox colors
-  const largeAirportColor = getCssVar('--large-airport-color');
-  const vorColor = getCssVar('--vor-color');
-  const defaultWaypointColor = getCssVar('--default-waypoint-color');
-  const strokeColor = getCssVar('--waypoint-stroke-color');
-  const labelColor = getCssVar('--waypoint-label-color');
-  const labelHalo = getCssVar('--waypoint-label-halo');
-
   return (
     <div className="navigation-display">
       <Map
         {...viewState}
         style={{ width: '100%', height: '100%' }}
-        mapStyle="https://demotiles.maplibre.org/style.json"
+        mapStyle={mapStyle}
         attributionControl={false}
       >
+        {/* Flight Plan Path (Magenta Line) */}
+        {flightPlanGeoJSON && (
+          <Source id="flightplan" type="geojson" data={flightPlanGeoJSON}>
+            {/* Past Legs */}
+            <Layer
+              id="fpl-past-legs"
+              type="line"
+              filter={['==', ['get', 'role'], 'pastLeg']}
+              layout={{ 'line-cap': 'round', 'line-join': 'round' }}
+              paint={{
+                'line-color': universalMagenta,
+                'line-width': 3,
+                'line-opacity': 0.3,
+                'line-dasharray': [2, 4],
+              }}
+            />
+
+            {/* Active Leg */}
+            <Layer
+              id="fpl-active-leg"
+              type="line"
+              filter={['==', ['get', 'role'], 'activeLeg']}
+              layout={{ 'line-cap': 'round', 'line-join': 'round' }}
+              paint={{ 'line-color': universalMagenta, 'line-width': 5 }}
+            />
+
+            {/* Future Legs */}
+            <Layer
+              id="fpl-future-legs"
+              type="line"
+              filter={['==', ['get', 'role'], 'futureLeg']}
+              layout={{ 'line-cap': 'round', 'line-join': 'round' }}
+              paint={{ 'line-color': universalMagenta, 'line-width': 3, 'line-opacity': 0.5 }}
+            />
+          </Source>
+        )}
+
         {navData && (
           <Source id="navdata" type="geojson" data={navData}>
             <Layer
@@ -78,7 +185,7 @@ const NavigationDisplay: React.FC<NavigationDisplayProps> = ({ initialRangeNM = 
                 'circle-color': [
                   'case',
                   ['all', ['in', 'airport', ['get', 'type']]],
-                  largeAirportColor,
+                  universalMagenta,
                   ['==', ['get', 'type'], 'VOR'],
                   vorColor,
                   defaultWaypointColor,

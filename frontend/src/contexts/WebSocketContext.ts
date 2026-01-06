@@ -1,32 +1,44 @@
 import { createContext } from 'react';
 
+export interface PlaybackProgress {
+  currentIndex: number;
+  totalSamples: number;
+  percentage: number;
+  startTime: number;
+  endTime: number;
+}
+
 export interface FlightSnapshot {
   timestamp: number;
   attitude: { pitch: number; roll: number; yaw: number };
   altitude: { altitude: number; kollsmanPressure: number };
   airSpeed: { speed: number };
   position: { latitude: number; longitude: number };
-  progress: {
-    currentIndex: number;
-    totalSamples: number;
-    percentage: number;
-    startTime: number;
-    endTime: number;
-  } | null;
+  progress: PlaybackProgress | null;
+  activeWaypointIndex: number;
+}
+
+export interface NavPoint {
+  ident: string;
+  type: string;
+  latitude: number;
+  longitude: number;
 }
 
 export interface WebSocketContextType {
   snapshot: FlightSnapshot | null;
+  flightPlan: NavPoint[] | null;
   switchProvider: (provider: 'simulated' | 'recorded', fileName?: string) => void;
   setPaused: (paused: boolean) => void;
   setSpeed: (speed: number) => void;
-  seek: (percentage: number) => void; // New method for scrubbing
+  seek: (percentage: number) => void;
   isPaused: boolean;
   speed: number;
   isConnected: boolean;
   activeProvider: 'simulated' | 'recorded';
   selectedFlight: string | null;
   reconnectCountdown: number | null;
+  updateFlightPlan: (waypoints: NavPoint[]) => void;
 }
 
 export const WebSocketContext = createContext<WebSocketContextType | null>(null);

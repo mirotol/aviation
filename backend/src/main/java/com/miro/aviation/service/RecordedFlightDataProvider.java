@@ -87,7 +87,8 @@ public class RecordedFlightDataProvider implements FlightDataProvider {
             snapshot.getAltitude(),
             snapshot.getAirSpeed(),
             getProgress(),
-            snapshot.getPosition()
+            snapshot.getPosition(),
+                0
         );
     }
     

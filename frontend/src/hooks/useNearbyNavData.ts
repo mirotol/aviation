@@ -25,7 +25,7 @@ export function useNearbyNavData(radiusNM = 100, refreshThresholdNM = 5) {
 
     const currentPos: GeoPoint = {
       lat: snapshot.position.latitude,
-      lon: snapshot.position.longitude
+      lon: snapshot.position.longitude,
     };
 
     // 3. Distance Check
@@ -34,7 +34,6 @@ export function useNearbyNavData(radiusNM = 100, refreshThresholdNM = 5) {
       : Infinity;
 
     if (distanceMoved >= refreshThresholdNM) {
-        console.log('FETCH NEW DATA')
       isFetching.current = true;
       lastFetchTime.current = now;
 
@@ -44,15 +43,15 @@ export function useNearbyNavData(radiusNM = 100, refreshThresholdNM = 5) {
       const url = `http://localhost:8080/api/nav/nearby?lat=${currentPos.lat}&lon=${currentPos.lon}&radius=${radiusNM}`;
 
       fetch(url)
-        .then(res => {
+        .then((res) => {
           if (!res.ok) throw new Error(`Server error: ${res.status}`);
           return res.json();
         })
-        .then(data => {
+        .then((data) => {
           setNavData(pointsToGeoJSON(data));
         })
-        .catch(err => {
-          console.warn("NavData Fetch suppressed/failed. Retrying in next cycle.", err.message);
+        .catch((err) => {
+          console.warn('NavData Fetch suppressed/failed. Retrying in next cycle.', err.message);
           // We don't reset lastFetchPos here so it won't try again until the plane moves more
         })
         .finally(() => {

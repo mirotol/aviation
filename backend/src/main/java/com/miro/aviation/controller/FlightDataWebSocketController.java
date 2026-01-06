@@ -1,6 +1,7 @@
 package com.miro.aviation.controller;
 
 import com.miro.aviation.model.FlightSnapshot;
+import com.miro.aviation.model.NavPoint;
 import com.miro.aviation.service.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,6 +17,7 @@ import org.springframework.web.socket.messaging.SessionDisconnectEvent;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.List;
 
 @Controller
 public class FlightDataWebSocketController {
@@ -80,6 +82,31 @@ public class FlightDataWebSocketController {
         }
 
         userProviders.put(sessionId, provider);
+        
+        // BROADCAST the initial flight plan for the new provider
+        broadcastFlightPlan(sessionId, provider);
+    }
+
+    @MessageMapping("/updateFlightPlan")
+    public void updateFlightPlan(List<NavPoint> newWaypoints, SimpMessageHeaderAccessor headerAccessor) {
+        String sessionId = headerAccessor.getSessionId();
+        FlightDataProvider provider = userProviders.get(sessionId);
+        
+        if (provider != null) {
+            logger.info("Updating Flight Plan for session: {} with {} waypoints", sessionId, newWaypoints.size());
+            provider.updateFlightPlan(newWaypoints);
+            // Synchronize frontend immediately
+            broadcastFlightPlan(sessionId, provider);
+        }
+    }
+
+    private void broadcastFlightPlan(String sessionId, FlightDataProvider provider) {
+        messagingTemplate.convertAndSendToUser(
+            sessionId, 
+            "/queue/flightPlan", 
+            provider.getFlightPlan(), 
+            createHeaders(sessionId)
+        );
     }
 
     @EventListener
