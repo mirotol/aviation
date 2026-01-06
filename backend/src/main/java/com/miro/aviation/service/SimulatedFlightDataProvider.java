@@ -1,12 +1,11 @@
 package com.miro.aviation.service;
 
-import com.miro.aviation.model.AirSpeed;
-import com.miro.aviation.model.Altitude;
-import com.miro.aviation.model.Attitude;
-import com.miro.aviation.model.FlightSnapshot;
-import com.miro.aviation.model.Position;
+import com.miro.aviation.model.*;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Component
 @Scope("prototype") // // Create new instance for each client
@@ -15,7 +14,10 @@ public class SimulatedFlightDataProvider implements FlightDataProvider {
     private final AttitudeSimulatorService attitudeSim;
     private final AltitudeSimulatorService altitudeSim;
     private final AirspeedSimulatorService speedSim;
-    
+
+    private List<NavPoint> waypoints = new ArrayList<>();
+    private int activeWaypointIndex = 0;
+
     // For now, let's keep simulated position at Helsinki Airport (EFHK)
     private double currentLat = 60.3172;
     private double currentLon = 24.9633;
@@ -36,6 +38,36 @@ public class SimulatedFlightDataProvider implements FlightDataProvider {
     }
 
     @Override
+    public List<NavPoint> getFlightPlan() {
+        return new ArrayList<>(waypoints);
+    }
+
+    @Override
+    public void updateFlightPlan(List<NavPoint> waypoints) {
+        this.waypoints = new ArrayList<>(waypoints);
+        // Reset active index always on update
+        this.activeWaypointIndex = 0;
+    }
+
+    @Override
+    public int getActiveWaypointIndex() {
+        return activeWaypointIndex;
+    }
+
+    @Override
+    public FlightSnapshot getCurrentSnapshot() {
+        return new FlightSnapshot(
+                simulatedTime,
+                getAttitude(),
+                getAltitude(),
+                getSpeed(),
+                null,
+                getPosition(),
+                activeWaypointIndex
+        );
+    }
+
+    @Override
     public Attitude getAttitude() {
         return attitudeSim.getCurrentAttitude();
     }
@@ -53,18 +85,6 @@ public class SimulatedFlightDataProvider implements FlightDataProvider {
     @Override
     public Position getPosition() {
         return new Position(currentLat, currentLon);
-    }
-
-    @Override
-    public FlightSnapshot getCurrentSnapshot() {
-        return new FlightSnapshot(
-                simulatedTime, // Use internal simulation clock
-                getAttitude(),
-                getAltitude(),
-                getSpeed(),
-                null, // No playback progress for simulated flight data
-                getPosition()
-        );
     }
 
     @Override

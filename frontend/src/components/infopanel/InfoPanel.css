@@ -1,6 +1,6 @@
 .info-panel-container {
-  color: #eee;
-  font-family: "Inter", "Segoe UI", sans-serif;
+  color: var(--text-main);
+  font-family: 'Inter', 'Segoe UI', sans-serif;
 }
 
 .info-panel-header {
@@ -23,7 +23,6 @@
 .status-dot {
   width: 8px;
   height: 8px;
-  borderRadius: 50%;
   transition: background-color 0.3s ease;
 }
 
@@ -38,7 +37,7 @@
 }
 
 .status-text {
-  color: #888;
+  color: var(--text-muted);
 }
 
 .status-text.offline {
@@ -47,14 +46,14 @@
 }
 
 .reconnect-timer {
-  color: #666;
+  color: var(--text-dark);
   font-size: 0.7rem;
   margin-left: auto;
 }
 
 .section-label {
   font-size: 0.8rem;
-  color: #666;
+  color: var(--text-dark);
   margin-bottom: 10px;
   text-transform: uppercase;
   letter-spacing: 1px;
@@ -68,8 +67,8 @@
 .source-btn {
   flex: 1;
   padding: 10px;
-  background-color: #2a2a2a;
-  color: #888;
+  background-color: var(--bg-surface);
+  color: var(--text-muted);
   border: 1px solid var(--border-color);
   border-radius: 4px;
   cursor: pointer;
@@ -81,7 +80,7 @@
 
 .source-btn.active {
   background-color: var(--primary-color);
-  color: #fff;
+  color: var(--text-bright);
   border-color: var(--primary-color);
 }
 
@@ -90,7 +89,7 @@
   margin-top: 10px;
   padding: 8px;
   background-color: var(--bg-black);
-  color: #eee;
+  color: var(--text-main);
   border: 1px solid var(--border-color);
   border-radius: 4px;
   font-size: 0.8rem;
@@ -98,10 +97,10 @@
 }
 
 .telemetry-card {
-  background-color: #111;
+  background-color: var(--panel-gray);
   padding: 10px 20px;
   border-radius: 8px;
-  border: 1px solid #222;
+  border: 1px solid var(--bezel-gray);
 }
 
 .data-row {
@@ -125,7 +124,7 @@
 }
 
 .empty-state {
-  color: #555;
+  color: var(--bezel-dark);
   font-style: italic;
   font-size: 0.8rem;
 }

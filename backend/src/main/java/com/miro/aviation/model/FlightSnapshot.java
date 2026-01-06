@@ -13,18 +13,19 @@ public class FlightSnapshot {
     private AirSpeed airSpeed;
     private Position position;
     private PlaybackProgress progress;
+    private int activeWaypointIndex = 0;
 
-    public FlightSnapshot(long timestamp, Attitude attitude, Altitude altitude, AirSpeed airSpeed, PlaybackProgress progress, Position position) {
+    public FlightSnapshot(long timestamp, Attitude attitude, Altitude altitude, AirSpeed airSpeed, PlaybackProgress progress, Position position, int activeWaypointIndex) {
         this.timestamp = timestamp;
         this.attitude = attitude;
         this.altitude = altitude;
         this.airSpeed = airSpeed;
         this.progress = progress;
         this.position = position;
+        this.activeWaypointIndex = activeWaypointIndex;
     }
 
-    public FlightSnapshot() {
-    }
+    public FlightSnapshot() {}
 
     public long getTimestamp() {
         return timestamp;
@@ -72,5 +73,13 @@ public class FlightSnapshot {
 
     public void setPosition(Position position) {
         this.position = position;
+    }
+
+    public int getActiveWaypointIndex() {
+        return activeWaypointIndex;
+    }
+
+    public void setActiveWaypointIndex(int activeWaypointIndex) {
+        this.activeWaypointIndex = activeWaypointIndex;
     }
 }

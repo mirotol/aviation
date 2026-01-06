@@ -3,9 +3,8 @@ package com.miro.aviation.service;
 import com.miro.aviation.model.AirSpeed;
 import com.miro.aviation.model.Altitude;
 import com.miro.aviation.model.Attitude;
-import com.miro.aviation.model.FlightSnapshot;
-import com.miro.aviation.model.PlaybackProgress;
-import com.miro.aviation.model.Position;
+import com.miro.aviation.model.*;
+import java.util.List;
 
 public interface FlightDataProvider {
 
@@ -20,6 +19,27 @@ public interface FlightDataProvider {
     //TODO: Extend with more statistics
 
     FlightSnapshot getCurrentSnapshot();
+
+    /**
+     * @return The current sequence of waypoints for this flight.
+     */
+    default List<NavPoint> getFlightPlan() {
+        return List.of();
+    }
+
+    /**
+     * Updates the sequence of waypoints for this session.
+     */
+    default void updateFlightPlan(List<NavPoint> waypoints) {
+        // providers may override
+    }
+
+    /**
+     * @return The index of the waypoint currently being flown toward.
+     */
+    default int getActiveWaypointIndex() {
+        return 0;
+    }
 
     default void tick() {
         // providers may override

@@ -6,6 +6,10 @@ export default function AirSpeedTape() {
   const snapshot = useFlightData();
   const speed = snapshot?.airSpeed.speed ?? 0;
 
+  // Update window height to match the new 600px total height minus the header/footer
+  // Header: 45px, Footer: 20px -> Window: 535px
+  const tapeWindowHeight = 535;
+
   // Each 10 knots = 60 pixels on our larger tape
   const pixelsPerKnot = 6;
   const tapeOffset = speed * pixelsPerKnot;
@@ -27,11 +31,11 @@ export default function AirSpeedTape() {
       </div>
       <div className="tape-window">
         {/* Added transition for buttery smooth movement */}
-        <div 
-          className="tape-scale" 
-          style={{ 
+        <div
+          className="tape-scale"
+          style={{
             transform: `translateY(${tapeOffset}px)`,
-            transition: 'transform 0.1s linear' 
+            transition: 'transform 0.1s linear',
           }}
         >
           {ticks.map((t) => (
