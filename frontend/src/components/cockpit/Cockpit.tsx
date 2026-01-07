@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
-import PFD from './PFD';
-import MFD from './MFD';
-import { EFISUnit } from './EFISUnit';
+import PFD from './pfd/PFD';
+import MFD from './mfd/MFD';
+import { EFISUnit } from './efis/EFISUnit';
 import './Cockpit.css';
 import { useFlightPlan } from '../../hooks/useFlightPlan';
 import { useWebSocket } from '../../hooks/useWebSocket';

@@ -11,7 +11,7 @@
 
 .instrument-panel {
   display: flex;
-  gap: 15px;
+  gap: 20px;
   background: var(--panel-gray); /* Even darker panel */
   padding: 20px;
   border-radius: 15px;

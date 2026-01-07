@@ -1,6 +1,6 @@
 import React from 'react';
-import NavigationDisplay from '../navigation/NavigationDisplay';
-import './EFIS.css';
+import NavigationDisplay from '../../navigation/NavigationDisplay';
+import '../efis/EFIS.css';
 
 const MFD: React.FC = () => {
   return (

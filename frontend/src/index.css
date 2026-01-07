@@ -18,8 +18,8 @@
   --border-color: #2d3238; /* Subtle panel borders */
   --panel-gray: #111111;
   --bezel-gray: #222222;
-  --bezel-light: #333333;
-  --bezel-dark: #444444;
+  --bezel-light: #2e2e2e;
+  --bezel-dark: #101010;
 
   /* Typography */
   --text-main: #e1e1e1; /* Off-white to reduce eye strain */
