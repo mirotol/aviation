@@ -16,8 +16,8 @@ import { getDistanceNM, GeoPoint } from '../utils/geoUtils';
  * secondary throttle based on *simulation time* (not wall-clock time).
  */
 export function useNearbyNavData(
-  fetchRadiusNM = 100, // Radius (NM) sent to backend for nav data
-  refreshThresholdNM = 5 // Minimum distance (NM) before refetch
+  fetchRadiusNM = 200, // Radius (NM) sent to backend for nav data
+  refreshThresholdNM = 100 // Minimum distance (NM) before refetch
 ) {
   const snapshot = useFlightData();
   const [navData, setNavData] = useState<GeoJSON.FeatureCollection | null>(null);
