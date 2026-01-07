@@ -1,7 +1,7 @@
 .attitude-container {
   position: relative;
-  width: 550px; /* Widened from 400px */
-  height: 600px;
+  flex-grow: 1; /* Take remaining width */
+  height: 768px; /* Height increased from 600px */
   background: var(--bg-black);
   border: 1px solid var(--border-color);
   overflow: hidden;

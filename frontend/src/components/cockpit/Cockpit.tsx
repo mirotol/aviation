@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import PFD from './PFD';
 import MFD from './MFD';
+import { EFISUnit } from './EFISUnit';
 import './Cockpit.css';
 import { useFlightPlan } from '../../hooks/useFlightPlan';
 import { useWebSocket } from '../../hooks/useWebSocket';
@@ -26,10 +27,13 @@ export default function Cockpit() {
   return (
     <main className="cockpit-main">
       <div className="instrument-panel">
-        <div className="efis-container">
+        <EFISUnit type="PFD">
           <PFD />
+        </EFISUnit>
+
+        <EFISUnit type="MFD">
           <MFD />
-        </div>
+        </EFISUnit>
       </div>
     </main>
   );
