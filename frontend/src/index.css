@@ -29,10 +29,10 @@
   --text-dark: #666666;
 
   /* Aviation Environment Palette */
-  --sky-color-top: #1e90ff;
-  --sky-color-bottom: #4682b4;
-  --ground-color-top: #8b4513;
-  --ground-color-bottom: #5d2e0c;
+  --sky-color-top: #061c40;
+  --sky-color-bottom: #092150;
+  --ground-color-top: #18321a;
+  --ground-color-bottom: #152412;
   --aviation-green: #00ff00;
 
   /* Instrument Hardware Colors */

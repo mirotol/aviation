@@ -1,0 +1,87 @@
+.bezel-knob-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.bezel-knob {
+  width: 60px;
+  height: 60px;
+  background: radial-gradient(circle at 30% 30%, #444, #111);
+  border-radius: 50%;
+  border: 2px solid #222;
+  box-shadow: 4px 4px 8px rgba(0, 0, 0, 0.6);
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform: rotate(var(--knob-rotation, 0deg));
+  transition: transform 0.1s ease-out;
+}
+
+.inner-ring {
+  width: 35px;
+  height: 35px;
+  background: radial-gradient(circle at 30% 30%, #555, #1a1a1a);
+  border-radius: 50%;
+  border: 1px solid #333;
+  box-shadow:
+    inset 2px 2px 4px rgba(255, 255, 255, 0.1),
+    2px 2px 4px rgba(0, 0, 0, 0.5);
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  /* Counteract the outer knob's rotation so the inner ring turns independently */
+  transform: rotate(calc(var(--inner-rotation, 0deg) - var(--knob-rotation, 0deg)));
+  transition: transform 0.1s ease-out;
+}
+
+.inner-ring:active {
+  background: #111;
+  transform: rotate(calc(var(--inner-rotation, 0deg) - var(--knob-rotation, 0deg))) scale(0.95);
+}
+
+.bezel-knob-container.small .bezel-knob {
+  width: 35px;
+  height: 35px;
+}
+
+.bezel-knob-container.small .inner-ring {
+  width: 20px;
+  height: 20px;
+}
+
+.knob-indicator {
+  position: absolute;
+  width: 2px;
+  background: #666;
+  transform: translateX(-50%);
+  left: 50%;
+}
+
+.knob-indicator.outer {
+  top: 5%;
+  height: 15%;
+}
+
+.knob-indicator.inner {
+  top: 10%;
+  height: 25%;
+}
+
+.knob-label {
+  font-size: 12px;
+  color: var(--text-dim);
+  font-weight: bold;
+}
+
+.bezel-knob.outer-ring.hover {
+  box-shadow: 0 0 0 2px rgba(0, 255, 255, 0.4);
+}
+
+.inner-ring.hover {
+  box-shadow: 0 0 0 2px rgba(0, 255, 255, 0.6);
+}

@@ -2,7 +2,7 @@ import React from 'react';
 import AttitudeIndicator from '../../attitudeindicator/AttitudeIndicator';
 import AltimeterTape from '../../altimeter/AltimeterTape';
 import AirSpeedTape from '../../airspeed/AirSpeedTape';
-import '../efis/EFIS.css';
+import '../efis/EFISUnit.css';
 
 const PFD: React.FC = () => {
   return (

@@ -49,7 +49,6 @@ public class CsvNavDataLoader {
                         continue;
                     }
 
-                    // DEBUG: log each loaded airport
                     logger.debug("Loaded airport {} at coordinates: {},{}", ident, lat, lon);
 
                     airports.add(new NavPoint(ident, type, lat, lon));

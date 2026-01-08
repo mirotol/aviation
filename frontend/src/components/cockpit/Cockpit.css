@@ -25,12 +25,11 @@
     0 0 100px rgba(0, 0, 0, 0.5),
     /* Ambient glow */ inset 0 1px 1px rgba(255, 255, 255, 0.1);
   position: relative;
-  transform: scale(var(--efis-scale, 0.8)) translateY(-50px);
+  transform: scale(var(--efis-scale, 0.9)) translateY(-50px);
   transform-origin: center;
-  --efis-scale: 0.8;
+  --efis-scale: 0.9;
 }
 
-/* Add a "Panel Label" or detail for flavor */
 .instrument-panel::after {
   content: 'AVIONICS SUITE v1.0';
   position: absolute;

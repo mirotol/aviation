@@ -1,0 +1,35 @@
+.side-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  /* Use fixed row grouping for symmetry instead of just space-between */
+  justify-content: flex-start;
+  padding: 20px 5px;
+  background: var(--bezel-dark);
+  width: 90px;
+  gap: 15px;
+}
+
+.side-panel-top-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+  width: 100%;
+}
+
+.side-panel-row {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  flex: 1; /* Each row takes equal available space */
+  gap: 15px;
+}
+
+.button-grid-6 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 4px;
+}
