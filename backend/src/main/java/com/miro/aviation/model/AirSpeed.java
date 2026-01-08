@@ -3,6 +3,8 @@ package com.miro.aviation.model;
 public class AirSpeed {
     private double speed; // knots
 
+    public AirSpeed() {}
+
     public AirSpeed(double speed) {
         this.speed = speed;
     }
