@@ -1,7 +1,7 @@
 /* Unique styles for Airspeed Tape (Right-Aligned) */
 .airspeed-tape-container {
-  width: 125px; /* Slightly wider */
-  height: 600px;
+  width: 150px; /* Widened from 125px */
+  height: 768px; /* Height increased from 600px */
   position: relative;
   background: var(--bg-black);
 }
@@ -13,7 +13,7 @@
 
 .airspeed-tape-container .readout-pointer {
   position: absolute;
-  top: 300px; /* Exact center of the 600px container */
+  top: 384px; /* Exact center of the 768px container */
   transform: translateY(-50%);
   right: 0px;
   z-index: 30;
@@ -36,8 +36,8 @@
 
 .airspeed-tape-container .tape-scale {
   position: absolute;
-  /* (600 total / 2) - 20 footer = 280px */
-  bottom: 280px;
+  /* (768 total / 2) - 20 footer = 364px */
+  bottom: 364px;
   left: 0;
   width: 100%;
   transition: transform 0.1s linear;

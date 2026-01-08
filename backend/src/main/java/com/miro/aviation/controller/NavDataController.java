@@ -25,14 +25,14 @@ public class NavDataController {
      *
      * @param lat Search center latitude
      * @param lon Search center longitude
-     * @param radius Search radius in Nautical Miles (default 100)
+     * @param radius Search radius in Nautical Miles (default 200)
      * @return List of NavPoints (Airports, Waypoints, VORs)
      */
     @GetMapping("/nearby")
     public List<NavPoint> getNearby(
             @RequestParam double lat,
             @RequestParam double lon,
-            @RequestParam(defaultValue = "100") double radius) {
+            @RequestParam(defaultValue = "200") double radius) {
         return navDataService.findNearby(lat, lon, radius);
     }
 }

@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useRef, useState, useLayoutEffect } from 'react';
 import Map, { Source, Layer } from 'react-map-gl/maplibre';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import { useFlightData } from '../../hooks/useFlightData';
@@ -45,6 +45,17 @@ const NavigationDisplay: React.FC<NavigationDisplayProps> = ({ initialRangeNM = 
   const snapshot = useFlightData();
   const { flightPlan } = useFlightPlan();
 
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  const [mapSizePx, setMapSizePx] = useState(500);
+
+  // Measure actual rendered map size (critical for correct scaling)
+  useLayoutEffect(() => {
+    if (!containerRef.current) return;
+    const rect = containerRef.current.getBoundingClientRect();
+    setMapSizePx(Math.min(rect.width, rect.height));
+  }, []);
+
   const initialIndex = RANGES.indexOf(initialRangeNM);
   const [rangeIndex, setRangeIndex] = useState(initialIndex >= 0 ? initialIndex : 2);
   const [brightness, setBrightness] = useState(75);
@@ -63,15 +74,7 @@ const NavigationDisplay: React.FC<NavigationDisplayProps> = ({ initialRangeNM = 
     []
   );
 
-  // Dynamic fetch radius based on MFD range
-  const fetchRadiusNM = useMemo(() => {
-    if (rangeNM <= 10) return 20;
-    if (rangeNM <= 40) return 60;
-    if (rangeNM <= 80) return 120;
-    return 200;
-  }, [rangeNM]);
-
-  const rawNavData = useNearbyNavData(fetchRadiusNM);
+  const rawNavData = useNearbyNavData(200, 100); // Fetch 200 NM around aircraft, refetch only after moving 100 NM
 
   // Filter nav points based on MFD range
   const navData = useMemo(() => {
@@ -96,39 +99,6 @@ const NavigationDisplay: React.FC<NavigationDisplayProps> = ({ initialRangeNM = 
     );
   }, [flightPlan, snapshot]);
 
-  /**
-   * Convert MFD range (nautical miles) into a MapLibre zoom level.
-   *
-   * This uses a logarithmic scale:
-   *  - Each range step halves/doubles the visible area
-   *  - Zoom decreases by ~1 for every doubling of range
-   *
-   * Formula:
-   *   zoom = log2(21600 / rangeNM) - 1
-   *
-   * Where:
-   *  - rangeNM = selected display range in nautical miles
-   *  - 21600 is a tuning constant representing a full-world scale in NM
-   *  - "-1" is a visual offset to better match avionics-style scaling
-   *
-   * Resulting zoom levels for predefined ranges:
-   *
-   *   Range (NM) → MapLibre Zoom
-   *   -------------------------
-   *     2 NM   → ~12.4
-   *     5 NM   → ~11.1
-   *    10 NM   → ~10.1
-   *    20 NM   → ~ 9.1
-   *    40 NM   → ~ 8.1
-   *    80 NM   → ~ 7.1
-   *   160 NM   → ~ 6.1
-   *   320 NM   → ~ 5.1
-   *
-   * These zoom levels are used to control layer visibility via
-   * minzoom / maxzoom in the map style (airports, runways, airways, etc).
-   */
-  const zoom = Math.log2(21600 / rangeNM) - 1;
-
   const handleRangeChange = (delta: number) => {
     setRangeIndex((prev) => Math.min(Math.max(prev + delta, 0), RANGES.length - 1));
   };
@@ -141,6 +111,38 @@ const NavigationDisplay: React.FC<NavigationDisplayProps> = ({ initialRangeNM = 
   const longitude = snapshot?.position?.longitude ?? 0;
   const track = snapshot?.attitude?.yaw ?? 0;
   const mapBearing = -track;
+
+  // Correct zoom calculation using actual rendered pixel radius
+  // Example: approximate conversion table for a 500px map at latitude 60°
+  // Using the formula:
+  //   zoom = log2( (metersPerPixelAtZoom0 * pixelsRadius) / metersRadius )
+
+  /*
+  | rangeNM | metersRadius | zoom
+  |---------|--------------|------
+  | 2       | 3,704        | 12.0
+  | 5       | 9,260        | 10.7
+  | 10      | 18,520       | 9.7
+  | 20      | 37,040       | 8.7
+  | 40      | 74,080       | 7.7
+  | 80      | 148,160      | 6.7
+  | 160     | 296,320      | 5.7
+  | 320     | 592,640      | 4.7
+*/
+  const zoom = useMemo(() => {
+    const metersPerNM = 1852;
+    const metersRadius = rangeNM * metersPerNM;
+
+    // Ground resolution at zoom 0: Equator circumference / tile size
+    // Using 512 as the standard tile size for zoom level calculations in most GL map providers
+    const worldSizeAtZoom0 = 40075016.686; // Earth circumference in meters
+    const metersPerPixelAtZoom0 = (worldSizeAtZoom0 * Math.cos((latitude * Math.PI) / 180)) / 512;
+
+    const pixelsRadius = mapSizePx / 2;
+
+    // Formula: zoom = log2( (metersPerPixelAtZoom0 * pixelsRadius) / metersRadius )
+    return Math.log2((metersPerPixelAtZoom0 * pixelsRadius) / metersRadius);
+  }, [rangeNM, latitude, mapSizePx]);
 
   const viewState = useMemo(
     () => ({
@@ -160,7 +162,7 @@ const NavigationDisplay: React.FC<NavigationDisplayProps> = ({ initialRangeNM = 
   }
 
   return (
-    <div className="navigation-display">
+    <div className="navigation-display" ref={containerRef}>
       <Map
         {...viewState}
         style={{ width: '100%', height: '100%' }}
@@ -215,12 +217,13 @@ const NavigationDisplay: React.FC<NavigationDisplayProps> = ({ initialRangeNM = 
               id="airport-icons-small"
               type="circle"
               filter={['==', ['get', 'type'], 'small_airport']}
+              minzoom={7}
               paint={{
-                'circle-radius': ['interpolate', ['linear'], ['zoom'], 6, 4, 10, 6],
+                'circle-radius': ['interpolate', ['linear'], ['zoom'], 7, 5, 12, 5],
                 'circle-color': colors.universalMagenta,
                 'circle-stroke-width': 2,
                 'circle-stroke-color': colors.strokeColor,
-                'circle-opacity': ['interpolate', ['linear'], ['zoom'], 6, 0.7, 9, 1],
+                'circle-opacity': ['interpolate', ['linear'], ['zoom'], 7, 0.7, 12, 1],
               }}
             />
             <Layer
@@ -279,17 +282,16 @@ const NavigationDisplay: React.FC<NavigationDisplayProps> = ({ initialRangeNM = 
               layout={{
                 'text-field': ['get', 'ident'],
                 'text-size': 13,
-                'text-font': ['DIN Pro Medium'],
-                'text-offset': [0, 1.1],
+                'text-font': ['DIN Pro Bold'],
+                'text-offset': [0, 1],
                 'text-anchor': 'top',
                 'text-allow-overlap': false,
               }}
               paint={{
                 'text-color': colors.labelColor,
                 'text-halo-color': colors.labelHalo,
-                'text-halo-width': 2,
-                'text-halo-blur': 0.5,
-                'text-opacity': ['interpolate', ['linear'], ['zoom'], 8.5, 0, 9.2, 1],
+                'text-halo-width': 3,
+                'text-halo-blur': 1,
               }}
             />
             <Layer
@@ -373,72 +375,123 @@ const NavigationDisplay: React.FC<NavigationDisplayProps> = ({ initialRangeNM = 
         </div>
       </div>
 
-      <svg className="compass-rose-svg" viewBox="0 0 500 500">
-        <g className="range-rings">
-          <circle cx="250" cy="250" r="220" className="range-ring outer" />
-          <circle cx="250" cy="250" r="110" className="range-ring inner" />
-          <text x="250" y="135" className="range-ring-label">
-            {rangeNM / 2}
-          </text>
-        </g>
+      <svg className="compass-rose-svg" viewBox={`0 0 ${mapSizePx} ${mapSizePx}`}>
+        {(() => {
+          const center = mapSizePx / 2;
+          const outerRadius = center; // full outer ring
+          const innerRadius = outerRadius / 2; // half ring
 
-        <g
-          style={{
-            transform: `rotate(${mapBearing}deg)`,
-            transformOrigin: '250px 250px',
-            transition: 'transform 0.1s linear',
-          }}
-        >
-          <circle cx="250" cy="250" r="220" className="compass-ring" />
-          {[...Array(72)].map((_, i) => (
-            <line
-              key={i}
-              x1="250"
-              y1={250 - 220}
-              x2="250"
-              y2={250 - 220 + (i % 6 === 0 ? 15 : 8)}
-              className={`compass-tick ${i % 6 === 0 ? 'major' : ''}`}
-              transform={`rotate(${i * 5}, 250, 250)`}
-            />
-          ))}
-          {[0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330].map((angle) => {
-            const labelRadius = 195;
-            let label: string = (angle / 10).toString();
-            let className = 'compass-label';
-            if (angle === 0) {
-              label = 'N';
-              className += ' cardinal-label north-label';
-            } else if (angle === 90) {
-              label = 'E';
-              className += ' cardinal-label';
-            } else if (angle === 180) {
-              label = 'S';
-              className += ' cardinal-label';
-            } else if (angle === 270) {
-              label = 'W';
-              className += ' cardinal-label';
-            }
+          return (
+            <>
+              {/* Range Rings */}
+              <g className="range-rings">
+                <circle cx={center} cy={center} r={outerRadius} className="range-ring outer" />
+                <circle cx={center} cy={center} r={innerRadius} className="range-ring inner" />
 
-            const x = 250 + labelRadius * Math.sin((angle * Math.PI) / 180);
-            const y = 250 - labelRadius * Math.cos((angle * Math.PI) / 180);
+                {/* Inner ring label with background */}
+                <g>
+                  <rect
+                    x={center + 90 - 20}
+                    y={center - innerRadius + 45 - 10}
+                    width={40}
+                    height={17}
+                    rx={3} // rounded corners
+                    ry={3}
+                    fill="rgba(0,0,0,0.7)" // semi-transparent dark background
+                  />
+                  <text
+                    x={center + 90}
+                    y={center - innerRadius + 45}
+                    textAnchor="middle"
+                    dominantBaseline="middle"
+                    fill="#fff"
+                    fontSize="12"
+                    fontWeight="bold"
+                  >
+                    {rangeNM / 2} NM
+                  </text>
+                </g>
+              </g>
 
-            return (
-              <text
-                key={angle}
-                x={x}
-                y={y}
-                className={className}
+              {/* Compass ticks and labels*/}
+              <g
                 style={{
-                  transform: `rotate(${-mapBearing}deg)`,
-                  transformOrigin: `${x}px ${y}px`,
-                  transition: 'transform 0.1s linear',
+                  transform: `rotate(${mapBearing}deg)`,
+                  transformOrigin: `${center}px ${center}px`,
                 }}
               >
-                {label}
-              </text>
-            );
-          })}
-        </g>
+                {Array.from({ length: 360 / 5 }, (_, i) => {
+                  const angle = i * 5;
+                  const angleRad = (angle * Math.PI) / 180;
+
+                  // Tick lengths
+                  let tickLength = 5; // short
+                  if (angle % 10 === 0) tickLength = 10; // medium
+                  if (angle % 30 === 0) tickLength = 15; // long
+
+                  // Tick coordinates
+                  const x1 = center + (outerRadius - tickLength) * Math.sin(angleRad);
+                  const y1 = center - (outerRadius - tickLength) * Math.cos(angleRad);
+                  const x2 = center + outerRadius * Math.sin(angleRad);
+                  const y2 = center - outerRadius * Math.cos(angleRad);
+
+                  // Labels only on 30° ticks
+                  let label = '';
+                  if (angle % 30 === 0) {
+                    switch (angle) {
+                      case 0:
+                        label = 'N';
+                        break;
+                      case 90:
+                        label = 'E';
+                        break;
+                      case 180:
+                        label = 'S';
+                        break;
+                      case 270:
+                        label = 'W';
+                        break;
+                      default:
+                        label = label = ((angle / 10) % 36).toString(); // 30° → 3, 300° → 30
+                    }
+                  }
+
+                  // Label coordinates
+                  const labelRadius = outerRadius - 25; // Inside outer circle near major ticks
+                  const lx = center + labelRadius * Math.sin(angleRad);
+                  const ly = center - labelRadius * Math.cos(angleRad);
+
+                  return (
+                    <g key={angle}>
+                      <line
+                        x1={x1}
+                        y1={y1}
+                        x2={x2}
+                        y2={y2}
+                        stroke="#fff"
+                        strokeWidth={angle % 30 === 0 ? 2 : 1}
+                      />
+                      {label && (
+                        <text
+                          x={lx}
+                          y={ly}
+                          textAnchor="middle"
+                          dominantBaseline="middle"
+                          fill="#fff"
+                          fontSize="12"
+                          fontWeight="bold"
+                          transform={`rotate(${-mapBearing}, ${lx}, ${ly})`} // keeps label upright
+                        >
+                          {label}
+                        </text>
+                      )}
+                    </g>
+                  );
+                })}
+              </g>
+            </>
+          );
+        })()}
       </svg>
 
       <div className="ownship-symbol">

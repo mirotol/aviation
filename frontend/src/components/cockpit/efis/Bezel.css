@@ -1,0 +1,9 @@
+.bezel-frame {
+  display: flex;
+  flex-direction: column;
+}
+
+.bezel-middle-row {
+  display: flex;
+  flex-direction: row;
+}
