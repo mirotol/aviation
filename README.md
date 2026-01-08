@@ -1,15 +1,16 @@
 # Aviation Project
 
-A high-fidelity Primary Flight Display (PFD) simulation system. This project features a Spring Boot backend that streams real-time telemetry via WebSockets to a React-based "Glass Cockpit" dashboard.
+A high-fidelity Primary Flight Display (PFD) and Multi-Function Display (MFD) simulation system. This project features a Spring Boot backend that streams real-time telemetry via WebSockets to a React-based "Glass Cockpit" dashboard.
 
 ## UI Preview
 
-![UI Preview](docs/images/ui_preview.png)
-
+![PFD Preview](docs/images/ui_preview.png)
+![MFD Preview](docs/images/ui_preview2.png)
 
 ## Project Overview
 
 The **Aviation Project** provides a real-time cockpit interface with live flight instruments. It supports two modes of data:
+
 - **Simulated**: Real-time generation of flight data using simulator services.
 - **Recorded**: Playback of historical flight data from CSV logs.
 
@@ -21,18 +22,21 @@ The **Aviation Project** provides a real-time cockpit interface with live flight
 ## Key Features
 
 - **Primary Flight Display (PFD)**: High-fidelity instrumentation including:
-  - **Airspeed & Altitude Tapes**: Optimized vertical sliding scales with 2.5° precision.
+  - **Airspeed & Altitude Tapes**: Optimized vertical sliding scales.
   - **Attitude Indicator**: SVG-based artificial horizon with synchronized sky-pointer bank scale.
+- **Multi-Function Display (MFD)**: Modern navigation display with:
+  - **Moving Map**: Real-time tracking of aircraft position.
+  - **Flight Plan Visualization**: Display of waypoints and active flight path.
+- **Integrated Cockpit Controls**:
+  - **Physical Knobs & Buttons**: Realistic interaction model for NAV/COM frequencies, heading, altitude, and menu navigation.
+  - **Softkeys**: Dynamic context-sensitive buttons aligned with the display width.
 - **Quiet Dark Cockpit Philosophy**: Professional UI design where buttons only "light up" when active, reducing pilot distraction.
-- **Universal Simulation Control**: 
+- **Universal Simulation Control**:
   - **Dampened Playback**: Pause/Play and variable time scaling (0.25x to 16x) with a time-deterministic `deltaTime` engine.
   - **Data Flexibility**: Instant switching between live simulations and historical CSV playback.
 - **Low-Latency Streaming**: STOMP over WebSockets broadcasting telemetry at 20Hz.
 
-## Project Structure
-
-- **`/backend`**: Spring Boot application handling telemetry logic, CSV parsing, and WebSocket broadcasting.
-- **`/frontend`**: React/TypeScript application providing the visual cockpit dashboard and high-performance instrumentation.
+## CI/CD
 
 This project uses GitHub Actions to automate testing and quality assurance:
 

@@ -1,0 +1,13 @@
+.bottom-panel {
+  display: flex;
+  justify-content: center;
+  background: var(--bezel-dark);
+  height: 60px;
+}
+
+.softkeys-container {
+  display: flex;
+  justify-content: space-around;
+  width: 1044px; /* Matches DisplayViewport width (1024px) + borders (2 * 10px) */
+  padding: 10px 0;
+}

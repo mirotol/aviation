@@ -1,0 +1,10 @@
+.unit-label {
+  background: var(--bezel-dark);
+  color: var(--text-dim);
+  font-family: sans-serif;
+  font-size: 14px;
+  text-align: center;
+  padding: 5px;
+  font-weight: bold;
+  letter-spacing: 2px;
+}

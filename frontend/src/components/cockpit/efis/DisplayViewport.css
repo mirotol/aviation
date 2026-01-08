@@ -1,0 +1,14 @@
+.display-viewport {
+  flex-grow: 1;
+  background: #000;
+  overflow: hidden;
+  position: relative;
+  border: 10px solid #111;
+  border-radius: 4px;
+}
+
+.efis-pfd .display-viewport,
+.efis-mfd .display-viewport {
+  width: 1024px;
+  height: 768px;
+}
