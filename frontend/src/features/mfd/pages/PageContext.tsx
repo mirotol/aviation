@@ -62,11 +62,6 @@ interface PageStateContextType {
   /** If set, shows this group as a modal (e.g. FPL or PROC) instead of the main navigation groups */
   mfdModalPage: MFDPageGroup | null;
 
-  // PFD State
-  pfdPageSelection: number;
-  /** Stack of softkey layers for PFD. Last element is the current one. */
-  pfdSoftkeyStack: SoftkeyLayer[];
-
   // MFD Softkey stack
   /** Stack of softkey layers for MFD. Overrides page-default softkeys if not empty. */
   mfdSoftkeyStack: SoftkeyLayer[];
@@ -87,15 +82,15 @@ interface PageStateContextType {
 
   // Softkey Stack Actions
   /** Push a new layer of softkeys (e.g., entering a sub-menu) */
-  pushSoftkeys: (unit: 'PFD' | 'MFD', layer: SoftkeyLayer) => void;
+  pushSoftkeys: (layer: SoftkeyLayer) => void;
   /** Remove the top layer of softkeys */
-  popSoftkeys: (unit: 'PFD' | 'MFD') => void;
+  popSoftkeys: () => void;
   /** Clear stack and set a specific root layer */
-  resetSoftkeys: (unit: 'PFD' | 'MFD', root: SoftkeyLayer) => void;
+  resetSoftkeys: (root: SoftkeyLayer) => void;
 
   // Current Visible Softkeys
   /** Get the 12 softkeys that should be rendered right now */
-  getVisibleSoftkeys: (unit: 'PFD' | 'MFD') => SoftkeyLayer;
+  getVisibleSoftkeys: () => SoftkeyLayer;
 }
 
 /**
@@ -291,9 +286,6 @@ export const PageProvider: React.FC<{ children: React.ReactNode }> = ({ children
   });
   const [mfdModalPage, setMfdModalPage] = useState<MFDPageGroup | null>(null);
 
-  const [pfdPageSelection, setPfdPageSelection] = useState(0);
-
-  const [pfdSoftkeyStack, setPfdSoftkeyStack] = useState<SoftkeyLayer[]>([]);
   const [mfdSoftkeyStack, setMfdSoftkeyStack] = useState<SoftkeyLayer[]>([]);
 
   /**
@@ -301,28 +293,16 @@ export const PageProvider: React.FC<{ children: React.ReactNode }> = ({ children
    */
   const groups: MFDPageGroup[] = ['MAP', 'WPT', 'AUX', 'NRST'];
 
-  const pushSoftkeys = useCallback((unit: 'PFD' | 'MFD', layer: SoftkeyLayer) => {
-    if (unit === 'PFD') {
-      setPfdSoftkeyStack((prev) => [...prev, layer]);
-    } else {
-      setMfdSoftkeyStack((prev) => [...prev, layer]);
-    }
+  const pushSoftkeys = useCallback((layer: SoftkeyLayer) => {
+    setMfdSoftkeyStack((prev) => [...prev, layer]);
   }, []);
 
-  const popSoftkeys = useCallback((unit: 'PFD' | 'MFD') => {
-    if (unit === 'PFD') {
-      setPfdSoftkeyStack((prev) => (prev.length > 0 ? prev.slice(0, -1) : prev));
-    } else {
-      setMfdSoftkeyStack((prev) => (prev.length > 0 ? prev.slice(0, -1) : prev));
-    }
+  const popSoftkeys = useCallback(() => {
+    setMfdSoftkeyStack((prev) => (prev.length > 0 ? prev.slice(0, -1) : prev));
   }, []);
 
-  const resetSoftkeys = useCallback((unit: 'PFD' | 'MFD', root: SoftkeyLayer) => {
-    if (unit === 'PFD') {
-      setPfdSoftkeyStack([root]);
-    } else {
-      setMfdSoftkeyStack([root]);
-    }
+  const resetSoftkeys = useCallback((root: SoftkeyLayer) => {
+    setMfdSoftkeyStack([root]);
   }, []);
 
   /**
@@ -330,90 +310,23 @@ export const PageProvider: React.FC<{ children: React.ReactNode }> = ({ children
    * Logic:
    * 1. If there's a softkey stack (e.g. pushed by a button), use the top layer.
    * 2. Otherwise:
-   *    - For PFD: returns hardcoded root softkeys.
-   *    - For MFD: returns softkeys defined in the active page's PageDefinition.
+   *    - returns softkeys defined in the active page's PageDefinition.
    */
-  const getVisibleSoftkeys = useCallback(
-    (unit: 'PFD' | 'MFD'): SoftkeyLayer => {
-      const stack = unit === 'PFD' ? pfdSoftkeyStack : mfdSoftkeyStack;
-      if (stack.length > 0) {
-        return stack[stack.length - 1];
-      }
+  const getVisibleSoftkeys = useCallback((): SoftkeyLayer => {
+    if (mfdSoftkeyStack.length > 0) {
+      return mfdSoftkeyStack[mfdSoftkeyStack.length - 1];
+    }
 
-      // Default root softkeys if stack is empty
-      if (unit === 'PFD') {
-        return [
-          {
-            label: 'INSET',
-            id: 'PFD_INSET',
-            action: () =>
-              pushSoftkeys('PFD', [
-                { label: 'OFF', action: () => popSoftkeys('PFD') },
-                { label: 'DCLTR' },
-                { label: 'TRAFFIC' },
-                { label: 'TOPO' },
-                {},
-                {},
-                {},
-                {},
-                {},
-                {},
-                { label: 'BACK', action: () => popSoftkeys('PFD') },
-                { label: 'ALERTS' },
-              ]),
-          },
-          {},
-          {},
-          {},
-          {},
-          {
-            label: 'PFD',
-            id: 'PFD_PFD',
-            action: () =>
-              pushSoftkeys('PFD', [
-                {},
-                { label: 'METRIC' },
-                { label: 'DFLTS' },
-                {},
-                {},
-                {},
-                {},
-                {},
-                {},
-                {},
-                { label: 'BACK', action: () => popSoftkeys('PFD') },
-                { label: 'ALERTS' },
-              ]),
-          },
-          {},
-          {},
-          {},
-          {},
-          {},
-          { label: 'ALERTS' },
-        ];
-      } else {
-        const currentGroup = mfdModalPage || mfdPageGroup;
-        const pageIdx = mfdGroupSelections[currentGroup];
-        const pageDef = MFD_PAGES[currentGroup][pageIdx];
-        const baseKeys = pageDef.softkeys?.() ?? [];
-        const keys: SoftkeyLayer = Array(12).fill({});
-        baseKeys.forEach((k, i) => {
-          keys[i] = k;
-        });
-        return keys;
-      }
-    },
-    [
-      pfdSoftkeyStack,
-      mfdSoftkeyStack,
-      mfdModalPage,
-      mfdPageGroup,
-      mfdGroupSelections,
-      pushSoftkeys,
-      popSoftkeys,
-    ]
-  );
+    const currentGroup = mfdModalPage || mfdPageGroup;
+    const pageIdx = mfdGroupSelections[currentGroup];
+    const pageDef = MFD_PAGES[currentGroup][pageIdx];
+    const baseKeys = pageDef.softkeys?.() ?? [];
+    const keys: SoftkeyLayer = Array(12).fill({});
+    baseKeys.forEach((k, i) => {
+      keys[i] = k;
+    });
+    return keys;
+  }, [mfdSoftkeyStack, mfdModalPage, mfdPageGroup, mfdGroupSelections]);
 
   const nextMfdPageGroup = useCallback(() => {
     if (mfdModalPage) return;
@@ -481,8 +394,6 @@ export const PageProvider: React.FC<{ children: React.ReactNode }> = ({ children
         mfdPageGroup,
         mfdPageSelection: mfdGroupSelections[mfdModalPage || mfdPageGroup],
         mfdModalPage,
-        pfdPageSelection,
-        pfdSoftkeyStack,
         mfdSoftkeyStack,
         setMfdPageGroup,
         nextMfdPageGroup,

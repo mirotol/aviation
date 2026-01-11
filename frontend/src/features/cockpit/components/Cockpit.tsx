@@ -5,7 +5,8 @@ import { EFISUnit } from '../../../components/common/EFISUnit';
 import '../styles/Cockpit.css';
 import { useFlightPlan } from '../../../hooks/useFlightPlan';
 import { useWebSocket } from '../../../hooks/useWebSocket';
-import { PageProvider } from '../../mfd/pages/PageContext';
+import { PageProvider as MFDProvider } from '../../mfd/pages/PageContext';
+import { PFDProvider } from '../../pfd/pages/PFDContext';
 
 export default function Cockpit() {
   const { updateFlightPlan } = useFlightPlan();
@@ -26,18 +27,20 @@ export default function Cockpit() {
   }, [isConnected]);
 
   return (
-    <PageProvider>
-      <main className="cockpit-main">
-        <div className="instrument-panel">
-          <EFISUnit type="PFD">
-            <PFD />
-          </EFISUnit>
+    <MFDProvider>
+      <PFDProvider>
+        <main className="cockpit-main">
+          <div className="instrument-panel">
+            <EFISUnit type="PFD">
+              <PFD />
+            </EFISUnit>
 
-          <EFISUnit type="MFD">
-            <MFD />
-          </EFISUnit>
-        </div>
-      </main>
-    </PageProvider>
+            <EFISUnit type="MFD">
+              <MFD />
+            </EFISUnit>
+          </div>
+        </main>
+      </PFDProvider>
+    </MFDProvider>
   );
 }

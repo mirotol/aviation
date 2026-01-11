@@ -3,6 +3,7 @@ import { Knob } from './Knob';
 import { BezelButton } from './BezelButton';
 import './styles/RightSidePanel.css';
 import { usePageContext, MFD_PAGES } from '../../features/mfd/pages/PageContext';
+import { usePFDContext } from '../../features/pfd/pages/PFDContext';
 
 const DoubleArrowIcon = () => (
   <svg width="24" height="14" viewBox="0 0 24 14" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -26,6 +27,9 @@ const DoubleArrowIcon = () => (
 
 export const RightSidePanel: React.FC<{ unitType?: 'PFD' | 'MFD' }> = ({ unitType = 'PFD' }) => {
   const prefix = `${unitType}_`;
+  const mfdContext = usePageContext();
+  const pfdContext = usePFDContext();
+
   const {
     mfdPageGroup,
     mfdPageSelection,
@@ -35,7 +39,7 @@ export const RightSidePanel: React.FC<{ unitType?: 'PFD' | 'MFD' }> = ({ unitTyp
     nextMfdPageSelection,
     prevMfdPageSelection,
     toggleMfdModal,
-  } = usePageContext();
+  } = mfdContext;
 
   const currentGroup = mfdModalPage ?? mfdPageGroup;
   const pageDef = unitType === 'MFD' ? MFD_PAGES[currentGroup][mfdPageSelection] : null;

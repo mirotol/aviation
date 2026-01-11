@@ -3,6 +3,7 @@ import { Knob } from './Knob';
 import { BezelButton } from './BezelButton';
 import './styles/LeftSidePanel.css';
 import { usePageContext } from '../../features/mfd/pages/PageContext';
+import { usePFDContext } from '../../features/pfd/pages/PFDContext';
 
 const DoubleArrowIcon = () => (
   <svg width="24" height="14" viewBox="0 0 24 14" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -26,6 +27,13 @@ const DoubleArrowIcon = () => (
 
 export const LeftSidePanel: React.FC<{ unitType?: 'PFD' | 'MFD' }> = ({ unitType = 'PFD' }) => {
   const prefix = `${unitType}_`;
+  const mfdContext = usePageContext();
+  const pfdContext = usePFDContext();
+
+  const handleKnobChange = (id: string, type: 'inner' | 'outer', dir: 'inc' | 'dec') => {
+    // Shared knob logic could be added here later if needed
+    console.log(`${id} ${type} ${dir}`);
+  };
 
   return (
     <div className="side-panel left-side-panel">

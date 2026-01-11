@@ -1,6 +1,7 @@
 import React from 'react';
 import '../styles/SoftkeyBar.css';
 import { usePageContext } from '../../mfd/pages/PageContext';
+import { usePFDContext } from '../../pfd/pages/PFDContext';
 
 interface SoftkeyBarProps {
   type: 'PFD' | 'MFD';
@@ -11,8 +12,9 @@ interface SoftkeyBarProps {
  * These labels correspond to the physical bezel buttons.
  */
 export const SoftkeyBar: React.FC<SoftkeyBarProps> = ({ type }) => {
-  const { getVisibleSoftkeys } = usePageContext();
-  const softkeys = getVisibleSoftkeys(type);
+  const mfdContext = usePageContext();
+  const pfdContext = usePFDContext();
+  const softkeys = type === 'MFD' ? mfdContext.getVisibleSoftkeys() : pfdContext.getVisibleSoftkeys();
 
   return (
     <div className="softkey-bar">

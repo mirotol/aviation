@@ -3,13 +3,13 @@ import AttitudeIndicator from './AttitudeIndicator';
 import AltimeterTape from './AltimeterTape';
 import AirSpeedTape from './AirSpeedTape';
 import '../../../components/common/styles/EFISUnit.css';
-import { usePageContext } from '../../mfd/pages/PageContext';
+import { usePFDContext } from '../pages/PFDContext';
 import { SoftkeyBar } from '../../cockpit/components/SoftkeyBar';
 import { ScreenLayout } from '../../../components/layout/ScreenLayout';
 import { PFDAnnunciationBar } from './PFDAnnunciationBar';
 
 const PFD: React.FC = () => {
-  const { pfdSoftkeyStack } = usePageContext();
+  const { pfdSoftkeyStack } = usePFDContext();
 
   return (
     <ScreenLayout
