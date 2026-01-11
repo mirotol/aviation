@@ -1,3 +1,10 @@
+/**
+ * This file contains the actual React components for each page.
+ * To add a new page:
+ * 1. Define a new React component here (or import it from another file).
+ * 2. Register it in the MFD_PAGES object in PageContext.tsx.
+ */
+
 import React from 'react';
 import NavigationDisplay from '../../navigation/NavigationDisplay';
 

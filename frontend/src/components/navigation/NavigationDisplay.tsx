@@ -54,8 +54,8 @@ const NavigationDisplay: React.FC<NavigationDisplayProps> = ({ initialRangeNM = 
   // Measure actual rendered map size (critical for correct scaling)
   // containerSize: the full pixel dimensions of the Map area.
   // mapSizePx: the diameter of the circular compass instrument in pixels.
-  const [containerSize, setContainerSize] = useState({ width: 855, height: 670 });
-  const [mapSizePx, setMapSizePx] = useState(690 * COMPASS_SCALE);
+  const [containerSize, setContainerSize] = useState({ width: 0, height: 0 });
+  const [mapSizePx, setMapSizePx] = useState(0);
 
   useLayoutEffect(() => {
     if (!containerRef.current) return;
@@ -63,9 +63,11 @@ const NavigationDisplay: React.FC<NavigationDisplayProps> = ({ initialRangeNM = 
     const updateSize = () => {
       if (!containerRef.current) return;
       const rect = containerRef.current.getBoundingClientRect();
-      setContainerSize({ width: rect.width, height: rect.height });
-      // Map size for instruments is now scaled
-      setMapSizePx(Math.min(rect.width, rect.height) * COMPASS_SCALE);
+      if (rect.width > 0 && rect.height > 0) {
+        setContainerSize({ width: rect.width, height: rect.height });
+        // Map size for instruments is now scaled
+        setMapSizePx(Math.min(rect.width, rect.height) * COMPASS_SCALE);
+      }
     };
 
     updateSize();
@@ -189,8 +191,16 @@ const NavigationDisplay: React.FC<NavigationDisplayProps> = ({ initialRangeNM = 
   );
 
   // JSX Rendering — safe to early-return now
-  if (!snapshot) {
-    return <div className="navigation-display">WAITING FOR GPS...</div>;
+  if (!snapshot || containerSize.width === 0 || containerSize.height === 0) {
+    return (
+      <div
+        className="navigation-display"
+        ref={containerRef}
+        style={{ width: '100%', height: '100%' }}
+      >
+        {!snapshot ? 'WAITING FOR GPS...' : 'INITIALIZING MAP...'}
+      </div>
+    );
   }
 
   return (

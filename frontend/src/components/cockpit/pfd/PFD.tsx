@@ -7,7 +7,6 @@ import { usePageContext } from '../pages/PageContext';
 import { SoftkeyBar } from '../efis/SoftkeyBar';
 import { ScreenLayout } from '../efis/ScreenLayout';
 import { PFDAnnunciationBar } from './PFDAnnunciationBar';
-import { EngineDisplay } from '../mfd/EngineDisplay';
 
 const PFD: React.FC = () => {
   const { pfdSoftkeyStack } = usePageContext();
@@ -15,7 +14,6 @@ const PFD: React.FC = () => {
   return (
     <ScreenLayout
       top={<PFDAnnunciationBar />}
-      leftSide={<EngineDisplay />}
       content={
         <div
           className="pfd-content"

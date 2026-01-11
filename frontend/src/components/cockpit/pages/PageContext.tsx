@@ -1,61 +1,109 @@
 import React, { createContext, useContext, useState, useCallback, useMemo } from 'react';
 import { NavigationMapPage, TrafficMapPage, PlaceholderPage } from './PageDefinitions';
 
+/**
+ * MFD Page Group identifiers.
+ * To add a new group (e.g., 'SYSTEM'), add it here and update MFD_PAGES.
+ */
 export type MFDPageGroup = 'MAP' | 'WPT' | 'AUX' | 'NRST' | 'FPL' | 'PROC';
 
+/**
+ * Configuration for a single softkey (buttons at the bottom of the screen).
+ */
 export interface SoftkeyConfig {
+  /** Text displayed above the physical button */
   label?: string;
+  /** Unique identifier for the softkey */
   id?: string;
+  /** Visual status of the softkey label */
   status?: 'active' | 'inactive' | 'toggle-on' | 'toggle-off';
+  /** Function called when the corresponding bezel button is pressed */
   action?: () => void;
 }
 
+/**
+ * A layer of 12 softkeys representing the current state of the bottom bar.
+ */
 export type SoftkeyLayer = SoftkeyConfig[];
 
+/**
+ * Definition of a screen/page in the EFIS system.
+ */
 export interface PageDefinition {
+  /** Unique ID for the page */
   id: string;
+  /** Human-readable name shown in headers */
   name: string;
+  /** The React component to render when this page is active */
   component: React.FC;
 
+  /** Handler for the inner (smaller) knob rotation */
   onInnerKnob?: (dir: 'inc' | 'dec') => void;
+  /** Handler for the outer (larger) knob rotation */
   onOuterKnob?: (dir: 'inc' | 'dec') => void;
+  /** Handler for the ENT (Enter) button */
   onEnt?: () => void;
+  /** Handler for the CLR (Clear) button */
   onClr?: () => void;
 
+  /**
+   * Function returning the base softkeys for this page.
+   * If not provided, the page will have empty softkeys by default.
+   */
   softkeys?: () => SoftkeyLayer;
 }
 
 interface PageStateContextType {
   // MFD State
+  /** Currently active page group on the MFD */
   mfdPageGroup: MFDPageGroup;
-  mfdPageSelection: number; // Index within the group
+  /** Currently active page index within the group */
+  mfdPageSelection: number;
+  /** If set, shows this group as a modal (e.g. FPL or PROC) instead of the main navigation groups */
   mfdModalPage: MFDPageGroup | null;
 
   // PFD State
   pfdPageSelection: number;
+  /** Stack of softkey layers for PFD. Last element is the current one. */
   pfdSoftkeyStack: SoftkeyLayer[];
 
   // MFD Softkey stack
+  /** Stack of softkey layers for MFD. Overrides page-default softkeys if not empty. */
   mfdSoftkeyStack: SoftkeyLayer[];
 
   // Navigation Actions
   setMfdPageGroup: (group: MFDPageGroup) => void;
+  /** Cycle to the next major MFD group (MAP -> WPT -> AUX -> NRST) */
   nextMfdPageGroup: () => void;
+  /** Cycle to the previous major MFD group */
   prevMfdPageGroup: () => void;
+  /** Cycle to the next page within the current group */
   nextMfdPageSelection: () => void;
+  /** Cycle to the previous page within the current group */
   prevMfdPageSelection: () => void;
   setMfdPageSelection: (index: number) => void;
+  /** Open/close a modal group like FPL or PROC */
   toggleMfdModal: (modal: MFDPageGroup) => void;
 
   // Softkey Stack Actions
+  /** Push a new layer of softkeys (e.g., entering a sub-menu) */
   pushSoftkeys: (unit: 'PFD' | 'MFD', layer: SoftkeyLayer) => void;
+  /** Remove the top layer of softkeys */
   popSoftkeys: (unit: 'PFD' | 'MFD') => void;
+  /** Clear stack and set a specific root layer */
   resetSoftkeys: (unit: 'PFD' | 'MFD', root: SoftkeyLayer) => void;
 
   // Current Visible Softkeys
+  /** Get the 12 softkeys that should be rendered right now */
   getVisibleSoftkeys: (unit: 'PFD' | 'MFD') => SoftkeyLayer;
 }
 
+/**
+ * Registry of all available pages on the MFD, organized by group.
+ * To add a new page:
+ * 1. Create the component in PageDefinitions.tsx (or elsewhere)
+ * 2. Add a new entry to the appropriate group array below.
+ */
 export const MFD_PAGES: Record<MFDPageGroup, PageDefinition[]> = {
   MAP: [
     {
@@ -227,6 +275,10 @@ export const MFD_PAGES: Record<MFDPageGroup, PageDefinition[]> = {
 
 const PageStateContext = createContext<PageStateContextType | null>(null);
 
+/**
+ * The PageProvider manages the global state of the avionics displays,
+ * including which page is active and what softkeys are currently shown.
+ */
 export const PageProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [mfdPageGroup, setMfdPageGroup] = useState<MFDPageGroup>('MAP');
   const [mfdGroupSelections, setMfdGroupSelections] = useState<Record<MFDPageGroup, number>>({
@@ -244,6 +296,9 @@ export const PageProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [pfdSoftkeyStack, setPfdSoftkeyStack] = useState<SoftkeyLayer[]>([]);
   const [mfdSoftkeyStack, setMfdSoftkeyStack] = useState<SoftkeyLayer[]>([]);
 
+  /**
+   * The list of major page groups that can be cycled using the outer knob on MFD.
+   */
   const groups: MFDPageGroup[] = ['MAP', 'WPT', 'AUX', 'NRST'];
 
   const pushSoftkeys = useCallback((unit: 'PFD' | 'MFD', layer: SoftkeyLayer) => {
@@ -270,6 +325,14 @@ export const PageProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, []);
 
+  /**
+   * Helper function to get currently visible softkeys.
+   * Logic:
+   * 1. If there's a softkey stack (e.g. pushed by a button), use the top layer.
+   * 2. Otherwise:
+   *    - For PFD: returns hardcoded root softkeys.
+   *    - For MFD: returns softkeys defined in the active page's PageDefinition.
+   */
   const getVisibleSoftkeys = useCallback(
     (unit: 'PFD' | 'MFD'): SoftkeyLayer => {
       const stack = unit === 'PFD' ? pfdSoftkeyStack : mfdSoftkeyStack;
