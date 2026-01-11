@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { useFlightData } from './useFlightData';
+import { useFlightData } from '../features/playback/hooks/useFlightData';
 import { pointsToGeoJSON } from '../utils/navDataUtils';
 import { getDistanceNM, GeoPoint } from '../utils/geoUtils';
 
