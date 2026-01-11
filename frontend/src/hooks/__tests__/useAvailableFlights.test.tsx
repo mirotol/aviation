@@ -70,7 +70,7 @@ describe('useAvailableFlights hook', () => {
     });
 
     expect(result.current.availableFlights).toEqual([]);
-    
+
     expect(consoleSpy).toHaveBeenCalledWith('Backend unavailable, retrying fetch on next mount...');
 
     consoleSpy.mockRestore();

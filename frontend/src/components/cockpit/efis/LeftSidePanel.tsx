@@ -2,12 +2,25 @@ import React from 'react';
 import { Knob } from './Knob';
 import { BezelButton } from './BezelButton';
 import './LeftSidePanel.css';
+import { usePageContext } from '../pages/PageContext';
 
 const DoubleArrowIcon = () => (
   <svg width="24" height="14" viewBox="0 0 24 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M 6 2 L 1 7 L 6 12" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
-    <path d="M 1 7 L 23 7" stroke="white" strokeWidth="2.5" strokeLinecap="round"/>
-    <path d="M 18 2 L 23 7 L 18 12" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+    <path
+      d="M 6 2 L 1 7 L 6 12"
+      stroke="white"
+      strokeWidth="2.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+    <path d="M 1 7 L 23 7" stroke="white" strokeWidth="2.5" strokeLinecap="round" />
+    <path
+      d="M 18 2 L 23 7 L 18 12"
+      stroke="white"
+      strokeWidth="2.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
   </svg>
 );
 
@@ -17,11 +30,7 @@ export const LeftSidePanel: React.FC<{ unitType?: 'PFD' | 'MFD' }> = ({ unitType
   return (
     <div className="side-panel left-side-panel">
       <div className="side-panel-top-group">
-        <Knob
-          id={`${prefix}VOL_SQ`}
-          label="VOL/SQ"
-          onPush={(id) => console.log(`${id} Pushed`)}
-        />
+        <Knob id={`${prefix}VOL_SQ`} label="VOL/SQ" onPush={(id) => console.log(`${id} Pushed`)} />
         <BezelButton
           id={`${prefix}NAV_SWAP`}
           label={<DoubleArrowIcon />}
@@ -37,11 +46,7 @@ export const LeftSidePanel: React.FC<{ unitType?: 'PFD' | 'MFD' }> = ({ unitType
       </div>
 
       <div className="side-panel-row">
-        <Knob
-          id={`${prefix}HDG`}
-          label="HDG"
-          onPush={(id) => console.log(`${id} Sync`)}
-        />
+        <Knob id={`${prefix}HDG`} label="HDG" onPush={(id) => console.log(`${id} Sync`)} />
       </div>
 
       <div className="side-panel-row">
@@ -61,11 +66,7 @@ export const LeftSidePanel: React.FC<{ unitType?: 'PFD' | 'MFD' }> = ({ unitType
       </div>
 
       <div className="side-panel-row">
-        <Knob
-          id={`${prefix}ALT`}
-          label="ALT"
-          onPush={(id) => console.log(`${id} Sync`)}
-        />
+        <Knob id={`${prefix}ALT`} label="ALT" onPush={(id) => console.log(`${id} Sync`)} />
       </div>
     </div>
   );

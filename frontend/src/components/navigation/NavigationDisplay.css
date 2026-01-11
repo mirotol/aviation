@@ -2,12 +2,21 @@
   width: 100%;
   height: 100%;
   background-color: var(--bg-black);
-  border: 2px solid var(--border-color);
-  border-radius: 4px;
+  border: none;
   position: relative;
   overflow: hidden;
   color: var(--text-bright);
   font-family: var(--font-family);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.map-container-wrapper {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  background: #000;
 }
 
 .map-canvas {
@@ -139,29 +148,13 @@
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
 }
 
-.compass-rose {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 480px;
-  height: 480px;
-  border: 2px solid rgba(255, 255, 255, 0.7);
-  border-radius: 50%;
-  pointer-events: none;
-  z-index: 4;
-  /* Glow/Shadow to separate from map */
-  box-shadow:
-    0 0 10px rgba(0, 0, 0, 1),
-    inset 0 0 10px rgba(0, 0, 0, 1);
-}
-
 .compass-rose-svg {
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 500px;
-  height: 500px;
+  width: 100%;
+  height: 100%;
   pointer-events: none;
   z-index: 4;
   overflow: visible;
@@ -199,63 +192,6 @@
 
 .north-label {
   fill: var(--text-bright); /* Modern displays often use white for N to keep it clean */
-}
-
-.degree-label,
-.cardinal {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  /* Create a triangle */
-  width: 0;
-  height: 0;
-  border-left: 8px solid transparent;
-  border-right: 8px solid transparent;
-  border-top: 12px solid var(--text-bright);
-  transform: translate(-50%, -248px); /* Positioned exactly above the ring */
-  z-index: 15;
-  filter: drop-shadow(0 0 2px rgba(0, 0, 0, 1));
-}
-
-.cardinal {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  font-weight: 900;
-  font-size: 20px;
-  color: var(--text-bright);
-  font-weight: 800;
-  text-align: center;
-  /* Critical: Thick text shadow for visibility on bright tiles */
-  text-shadow:
-    -2px -2px 0 #000,
-    2px -2px 0 #000,
-    -2px 2px 0 #000,
-    2px 2px 0 #000,
-    0 0 10px #000;
-}
-
-.tick {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 2px;
-  height: 12px;
-  background: var(--text-bright);
-  /* Outline for the tick itself */
-  box-shadow:
-    -1px 0 0 #000,
-    1px 0 0 #000;
-  transform-origin: center center;
-}
-
-.tick.major {
-  width: 3px;
-  height: 18px;
-  box-shadow:
-    -1px 0 0 #000,
-    1px 0 0 #000,
-    0 0 5px rgba(0, 0, 0, 1);
 }
 
 .map-dimmer {

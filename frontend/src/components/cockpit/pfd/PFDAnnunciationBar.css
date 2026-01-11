@@ -1,0 +1,70 @@
+.pfd-annunciation-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 100%;
+  padding: 0 40px;
+  background: #000;
+  color: #fff;
+  font-family: 'JetBrains Mono', monospace;
+  box-sizing: border-box;
+}
+
+.annunciation-section {
+  display: flex;
+  align-items: center;
+  height: 100%;
+}
+
+.annunciation-section.left {
+  flex: 1;
+}
+
+.annunciation-section.center {
+  flex: 2;
+  justify-content: center;
+  border-left: 1px solid #333;
+  border-right: 1px solid #333;
+}
+
+.annunciation-section.right {
+  flex: 1;
+  justify-content: flex-end;
+}
+
+.nav-info .label {
+  color: var(--text-dim);
+  font-size: 12px;
+  margin-right: 5px;
+}
+
+.nav-info .value {
+  color: var(--text-bright);
+  font-size: 18px;
+  font-weight: bold;
+  margin-right: 15px;
+}
+
+.afcs-status span {
+  margin: 0 10px;
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.afcs-status .mode {
+  color: var(--aviation-green);
+}
+
+.afcs-status .active {
+  color: var(--aviation-green);
+}
+
+.afcs-status .armed {
+  color: #fff;
+}
+
+.nav-data .waypoint {
+  color: var(--universal-magenta);
+  font-size: 18px;
+  font-weight: bold;
+}

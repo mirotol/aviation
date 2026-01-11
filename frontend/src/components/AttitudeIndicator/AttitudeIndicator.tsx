@@ -54,7 +54,7 @@ export default function AttitudeIndicator() {
         <div className="pitch-ladder">
           {pitchMarkers.map((deg) => {
             const isMajor = deg % 10 === 0;
-            const type = isMajor ? 'major' : 'mid'
+            const type = isMajor ? 'major' : 'mid';
 
             return (
               <div
@@ -123,19 +123,22 @@ export default function AttitudeIndicator() {
               />
             );
           })}
-
         </svg>
       </div>
 
       <div className="aircraft-symbol">
         <svg viewBox="0 0 200 60" className="aircraft-svg">
           {/* Central Dot */}
-          <circle cx="100" cy="30" r="3" fill="var(--instrument-yellow)" stroke="black" strokeWidth="1" />
-          {/* Left Wing */}
-          <path
-            d="M 10 30 L 75 30 L 75 42 L 70 42 L 70 34 L 10 34 Z"
-            className="aircraft-shape"
+          <circle
+            cx="100"
+            cy="30"
+            r="3"
+            fill="var(--instrument-yellow)"
+            stroke="black"
+            strokeWidth="1"
           />
+          {/* Left Wing */}
+          <path d="M 10 30 L 75 30 L 75 42 L 70 42 L 70 34 L 10 34 Z" className="aircraft-shape" />
           {/* Right Wing */}
           <path
             d="M 190 30 L 125 30 L 125 42 L 130 42 L 130 34 L 190 34 Z"

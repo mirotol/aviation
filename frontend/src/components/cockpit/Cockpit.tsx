@@ -5,6 +5,7 @@ import { EFISUnit } from './efis/EFISUnit';
 import './Cockpit.css';
 import { useFlightPlan } from '../../hooks/useFlightPlan';
 import { useWebSocket } from '../../hooks/useWebSocket';
+import { PageProvider } from './pages/PageContext';
 
 export default function Cockpit() {
   const { updateFlightPlan } = useFlightPlan();
@@ -25,16 +26,18 @@ export default function Cockpit() {
   }, [isConnected]);
 
   return (
-    <main className="cockpit-main">
-      <div className="instrument-panel">
-        <EFISUnit type="PFD">
-          <PFD />
-        </EFISUnit>
+    <PageProvider>
+      <main className="cockpit-main">
+        <div className="instrument-panel">
+          <EFISUnit type="PFD">
+            <PFD />
+          </EFISUnit>
 
-        <EFISUnit type="MFD">
-          <MFD />
-        </EFISUnit>
-      </div>
-    </main>
+          <EFISUnit type="MFD">
+            <MFD />
+          </EFISUnit>
+        </div>
+      </main>
+    </PageProvider>
   );
 }

@@ -47,12 +47,15 @@ describe('useFlightData hook', () => {
 
     const { result } = renderHook(() => useFlightData(), { wrapper });
 
-    await waitFor(() => {
-      expect(result.current).not.toBeNull();
-    }, { timeout: 2000 });
+    await waitFor(
+      () => {
+        expect(result.current).not.toBeNull();
+      },
+      { timeout: 2000 }
+    );
 
     const snapshot = result.current!;
-    
+
     // Core Metadata
     expect(snapshot.timestamp).toBe(mockTimestamp);
 

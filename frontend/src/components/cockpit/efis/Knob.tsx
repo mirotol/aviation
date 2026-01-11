@@ -27,22 +27,16 @@ export const Knob: React.FC<KnobProps> = ({
     e.stopPropagation();
 
     const direction: 'inc' | 'dec' = e.deltaY < 0 ? 'inc' : 'dec';
-    const magnitude = Math.abs(e.deltaY);
 
-    // Scroll acceleration
-    const steps = magnitude < 30 ? 1 : magnitude < 80 ? 5 : 10;
-    const rotationStep = 5; // Degrees per step
+    // Visual rotation step, with 36 it means 10 steps for full circle
+    const rotationStep = 36;
 
     if (target === 'outer') {
-      setOuterRotation(
-        (prev) => prev + (direction === 'inc' ? rotationStep * steps : -rotationStep * steps)
-      );
-      for (let i = 0; i < steps; i++) onOuterChange?.(direction, id);
+      setOuterRotation((prev) => prev + (direction === 'inc' ? rotationStep : -rotationStep));
+      onOuterChange?.(direction, id);
     } else {
-      setInnerRotation(
-        (prev) => prev + (direction === 'inc' ? rotationStep * steps : -rotationStep * steps)
-      );
-      for (let i = 0; i < steps; i++) onInnerChange?.(direction, id);
+      setInnerRotation((prev) => prev + (direction === 'inc' ? rotationStep : -rotationStep));
+      onInnerChange?.(direction, id);
     }
   };
 

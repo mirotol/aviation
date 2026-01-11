@@ -27,7 +27,7 @@
   position: relative;
   transform: scale(var(--efis-scale, 0.9)) translateY(-50px);
   transform-origin: center;
-  --efis-scale: 0.9;
+  --efis-scale: 1;
 }
 
 .instrument-panel::after {

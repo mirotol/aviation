@@ -1,5 +1,5 @@
 # Auto-normalize text files
-* text=auto
+* text=auto eol=lf
 
 # TypeScript / JavaScript files
 *.ts text eol=crlf

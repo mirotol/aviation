@@ -22,7 +22,7 @@ export const BezelButton: React.FC<BezelButtonProps> = ({
 
   return (
     <div className={`${baseClass} ${className}`} onClick={() => onClick?.(id)}>
-      {label}
+      <span className="button-label">{label}</span>
     </div>
   );
 };
