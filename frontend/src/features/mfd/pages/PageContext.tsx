@@ -103,7 +103,7 @@ export const MFD_PAGES: Record<MFDPageGroup, PageDefinition[]> = {
   MAP: [
     {
       id: 'MAP_NAV',
-      name: 'Navigation Map',
+      name: 'Default NAV',
       component: NavigationMapPage,
       softkeys: () => [
         { label: 'TRAFFIC', id: 'MAP_TRAFFIC' },

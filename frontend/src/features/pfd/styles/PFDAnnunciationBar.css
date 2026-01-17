@@ -1,19 +1,33 @@
+/* ===============================
+   PFD ANNUNCIATION BAR (ROOT)
+   =============================== */
+
 .pfd-annunciation-bar {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  align-items: stretch; /* ensures all sections same height */
+  justify-content: flex-start;
   height: 100%;
-  padding: 0 40px;
+  padding: 0 5px;
   background: #000;
   color: #fff;
   font-family: 'JetBrains Mono', monospace;
   box-sizing: border-box;
 }
 
+/* Vertical divider between main sections (left, center, right) */
+.pfd-annunciation-bar .annunciation-section:not(:first-child) {
+  border-left: 4px solid #333;
+}
+
+/* ===============================
+   GENERIC SECTION LAYOUT
+   =============================== */
+
 .annunciation-section {
   display: flex;
-  align-items: center;
+  flex-direction: column;
   height: 100%;
+  box-sizing: border-box;
 }
 
 .annunciation-section.left {
@@ -22,15 +36,149 @@
 
 .annunciation-section.center {
   flex: 2;
-  justify-content: center;
-  border-left: 1px solid #333;
-  border-right: 1px solid #333;
+  display: flex;
+  flex-direction: column;
 }
 
 .annunciation-section.right {
   flex: 1;
+}
+
+/* ===============================
+   GENERIC TOP / BOTTOM ROWS
+   (NAV + COM)
+   =============================== */
+
+.annunciation-row {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0;
+  flex: 1; /* ensures equal height for top/bottom rows */
+}
+
+.annunciation-row.top {
+  justify-content: flex-start;
+}
+
+.annunciation-row.bottom {
+  justify-content: flex-start;
+  border-top: 4px solid #333;
+}
+
+/* Right alignment for right section rows */
+.annunciation-section.right .annunciation-row.top {
   justify-content: flex-end;
 }
+.annunciation-section.right .annunciation-row.bottom {
+  justify-content: flex-end;
+}
+
+/* ===============================
+   NAVIGATION STATUS BOX (CENTER TOP)
+   =============================== */
+
+.nav-status-box {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr; /* Left / Right columns */
+  width: 100%;
+  flex: 1; /* takes 50% of center section */
+  box-sizing: border-box;
+  align-items: center;
+  padding: 0 4px;
+}
+
+/* Add vertical divider between left/right */
+.nav-status-left {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  border-right: 4px solid #333;
+  padding-right: 4px; /* spacing so text doesn't touch border */
+}
+
+.nav-status-right {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  padding-left: 4px; /* spacing from border */
+}
+
+.nav-active-leg {
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+.nav-dis-brg {
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+/* ===============================
+   AFCS STATUS BOX (CENTER BOTTOM)
+   =============================== */
+
+.afcs-box {
+  display: grid;
+  grid-template-columns: 1fr 0.5fr 1.5fr; /* Lateral / Center / Vertical */
+  width: 100%;
+  flex: 1; /* takes bottom 50% height of center */
+  box-sizing: border-box;
+  align-items: center;
+  justify-content: stretch;
+  border-top: 4px solid #333;
+}
+
+/* Vertical dividers between AFCS zones */
+.afcs-box > div:not(:last-child) {
+  border-right: 4px solid #333;
+  padding: 0 4px;
+}
+
+/* Lateral / center / vertical zones */
+.afcs-lateral,
+.afcs-center,
+.afcs-vertical {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.afcs-lateral {
+  justify-content: flex-start;
+}
+
+.afcs-center {
+  justify-content: center;
+}
+
+.afcs-vertical {
+  justify-content: flex-end;
+}
+
+/* ===============================
+   AFCS STATE COLORS
+   =============================== */
+
+.afcs-box .active {
+  color: var(--aviation-green);
+}
+
+.afcs-box .armed {
+  color: #ffffff;
+}
+
+.afcs-box .mode-reference {
+  color: var(--text-dim);
+  font-weight: normal;
+  font-size: 12px;
+}
+
+/* ===============================
+   NAV / COM TEXT STYLING
+   =============================== */
 
 .nav-info .label {
   color: var(--text-dim);
@@ -45,26 +193,17 @@
   margin-right: 15px;
 }
 
-.afcs-status span {
-  margin: 0 10px;
-  font-size: 20px;
-  font-weight: bold;
-}
-
-.afcs-status .mode {
-  color: var(--aviation-green);
-}
-
-.afcs-status .active {
-  color: var(--aviation-green);
-}
-
-.afcs-status .armed {
-  color: #fff;
-}
-
-.nav-data .waypoint {
+.nav-active-leg {
   color: var(--universal-magenta);
   font-size: 18px;
   font-weight: bold;
+}
+
+/* ===============================
+   OPTIONAL: ENSURE CENTER SECTION SPLIT 50/50
+   =============================== */
+
+.nav-status-box,
+.afcs-box {
+  flex: 1; /* equal top/bottom height */
 }

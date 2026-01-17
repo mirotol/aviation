@@ -1,19 +1,6 @@
 # Auto-normalize text files
 * text=auto eol=lf
 
-# TypeScript / JavaScript files
-*.ts text eol=crlf
-*.tsx text eol=crlf
-*.js text eol=crlf
-*.jsx text eol=crlf
-
-# CSS/HTML
-*.css text eol=crlf
-*.html text eol=crlf
-
-# JSON should remain LF
-*.json text eol=lf
-
 # Images / binaries
 *.png binary
 *.jpg binary

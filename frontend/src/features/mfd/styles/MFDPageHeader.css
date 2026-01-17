@@ -23,6 +23,8 @@
 .header-section.center {
   flex: 2;
   justify-content: center;
+  border-left: 1px solid #333;
+  border-right: 1px solid #333;
 }
 
 .header-section.right {
