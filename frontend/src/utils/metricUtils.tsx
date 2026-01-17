@@ -26,10 +26,13 @@ export function formatMetric(
     displayValue = value;
   }
 
+  const unitClass =
+    unit === '°' || unit?.includes('°') ? 'nav-value-unit degree' : 'nav-value-unit';
+
   return (
     <>
       <span className="nav-value-main">{displayValue}</span>
-      {unit && <span className="nav-value-unit">{unit}</span>}
+      {unit && <span className={unitClass}>{unit}</span>}
     </>
   );
 }

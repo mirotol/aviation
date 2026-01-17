@@ -114,15 +114,20 @@
 
 .nav-value {
   color: var(--universal-magenta);
-  font-size: 14px;
   font-weight: bold;
 }
 
 .nav-value-main {
-  font-size: 14px;
+  font-size: 18px;
 }
 
 .nav-value-unit {
-  font-size: 11px;
+  font-size: 12px;
   margin-left: 2px;
+}
+
+/* Angular units (°, °T, °M) → raised */
+.nav-value-unit.degree {
+  vertical-align: super;
+  font-size: 14px;
 }
