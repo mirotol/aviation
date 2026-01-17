@@ -436,22 +436,24 @@ const NavigationDisplay: React.FC<NavigationDisplayProps> = ({ initialRangeNM = 
                   <circle cx={centerX} cy={centerY} r={outerRadius} className="range-ring outer" />
                   <circle cx={centerX} cy={centerY} r={innerRadius} className="range-ring inner" />
 
-                  {/* Inner ring label with background */}
+                  {/* Outer ring label with background */}
                   <g>
                     {(() => {
                       const labelAngle = (45 * Math.PI) / 180;
-                      const lx = centerX + innerRadius * Math.sin(labelAngle);
-                      const ly = centerY - innerRadius * Math.cos(labelAngle);
+                      const lx = centerX + outerRadius * Math.sin(labelAngle);
+                      const ly = centerY - outerRadius * Math.cos(labelAngle);
                       return (
                         <>
                           <rect
-                            x={lx - 22}
-                            y={ly - 10}
-                            width={44}
+                            x={lx - 30}
+                            y={ly - 12}
+                            width={60}
                             height={20}
-                            rx={3}
-                            ry={3}
-                            fill="rgba(0,0,0,0.7)"
+                            fill="rgb(0, 0, 0)"
+                            stroke="rgba(255,255,255,0.8)"
+                            strokeWidth={1}
+                            shapeRendering="crispEdges"
+                            vectorEffect="non-scaling-stroke"
                           />
                           <text
                             x={lx}
@@ -459,10 +461,18 @@ const NavigationDisplay: React.FC<NavigationDisplayProps> = ({ initialRangeNM = 
                             textAnchor="middle"
                             dominantBaseline="middle"
                             fill="#fff"
-                            fontSize="11"
                             fontWeight="bold"
+                            fontFamily="'Roboto Mono', 'JetBrains Mono', monospace"
                           >
-                            {rangeNM / 2}
+                            <tspan fontSize="18">{rangeNM}</tspan>
+                            <tspan
+                              fontSize="14"
+                              dx="4" // spacing between number and unit
+                              dy="3"
+                              dominantBaseline="middle"
+                            >
+                              NM
+                            </tspan>
                           </text>
                         </>
                       );
@@ -556,8 +566,6 @@ const NavigationDisplay: React.FC<NavigationDisplayProps> = ({ initialRangeNM = 
             <path d="M21,16L21,14L13,9L13,3.5A1.5,1.5 0 0,0 11.5,2A1.5,1.5 0 0,0 10,3.5L10,9L2,14L2,16L10,13.5L10,18L8,19.5L8,21L11.5,20L15,21L15,19.5L13,18L13,13.5L21,16Z" />
           </svg>
         </div>
-
-        <div className="range-indicator">{rangeNM} NM</div>
       </div>
     </div>
   );
