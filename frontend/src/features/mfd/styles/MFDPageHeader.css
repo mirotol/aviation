@@ -1,7 +1,6 @@
 .mfd-page-header {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  align-items: stretch;
   height: 100%;
   padding: 0 40px;
   background: #000;
@@ -12,24 +11,44 @@
 
 .header-section {
   display: flex;
-  align-items: center;
   height: 100%;
+  box-sizing: border-box;
 }
 
 .header-section.left {
   flex: 1;
+  align-items: center;
 }
 
 .header-section.center {
   flex: 2;
-  justify-content: center;
-  border-left: 1px solid #333;
-  border-right: 1px solid #333;
+  flex-direction: column;
+  border-left: 4px solid #333;
+  border-right: 4px solid #333;
 }
 
 .header-section.right {
   flex: 1;
+  align-items: center;
   justify-content: flex-end;
+}
+
+.center-row {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  flex: 1; /* 50 / 50 split */
+  box-sizing: border-box;
+}
+
+.center-row.top {
+  justify-content: center;
+  gap: 20px;
+}
+
+.center-row.bottom {
+  justify-content: center;
+  border-top: 4px solid #333; /* perfectly aligned divider */
 }
 
 .engine-data-summary .label {
@@ -76,4 +95,26 @@
 
 .dot.active {
   color: var(--aviation-green);
+}
+
+/* NAV METRICS (GS / DTK / TRK / ETE) */
+.nav-metric {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  white-space: nowrap;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.nav-label {
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: normal;
+}
+
+.nav-value {
+  color: var(--universal-magenta);
+  font-size: 14px;
+  font-weight: bold;
 }

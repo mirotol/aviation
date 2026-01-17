@@ -557,15 +557,6 @@ const NavigationDisplay: React.FC<NavigationDisplayProps> = ({ initialRangeNM = 
           </svg>
         </div>
 
-        <div className="map-overlay">
-          <div className="stat">
-            GS <span className="value">{Math.round(snapshot.airSpeed.speed)} KT</span>
-          </div>
-          <div className="stat">
-            TRK <span className="value">{Math.round(track).toString().padStart(3, '0')}°</span>
-          </div>
-        </div>
-
         <div className="range-indicator">{rangeNM} NM</div>
       </div>
     </div>

@@ -5,7 +5,7 @@ import { NavigationMapPage, TrafficMapPage, PlaceholderPage } from './PageDefini
  * MFD Page Group identifiers.
  * To add a new group (e.g., 'SYSTEM'), add it here and update MFD_PAGES.
  */
-export type MFDPageGroup = 'MAP' | 'WPT' | 'AUX' | 'NRST' | 'FPL' | 'PROC';
+export type MFDPageGroup = 'NAV' | 'WPT' | 'AUX' | 'NRST' | 'FPL' | 'PROC';
 
 /**
  * Configuration for a single softkey (buttons at the bottom of the screen).
@@ -68,7 +68,7 @@ interface PageStateContextType {
 
   // Navigation Actions
   setMfdPageGroup: (group: MFDPageGroup) => void;
-  /** Cycle to the next major MFD group (MAP -> WPT -> AUX -> NRST) */
+  /** Cycle to the next major MFD group (NAV -> WPT -> AUX -> NRST) */
   nextMfdPageGroup: () => void;
   /** Cycle to the previous major MFD group */
   prevMfdPageGroup: () => void;
@@ -100,29 +100,29 @@ interface PageStateContextType {
  * 2. Add a new entry to the appropriate group array below.
  */
 export const MFD_PAGES: Record<MFDPageGroup, PageDefinition[]> = {
-  MAP: [
+  NAV: [
     {
-      id: 'MAP_NAV',
+      id: 'NAV_DEFAULT',
       name: 'Default NAV',
       component: NavigationMapPage,
       softkeys: () => [
-        { label: 'TRAFFIC', id: 'MAP_TRAFFIC' },
-        { label: 'TOPO', id: 'MAP_TOPO' },
-        { label: 'TERRAIN', id: 'MAP_TERRAIN' },
+        { label: 'TRAFFIC', id: 'NAV_TRAFFIC' },
+        { label: 'TOPO', id: 'NAV_TOPO' },
+        { label: 'TERRAIN', id: 'NAV_TERRAIN' },
       ],
     },
     {
-      id: 'MAP_TFC',
+      id: 'NAV_TFC',
       name: 'Traffic Map',
       component: TrafficMapPage,
     },
     {
-      id: 'MAP_WEATHER',
+      id: 'NAV_WEATHER',
       name: 'Weather Data Link',
       component: () => <PlaceholderPage name="Weather Data Link" />,
     },
     {
-      id: 'MAP_TERRAIN',
+      id: 'NAV_TERRAIN',
       name: 'Terrain Proximity',
       component: () => <PlaceholderPage name="Terrain Proximity" />,
     },
@@ -275,9 +275,9 @@ const PageStateContext = createContext<PageStateContextType | null>(null);
  * including which page is active and what softkeys are currently shown.
  */
 export const PageProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [mfdPageGroup, setMfdPageGroup] = useState<MFDPageGroup>('MAP');
+  const [mfdPageGroup, setMfdPageGroup] = useState<MFDPageGroup>('NAV');
   const [mfdGroupSelections, setMfdGroupSelections] = useState<Record<MFDPageGroup, number>>({
-    MAP: 0,
+    NAV: 0,
     WPT: 0,
     AUX: 0,
     NRST: 0,
@@ -291,7 +291,7 @@ export const PageProvider: React.FC<{ children: React.ReactNode }> = ({ children
   /**
    * The list of major page groups that can be cycled using the outer knob on MFD.
    */
-  const groups: MFDPageGroup[] = ['MAP', 'WPT', 'AUX', 'NRST'];
+  const groups: MFDPageGroup[] = ['NAV', 'WPT', 'AUX', 'NRST'];
 
   const pushSoftkeys = useCallback((layer: SoftkeyLayer) => {
     setMfdSoftkeyStack((prev) => [...prev, layer]);
