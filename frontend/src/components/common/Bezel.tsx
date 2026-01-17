@@ -18,7 +18,7 @@ export const Bezel: React.FC<BezelProps> = ({ type, children }) => {
 
       <div className="bezel-middle-row">
         <LeftSidePanel unitType={type} />
-        <DisplayViewport>{children}</DisplayViewport>
+        <DisplayViewport type={type}>{children}</DisplayViewport>
         <RightSidePanel unitType={type} />
       </div>
 

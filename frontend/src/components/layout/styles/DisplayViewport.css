@@ -19,7 +19,19 @@
   bottom: 0;
   pointer-events: none;
   background: radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.05) 0%, transparent 70%);
-  z-index: 100;
+  z-index: 2100; /* Highest layer - glass reflection */
+}
+
+.display-dimmer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 2000; /* Above all content including menus */
+  background-color: transparent;
+  transition: background-color 0.1s ease-out;
 }
 
 .efis-pfd .display-viewport,

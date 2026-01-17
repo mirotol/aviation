@@ -7,6 +7,7 @@ import { useFlightPlan } from '../../../hooks/useFlightPlan';
 import { useWebSocket } from '../../../hooks/useWebSocket';
 import { PageProvider as MFDProvider } from '../../mfd/pages/PageContext';
 import { PFDProvider } from '../../pfd/pages/PFDContext';
+import { BrightnessProvider } from '../../../context/BrightnessContext';
 
 export default function Cockpit() {
   const { updateFlightPlan } = useFlightPlan();
@@ -26,20 +27,22 @@ export default function Cockpit() {
   }, [isConnected]);
 
   return (
-    <MFDProvider>
-      <PFDProvider>
-        <main className="cockpit-main">
-          <div className="instrument-panel">
-            <EFISUnit type="PFD">
-              <PFD />
-            </EFISUnit>
+    <BrightnessProvider>
+      <MFDProvider>
+        <PFDProvider>
+          <main className="cockpit-main">
+            <div className="instrument-panel">
+              <EFISUnit type="PFD">
+                <PFD />
+              </EFISUnit>
 
-            <EFISUnit type="MFD">
-              <MFD />
-            </EFISUnit>
-          </div>
-        </main>
-      </PFDProvider>
-    </MFDProvider>
+              <EFISUnit type="MFD">
+                <MFD />
+              </EFISUnit>
+            </div>
+          </main>
+        </PFDProvider>
+      </MFDProvider>
+    </BrightnessProvider>
   );
 }

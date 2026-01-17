@@ -84,7 +84,6 @@ const NavigationDisplay: React.FC<NavigationDisplayProps> = ({ initialRangeNM = 
     const idx = RANGES.indexOf(initialRangeNM);
     return idx >= 0 ? idx : 2;
   });
-  const [brightness, setBrightness] = useState(75);
   const rangeNM = RANGES[rangeIndex];
 
   // Mapbox colors
@@ -141,10 +140,6 @@ const NavigationDisplay: React.FC<NavigationDisplayProps> = ({ initialRangeNM = 
       setOnMfdJoystickPush(undefined);
     };
   }, [setOnMfdRangeKnob, setOnMfdJoystickPush, rangeIndex]); // re-bind so it has fresh handleRangeChange/rangeIndex if needed
-
-  const handleBrightnessChange = (delta: number) => {
-    setBrightness((prev) => Math.min(Math.max(prev + delta, 20), 100));
-  };
 
   const latitude = snapshot?.position?.latitude ?? 0;
   const longitude = snapshot?.position?.longitude ?? 0;
@@ -412,18 +407,6 @@ const NavigationDisplay: React.FC<NavigationDisplayProps> = ({ initialRangeNM = 
             </Source>
           )}
         </Map>
-
-        <div
-          className="map-dimmer"
-          style={{ backgroundColor: `rgba(0, 0, 0, ${1 - brightness / 100})` }}
-        />
-
-        <div className="range-controls">
-          <div className="control-group">
-            <button onClick={() => handleBrightnessChange(-5)}>BRT −</button>
-            <button onClick={() => handleBrightnessChange(5)}>BRT +</button>
-          </div>
-        </div>
 
         <svg
           className="compass-rose-svg"

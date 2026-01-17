@@ -86,50 +86,6 @@
   text-align: right;
 }
 
-.range-controls {
-  position: absolute;
-  bottom: 20px;
-  right: 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 15px; /* Gap between RNG and BRT groups */
-  z-index: 10;
-}
-
-.control-group {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-}
-
-.range-controls button {
-  background: var(--bg-surface);
-  border: 1px solid var(--border-color);
-  color: var(--aviation-green);
-  padding: 8px 12px;
-  font-weight: bold;
-  cursor: pointer;
-  border-radius: 4px;
-  min-width: 80px;
-  transition: background 0.2s;
-}
-
-.range-controls button:hover:not(:disabled) {
-  background: var(--bezel-light);
-  color: var(--text-bright);
-}
-
-.range-controls button:active:not(:disabled) {
-  background: var(--aviation-green);
-  color: var(--bg-black);
-}
-
-.range-controls button:disabled {
-  opacity: 0.3;
-  cursor: not-allowed;
-}
-
-
 .compass-rose-svg {
   position: absolute;
   top: 50%;
