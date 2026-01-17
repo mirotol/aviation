@@ -43,6 +43,9 @@ export const RightSidePanel: React.FC<{ unitType?: 'PFD' | 'MFD' }> = ({ unitTyp
     onMfdJoystickPush,
   } = mfdContext;
 
+  const { pfdMenuMode, onPfdFmsOuter, onPfdFmsInner, onPfdEnt, onPfdClr, togglePfdMenu } =
+    pfdContext;
+
   const currentGroup = mfdModalPage ?? mfdPageGroup;
   const pageDef = unitType === 'MFD' ? MFD_PAGES[currentGroup][mfdPageSelection] : null;
 
@@ -53,6 +56,10 @@ export const RightSidePanel: React.FC<{ unitType?: 'PFD' | 'MFD' }> = ({ unitTyp
       } else {
         if (dir === 'inc') nextMfdPageGroup();
         else prevMfdPageGroup();
+      }
+    } else {
+      if (onPfdFmsOuter) {
+        onPfdFmsOuter(dir);
       }
     }
   };
@@ -65,6 +72,10 @@ export const RightSidePanel: React.FC<{ unitType?: 'PFD' | 'MFD' }> = ({ unitTyp
         if (dir === 'inc') nextMfdPageSelection();
         else prevMfdPageSelection();
       }
+    } else {
+      if (onPfdFmsInner) {
+        onPfdFmsInner(dir);
+      }
     }
   };
 
@@ -74,8 +85,14 @@ export const RightSidePanel: React.FC<{ unitType?: 'PFD' | 'MFD' }> = ({ unitTyp
       else if (btn === 'PROC') toggleMfdModal('PROC');
       else if (btn === 'ENT' && pageDef?.onEnt) pageDef.onEnt();
       else if (btn === 'CLR' && pageDef?.onClr) pageDef.onClr();
+    } else {
+      if (btn === 'MENU') togglePfdMenu('SETUP');
+      else if (btn === 'DIR') togglePfdMenu('DIRECT_TO');
+      else if (btn === 'FPL') togglePfdMenu('FPL');
+      else if (btn === 'PROC') togglePfdMenu('PROC');
+      else if (btn === 'ENT' && onPfdEnt) onPfdEnt();
+      else if (btn === 'CLR' && onPfdClr) onPfdClr();
     }
-    console.log(`${prefix}${btn} Clicked`);
   };
 
   return (
@@ -133,8 +150,12 @@ export const RightSidePanel: React.FC<{ unitType?: 'PFD' | 'MFD' }> = ({ unitTyp
               label={btn}
               variant="small"
               className={
-                (btn === 'FPL' && mfdModalPage === 'FPL') ||
-                (btn === 'PROC' && mfdModalPage === 'PROC')
+                (unitType === 'MFD' && btn === 'FPL' && mfdModalPage === 'FPL') ||
+                (unitType === 'MFD' && btn === 'PROC' && mfdModalPage === 'PROC') ||
+                (unitType === 'PFD' && btn === 'MENU' && pfdMenuMode === 'SETUP') ||
+                (unitType === 'PFD' && btn === 'DIR' && pfdMenuMode === 'DIRECT_TO') ||
+                (unitType === 'PFD' && btn === 'FPL' && pfdMenuMode === 'FPL') ||
+                (unitType === 'PFD' && btn === 'PROC' && pfdMenuMode === 'PROC')
                   ? 'active'
                   : ''
               }

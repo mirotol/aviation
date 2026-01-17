@@ -19,11 +19,26 @@ export interface SoftkeyConfig {
  */
 export type SoftkeyLayer = SoftkeyConfig[];
 
+export type PFDMenuMode = 'SETUP' | 'DIRECT_TO' | 'FPL' | 'PROC';
+
 interface PFDContextType {
   // PFD State
   pfdPageSelection: number;
   /** Stack of softkey layers for PFD. Last element is the current one. */
   pfdSoftkeyStack: SoftkeyLayer[];
+
+  // Menu State
+  pfdMenuMode: PFDMenuMode | null;
+
+  // Knob Handlers
+  onPfdFmsOuter?: (dir: 'inc' | 'dec') => void;
+  setOnPfdFmsOuter: (handler: ((dir: 'inc' | 'dec') => void) | undefined) => void;
+  onPfdFmsInner?: (dir: 'inc' | 'dec') => void;
+  setOnPfdFmsInner: (handler: ((dir: 'inc' | 'dec') => void) | undefined) => void;
+  onPfdEnt?: () => void;
+  setOnPfdEnt: (handler: (() => void) | undefined) => void;
+  onPfdClr?: () => void;
+  setOnPfdClr: (handler: (() => void) | undefined) => void;
 
   // Actions
   setPfdPageSelection: (index: number) => void;
@@ -31,6 +46,8 @@ interface PFDContextType {
   popSoftkeys: () => void;
   resetSoftkeys: (root: SoftkeyLayer) => void;
   getVisibleSoftkeys: () => SoftkeyLayer;
+  togglePfdMenu: (mode: PFDMenuMode) => void;
+  closePfdMenu: () => void;
 }
 
 const PFDContext = createContext<PFDContextType | null>(null);
@@ -38,6 +55,12 @@ const PFDContext = createContext<PFDContextType | null>(null);
 export const PFDProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [pfdPageSelection, setPfdPageSelection] = useState(0);
   const [pfdSoftkeyStack, setPfdSoftkeyStack] = useState<SoftkeyLayer[]>([]);
+  const [pfdMenuMode, setPfdMenuMode] = useState<PFDMenuMode | null>(null);
+
+  const [onPfdFmsOuter, setOnPfdFmsOuter] = useState<((dir: 'inc' | 'dec') => void) | undefined>();
+  const [onPfdFmsInner, setOnPfdFmsInner] = useState<((dir: 'inc' | 'dec') => void) | undefined>();
+  const [onPfdEnt, setOnPfdEnt] = useState<(() => void) | undefined>();
+  const [onPfdClr, setOnPfdClr] = useState<(() => void) | undefined>();
 
   const pushSoftkeys = useCallback((layer: SoftkeyLayer) => {
     setPfdSoftkeyStack((prev) => [...prev, layer]);
@@ -49,6 +72,14 @@ export const PFDProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const resetSoftkeys = useCallback((root: SoftkeyLayer) => {
     setPfdSoftkeyStack([root]);
+  }, []);
+
+  const togglePfdMenu = useCallback((mode: PFDMenuMode) => {
+    setPfdMenuMode((prev) => (prev === mode ? null : mode));
+  }, []);
+
+  const closePfdMenu = useCallback(() => {
+    setPfdMenuMode(null);
   }, []);
 
   const getVisibleSoftkeys = useCallback((): SoftkeyLayer => {
@@ -114,11 +145,22 @@ export const PFDProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       value={{
         pfdPageSelection,
         pfdSoftkeyStack,
+        pfdMenuMode,
+        onPfdFmsOuter,
+        setOnPfdFmsOuter,
+        onPfdFmsInner,
+        setOnPfdFmsInner,
+        onPfdEnt,
+        setOnPfdEnt,
+        onPfdClr,
+        setOnPfdClr,
         setPfdPageSelection,
         pushSoftkeys,
         popSoftkeys,
         resetSoftkeys,
         getVisibleSoftkeys,
+        togglePfdMenu,
+        closePfdMenu,
       }}
     >
       {children}

@@ -23,10 +23,16 @@ export const Knob: React.FC<KnobProps> = ({
   const [hoverRing, setHoverRing] = useState<'outer' | 'inner' | null>(null);
   const [outerRotation, setOuterRotation] = useState(0);
   const [innerRotation, setInnerRotation] = useState(0);
+  const [lastEventTime, setLastEventTime] = useState(0);
 
   const handleWheel = (e: React.WheelEvent, target: 'inner' | 'outer') => {
     e.preventDefault();
     e.stopPropagation();
+
+    const now = Date.now();
+    // Throttle wheel events to avoid double-triggering on high-precision mice/touchpads
+    if (now - lastEventTime < 50) return;
+    setLastEventTime(now);
 
     const direction: 'inc' | 'dec' = e.deltaY < 0 ? 'inc' : 'dec';
 

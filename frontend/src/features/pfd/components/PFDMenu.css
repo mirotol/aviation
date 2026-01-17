@@ -1,0 +1,81 @@
+.pfd-menu-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1000;
+  display: flex;
+  justify-content: flex-end;
+  align-items: flex-end;
+  padding: 10px;
+  box-sizing: border-box;
+}
+
+.pfd-menu-window {
+  width: 33.33%;
+  height: 250px;
+  background-color: #000;
+  border: 2px solid #555;
+  border-radius: 2px;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.9);
+  pointer-events: auto;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.pfd-menu-header {
+  background-color: #333;
+  color: var(--text-bright);
+  padding: 4px 8px;
+  font-size: 14px;
+  font-weight: bold;
+  text-align: center;
+  border-bottom: 2px solid #555;
+}
+
+.pfd-menu-content {
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.pfd-menu-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px 8px;
+  font-size: 13px;
+  color: var(--text-bright);
+}
+
+.pfd-menu-values {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  min-width: 140px;
+}
+
+.pfd-menu-values .value:first-child {
+  width: 60px;
+  text-align: right;
+}
+
+.pfd-menu-values .value:last-child {
+  width: 75px;
+  text-align: right;
+}
+
+.pfd-menu-row .value {
+  color: var(--aviation-green);
+  font-weight: bold;
+  padding: 0 4px;
+}
+
+.pfd-menu-row .value.focused {
+  background-color: var(--primary-color);
+  color: #000;
+}

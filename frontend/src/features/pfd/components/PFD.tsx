@@ -7,6 +7,7 @@ import { usePFDContext } from '../pages/PFDContext';
 import { SoftkeyBar } from '../../cockpit/components/SoftkeyBar';
 import { ScreenLayout } from '../../../components/layout/ScreenLayout';
 import { PFDAnnunciationBar } from './PFDAnnunciationBar';
+import { PFDMenu } from './PFDMenu';
 
 const PFD: React.FC = () => {
   const { pfdSoftkeyStack } = usePFDContext();
@@ -22,6 +23,8 @@ const PFD: React.FC = () => {
           <AirSpeedTape />
           <AttitudeIndicator />
           <AltimeterTape />
+
+          <PFDMenu />
 
           {pfdSoftkeyStack.length > 0 && (
             <div
