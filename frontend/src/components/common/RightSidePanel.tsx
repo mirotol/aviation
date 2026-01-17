@@ -39,6 +39,8 @@ export const RightSidePanel: React.FC<{ unitType?: 'PFD' | 'MFD' }> = ({ unitTyp
     nextMfdPageSelection,
     prevMfdPageSelection,
     toggleMfdModal,
+    onMfdRangeKnob,
+    onMfdJoystickPush,
   } = mfdContext;
 
   const currentGroup = mfdModalPage ?? mfdPageGroup;
@@ -106,9 +108,22 @@ export const RightSidePanel: React.FC<{ unitType?: 'PFD' | 'MFD' }> = ({ unitTyp
         <Knob
           id={`${prefix}RANGE`}
           label="RANGE"
-          onOuterChange={(dir, id) => console.log(`${id} Outer ${dir}`)}
-          onInnerChange={(dir, id) => console.log(`${id} Inner ${dir}`)}
-          onPush={(id) => console.log(`${id} Pushed`)}
+          isSingle={true}
+          onOuterChange={(dir) => {
+            if (unitType === 'MFD' && onMfdRangeKnob) {
+              onMfdRangeKnob(dir);
+            }
+          }}
+          onInnerChange={(dir) => {
+            if (unitType === 'MFD' && onMfdRangeKnob) {
+              onMfdRangeKnob(dir);
+            }
+          }}
+          onPush={() => {
+            if (unitType === 'MFD' && onMfdJoystickPush) {
+              onMfdJoystickPush();
+            }
+          }}
         />
         <div className="button-grid-6">
           {['DIR', 'MENU', 'FPL', 'PROC', 'CLR', 'ENT'].map((btn) => (

@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useState, useLayoutEffect } from 'react';
+import React, { useMemo, useRef, useState, useLayoutEffect, useEffect } from 'react';
 import Map, { Source, Layer } from 'react-map-gl/maplibre';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import { useFlightData } from '../../playback/hooks/useFlightData';
@@ -6,6 +6,7 @@ import { useFlightPlan } from '../../../hooks/useFlightPlan';
 import { useNearbyNavData } from '../../../hooks/useNearbyNavData';
 import { flightPlanToGeoJSON } from '../../../utils/navDataUtils';
 import { shouldShowNavPoint } from '../../../utils/navDisplayPolicy';
+import { usePageContext } from '../pages/PageContext';
 import '../styles/NavigationDisplay.css';
 import mapStyleJson from '../../../styles/mapStyle.json';
 import type { StyleSpecification, VectorSourceSpecification } from 'maplibre-gl';
@@ -48,6 +49,7 @@ const COMPASS_SCALE = 0.75;
 const NavigationDisplay: React.FC<NavigationDisplayProps> = ({ initialRangeNM = 20 }) => {
   const snapshot = useFlightData();
   const { flightPlan } = useFlightPlan();
+  const { setOnMfdRangeKnob, setOnMfdJoystickPush } = usePageContext();
 
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -126,6 +128,19 @@ const NavigationDisplay: React.FC<NavigationDisplayProps> = ({ initialRangeNM = 
   const handleRangeChange = (delta: number) => {
     setRangeIndex((prev) => Math.min(Math.max(prev + delta, 0), RANGES.length - 1));
   };
+
+  useEffect(() => {
+    setOnMfdRangeKnob(() => (dir: 'inc' | 'dec') => {
+      handleRangeChange(dir === 'inc' ? 1 : -1);
+    });
+    setOnMfdJoystickPush(() => () => {
+      console.log('MFD Range Joystick Pushed - Pan/Scroll toggle placeholder');
+    });
+    return () => {
+      setOnMfdRangeKnob(undefined);
+      setOnMfdJoystickPush(undefined);
+    };
+  }, [setOnMfdRangeKnob, setOnMfdJoystickPush, rangeIndex]); // re-bind so it has fresh handleRangeChange/rangeIndex if needed
 
   const handleBrightnessChange = (delta: number) => {
     setBrightness((prev) => Math.min(Math.max(prev + delta, 20), 100));
@@ -405,17 +420,6 @@ const NavigationDisplay: React.FC<NavigationDisplayProps> = ({ initialRangeNM = 
 
         <div className="range-controls">
           <div className="control-group">
-            <button onClick={() => handleRangeChange(-1)} disabled={rangeIndex === 0}>
-              RNG −
-            </button>
-            <button
-              onClick={() => handleRangeChange(1)}
-              disabled={rangeIndex === RANGES.length - 1}
-            >
-              RNG +
-            </button>
-          </div>
-          <div className="control-group">
             <button onClick={() => handleBrightnessChange(-5)}>BRT −</button>
             <button onClick={() => handleBrightnessChange(5)}>BRT +</button>
           </div>
@@ -462,7 +466,6 @@ const NavigationDisplay: React.FC<NavigationDisplayProps> = ({ initialRangeNM = 
                             dominantBaseline="middle"
                             fill="#fff"
                             fontWeight="bold"
-                            fontFamily="'Roboto Mono', 'JetBrains Mono', monospace"
                           >
                             <tspan fontSize="18">{rangeNM}</tspan>
                             <tspan

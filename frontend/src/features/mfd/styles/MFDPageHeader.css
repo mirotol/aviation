@@ -5,7 +5,6 @@
   padding: 0 40px;
   background: #000;
   color: #fff;
-  font-family: 'JetBrains Mono', monospace;
   box-sizing: border-box;
 }
 
@@ -64,7 +63,7 @@
 }
 
 .page-title {
-  color: var(--text-bright);
+  color: var(--universal-cyan);
   font-size: 20px;
   font-weight: bold;
   text-transform: uppercase;

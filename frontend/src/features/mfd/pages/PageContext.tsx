@@ -88,6 +88,12 @@ interface PageStateContextType {
   /** Clear stack and set a specific root layer */
   resetSoftkeys: (root: SoftkeyLayer) => void;
 
+  // Knob Handlers
+  onMfdRangeKnob?: (dir: 'inc' | 'dec') => void;
+  setOnMfdRangeKnob: (handler: ((dir: 'inc' | 'dec') => void) | undefined) => void;
+  onMfdJoystickPush?: () => void;
+  setOnMfdJoystickPush: (handler: (() => void) | undefined) => void;
+
   // Current Visible Softkeys
   /** Get the 12 softkeys that should be rendered right now */
   getVisibleSoftkeys: () => SoftkeyLayer;
@@ -288,6 +294,9 @@ export const PageProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const [mfdSoftkeyStack, setMfdSoftkeyStack] = useState<SoftkeyLayer[]>([]);
 
+  const [onMfdRangeKnob, setOnMfdRangeKnob] = useState<((dir: 'inc' | 'dec') => void) | undefined>();
+  const [onMfdJoystickPush, setOnMfdJoystickPush] = useState<(() => void) | undefined>();
+
   /**
    * The list of major page groups that can be cycled using the outer knob on MFD.
    */
@@ -405,6 +414,10 @@ export const PageProvider: React.FC<{ children: React.ReactNode }> = ({ children
         pushSoftkeys,
         popSoftkeys,
         resetSoftkeys,
+        onMfdRangeKnob,
+        setOnMfdRangeKnob,
+        onMfdJoystickPush,
+        setOnMfdJoystickPush,
         getVisibleSoftkeys,
       }}
     >

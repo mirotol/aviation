@@ -1,6 +1,5 @@
 .info-panel-container {
   color: var(--text-main);
-  font-family: 'Inter', 'Segoe UI', sans-serif;
 }
 
 .info-panel-header {
@@ -120,7 +119,6 @@
 .data-value {
   color: var(--primary-color);
   font-size: 1.1rem;
-  font-family: monospace;
 }
 
 .empty-state {
@@ -150,7 +148,6 @@
   overflow-y: auto;
   max-height: 450px; /* ~20 lines of telemetry */
   line-height: 1.4;
-  font-family: 'JetBrains Mono', 'Fira Code', monospace;
 }
 
 /* Custom scrollbar for that sleek aviation look */

@@ -31,7 +31,6 @@ const PFD: React.FC = () => {
                 bottom: 10,
                 left: 10,
                 color: 'var(--aviation-green)',
-                fontFamily: 'JetBrains Mono, monospace',
                 fontSize: '12px',
                 zIndex: 100,
                 background: 'rgba(0,0,0,0.7)',

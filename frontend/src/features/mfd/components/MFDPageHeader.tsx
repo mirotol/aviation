@@ -21,7 +21,7 @@ export const MFDPageHeader: React.FC<MFDPageHeaderProps> = ({ title, pageIndex, 
 
   return (
     <div className="mfd-page-header">
-      <div className="header-section left">{groupLabel} INFO</div>
+      <div className="header-section left">NAV INFO</div>
 
       <div className="header-section center">
         {/* TOP: NAV DATA */}
@@ -49,7 +49,9 @@ export const MFDPageHeader: React.FC<MFDPageHeaderProps> = ({ title, pageIndex, 
 
         {/* BOTTOM: PAGE INFO */}
         <div className="center-row bottom">
-          <div className="page-title">{groupLabel} – {title}</div>
+          <div className="page-title">
+            {groupLabel} – {title}
+          </div>
         </div>
       </div>
 

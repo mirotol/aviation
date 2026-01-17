@@ -50,7 +50,6 @@
 
 .soft-key-button .button-label {
   color: var(--text-bright);
-  font-family: 'JetBrains Mono', monospace;
   font-size: 11px;
   font-weight: bold;
   text-align: center;

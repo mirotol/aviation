@@ -5,6 +5,7 @@ interface KnobProps {
   id?: string;
   size?: 'small' | 'large';
   label?: string;
+  isSingle?: boolean;
   onOuterChange?: (direction: 'inc' | 'dec', id?: string) => void;
   onInnerChange?: (direction: 'inc' | 'dec', id?: string) => void;
   onPush?: (id?: string) => void;
@@ -14,6 +15,7 @@ export const Knob: React.FC<KnobProps> = ({
   id,
   size = 'large',
   label,
+  isSingle = false,
   onOuterChange,
   onInnerChange,
   onPush,
@@ -52,27 +54,29 @@ export const Knob: React.FC<KnobProps> = ({
       >
         <div className="knob-indicator outer" />
 
-        <div
-          className={`inner-ring ${hoverRing === 'inner' ? 'hover' : ''}`}
-          onMouseEnter={() => setHoverRing('inner')}
-          onMouseLeave={() => setHoverRing('outer')}
-          onWheel={(e) => {
-            e.stopPropagation();
-            handleWheel(e, 'inner');
-          }}
-          onClick={(e) => {
-            e.stopPropagation();
-            onPush?.(id);
-          }}
-          style={
-            {
-              '--inner-rotation': `${innerRotation}deg`,
-              '--knob-rotation': `${outerRotation}deg`,
-            } as React.CSSProperties
-          }
-        >
-          <div className="knob-indicator inner" />
-        </div>
+        {!isSingle && (
+          <div
+            className={`inner-ring ${hoverRing === 'inner' ? 'hover' : ''}`}
+            onMouseEnter={() => setHoverRing('inner')}
+            onMouseLeave={() => setHoverRing('outer')}
+            onWheel={(e) => {
+              e.stopPropagation();
+              handleWheel(e, 'inner');
+            }}
+            onClick={(e) => {
+              e.stopPropagation();
+              onPush?.(id);
+            }}
+            style={
+              {
+                '--inner-rotation': `${innerRotation}deg`,
+                '--knob-rotation': `${outerRotation}deg`,
+              } as React.CSSProperties
+            }
+          >
+            <div className="knob-indicator inner" />
+          </div>
+        )}
       </div>
 
       {label && <div className="knob-label">{label}</div>}

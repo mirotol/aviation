@@ -6,7 +6,6 @@
   position: relative;
   overflow: hidden;
   color: var(--text-bright);
-  font-family: var(--font-family);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -69,7 +68,6 @@
 }
 
 .stat {
-  font-family: var(--font-family);
   font-size: 14px;
   color: var(--aviation-green);
   font-weight: bold;
@@ -82,7 +80,6 @@
 .stat .value {
   color: var(--text-bright);
   margin-left: 8px;
-  font-family: 'JetBrains Mono', 'Courier New', Courier, monospace;
   font-size: 18px;
   display: inline-block;
   min-width: 60px;
@@ -110,7 +107,6 @@
   border: 1px solid var(--border-color);
   color: var(--aviation-green);
   padding: 8px 12px;
-  font-family: var(--font-family);
   font-weight: bold;
   cursor: pointer;
   border-radius: 4px;
@@ -163,7 +159,6 @@
 
 .compass-label {
   fill: var(--text-bright);
-  font-family: var(--font-family);
   font-weight: 700;
   font-size: 16px;
   text-anchor: middle;
@@ -223,7 +218,6 @@
 
 .range-ring-label {
   fill: var(--text-bright);
-  font-family: 'JetBrains Mono', monospace;
   font-size: 14px; /* Slightly larger */
   text-anchor: middle;
   font-weight: 900;

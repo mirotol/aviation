@@ -1,4 +1,8 @@
 :root {
+  /* Universal Colors, used on all instruments */
+  --universal-magenta: #ff00ff;
+  --universal-cyan: #06eded;
+
   /* Core Brand Colors */
   --primary-color: #4a90e2;
   /* Navigation / Active Blue */
@@ -41,18 +45,13 @@
 
   /* Map Icon Colors*/
   --ownship-color: #00eeff;
-  --universal-magenta: #ff00ff;
   --vor-color: #0000ff;
   --default-waypoint-color: #00ffff;
   --waypoint-stroke-color: #000000;
   --waypoint-label-color: #ffffff;
   --waypoint-label-halo: #000000;
 
-  font-family:
-    'Inter',
-    system-ui,
-    -apple-system,
-    sans-serif;
+  font-family: 'Roboto Mono', 'JetBrains Mono', monospace;
   color: var(--text-main);
   background-color: var(--bg-black);
 }
@@ -60,6 +59,7 @@
 body {
   margin: 0;
   padding: 0;
+  font-family: 'Roboto Mono', 'JetBrains Mono', monospace;
   background-color: var(--bg-black);
   color: var(--text-main);
   overflow: hidden;
@@ -94,7 +94,6 @@ button:hover {
   background: var(--bg-surface);
   border: 1px solid var(--border-color);
   overflow: hidden;
-  font-family: 'JetBrains Mono', monospace;
   font-variant-numeric: tabular-nums; /* Forces identical width for numbers */
 }
 
