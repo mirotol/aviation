@@ -84,7 +84,7 @@
   align-items: center;
   gap: 15px;
   color: #fff;
-  font-size: 0.75rem;
+  font-size: 0.8rem;
   text-transform: uppercase;
   letter-spacing: 1.5px;
 }
@@ -107,7 +107,7 @@
   padding: 8px 0;
   min-width: 62px;
   cursor: pointer;
-  font-size: 0.75rem;
+  font-size: 0.8rem;
   font-family: inherit;
   font-weight: 600;
   text-transform: uppercase;

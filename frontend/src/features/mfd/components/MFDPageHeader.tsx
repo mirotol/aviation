@@ -1,6 +1,7 @@
 import React from 'react';
 import { useWebSocket } from '../../../hooks/useWebSocket';
 import { usePageContext } from '../pages/PageContext';
+import { formatMetric } from '../../../utils/metricUtils';
 import '../styles/MFDPageHeader.css';
 
 interface MFDPageHeaderProps {
@@ -13,9 +14,8 @@ export const MFDPageHeader: React.FC<MFDPageHeaderProps> = ({ title, pageIndex, 
   const { snapshot } = useWebSocket();
   const { mfdPageGroup, mfdModalPage } = usePageContext();
 
-  const gs = snapshot ? Math.round(snapshot.airSpeed.speed) : 0;
-  const trk = snapshot ? Math.round(snapshot.attitude.yaw) : 0;
-  const trkStr = trk.toString().padStart(3, '0');
+  const gs = snapshot ? Math.round(snapshot.airSpeed.speed) : null;
+  const trk = snapshot ? Math.round(snapshot.attitude.yaw) : null;
 
   const groupLabel = mfdModalPage || mfdPageGroup;
 
@@ -28,22 +28,22 @@ export const MFDPageHeader: React.FC<MFDPageHeaderProps> = ({ title, pageIndex, 
         <div className="center-row top">
           <div className="nav-metric">
             <span className="nav-label">GS</span>
-            <span className="nav-value">{gs}KT</span>
+            <span className="nav-value">{formatMetric(gs, 'KT', 0)}</span>
           </div>
 
           <div className="nav-metric">
             <span className="nav-label">DTK</span>
-            <span className="nav-value">273°</span>
+            <span className="nav-value">{formatMetric(null, '°', 3)}</span>
           </div>
 
           <div className="nav-metric">
             <span className="nav-label">TRK</span>
-            <span className="nav-value">{trkStr}°</span>
+            <span className="nav-value">{formatMetric(trk, '°', 3)}</span>
           </div>
 
           <div className="nav-metric">
             <span className="nav-label">ETE</span>
-            <span className="nav-value">00:18</span>
+            <span className="nav-value">{formatMetric(null, '', 5, '_', '__:__')}</span>
           </div>
         </div>
 

@@ -17,7 +17,7 @@
 .bezel-button.small {
   width: 38px;
   height: 25px;
-  font-size: 11px;
+  font-size: 13px;
 }
 
 .bezel-button svg {
@@ -50,7 +50,7 @@
 
 .soft-key-button .button-label {
   color: var(--text-bright);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: bold;
   text-align: center;
 }

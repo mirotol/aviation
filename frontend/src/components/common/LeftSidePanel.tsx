@@ -38,7 +38,7 @@ export const LeftSidePanel: React.FC<{ unitType?: 'PFD' | 'MFD' }> = ({ unitType
   return (
     <div className="side-panel left-side-panel">
       <div className="side-panel-top-group">
-        <Knob id={`${prefix}VOL_SQ`} label="VOL/SQ" onPush={(id) => console.log(`${id} Pushed`)} />
+        <Knob id={`${prefix}VOL_SQ`} label="VOL/ID" onPush={(id) => console.log(`${id} Pushed`)} />
         <BezelButton
           id={`${prefix}NAV_SWAP`}
           label={<DoubleArrowIcon />}

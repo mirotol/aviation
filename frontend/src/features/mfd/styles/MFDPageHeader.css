@@ -117,3 +117,12 @@
   font-size: 14px;
   font-weight: bold;
 }
+
+.nav-value-main {
+  font-size: 14px;
+}
+
+.nav-value-unit {
+  font-size: 11px;
+  margin-left: 2px;
+}
