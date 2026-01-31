@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useCallback, useMemo } from 'react';
 import { NavigationMapPage, TrafficMapPage, PlaceholderPage } from './PageDefinitions';
+import { ActiveFlightPlan } from './ActiveFlightPlan';
 
 /**
  * MFD Page Group identifiers.
@@ -93,6 +94,15 @@ interface PageStateContextType {
   setOnMfdRangeKnob: (handler: ((dir: 'inc' | 'dec') => void) | undefined) => void;
   onMfdJoystickPush?: () => void;
   setOnMfdJoystickPush: (handler: (() => void) | undefined) => void;
+
+  onMfdFmsOuter?: (dir: 'inc' | 'dec') => void;
+  setOnMfdFmsOuter: (handler: ((dir: 'inc' | 'dec') => void) | undefined) => void;
+  onMfdFmsInner?: (dir: 'inc' | 'dec') => void;
+  setOnMfdFmsInner: (handler: ((dir: 'inc' | 'dec') => void) | undefined) => void;
+  onMfdEnt?: () => void;
+  setOnMfdEnt: (handler: (() => void) | undefined) => void;
+  onMfdClr?: () => void;
+  setOnMfdClr: (handler: (() => void) | undefined) => void;
 
   // Current Visible Softkeys
   /** Get the 12 softkeys that should be rendered right now */
@@ -241,7 +251,7 @@ export const MFD_PAGES: Record<MFDPageGroup, PageDefinition[]> = {
     {
       id: 'FPL_ACTIVE',
       name: 'Active Flight Plan',
-      component: () => <PlaceholderPage name="Active Flight Plan" />,
+      component: ActiveFlightPlan,
     },
     {
       id: 'FPL_CATALOG',
@@ -294,8 +304,15 @@ export const PageProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const [mfdSoftkeyStack, setMfdSoftkeyStack] = useState<SoftkeyLayer[]>([]);
 
-  const [onMfdRangeKnob, setOnMfdRangeKnob] = useState<((dir: 'inc' | 'dec') => void) | undefined>();
+  const [onMfdRangeKnob, setOnMfdRangeKnob] = useState<
+    ((dir: 'inc' | 'dec') => void) | undefined
+  >();
   const [onMfdJoystickPush, setOnMfdJoystickPush] = useState<(() => void) | undefined>();
+
+  const [onMfdFmsOuter, setOnMfdFmsOuter] = useState<((dir: 'inc' | 'dec') => void) | undefined>();
+  const [onMfdFmsInner, setOnMfdFmsInner] = useState<((dir: 'inc' | 'dec') => void) | undefined>();
+  const [onMfdEnt, setOnMfdEnt] = useState<(() => void) | undefined>();
+  const [onMfdClr, setOnMfdClr] = useState<(() => void) | undefined>();
 
   /**
    * The list of major page groups that can be cycled using the outer knob on MFD.
@@ -418,6 +435,14 @@ export const PageProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setOnMfdRangeKnob,
         onMfdJoystickPush,
         setOnMfdJoystickPush,
+        onMfdFmsOuter,
+        setOnMfdFmsOuter,
+        onMfdFmsInner,
+        setOnMfdFmsInner,
+        onMfdEnt,
+        setOnMfdEnt,
+        onMfdClr,
+        setOnMfdClr,
         getVisibleSoftkeys,
       }}
     >

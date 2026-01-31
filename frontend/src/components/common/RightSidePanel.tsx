@@ -41,6 +41,10 @@ export const RightSidePanel: React.FC<{ unitType?: 'PFD' | 'MFD' }> = ({ unitTyp
     toggleMfdModal,
     onMfdRangeKnob,
     onMfdJoystickPush,
+    onMfdFmsOuter,
+    onMfdFmsInner,
+    onMfdEnt,
+    onMfdClr,
   } = mfdContext;
 
   const { pfdMenuMode, onPfdFmsOuter, onPfdFmsInner, onPfdEnt, onPfdClr, togglePfdMenu } =
@@ -51,7 +55,9 @@ export const RightSidePanel: React.FC<{ unitType?: 'PFD' | 'MFD' }> = ({ unitTyp
 
   const handleFmsOuter = (dir: 'inc' | 'dec') => {
     if (unitType === 'MFD') {
-      if (pageDef?.onOuterKnob) {
+      if (onMfdFmsOuter) {
+        onMfdFmsOuter(dir);
+      } else if (pageDef?.onOuterKnob) {
         pageDef.onOuterKnob(dir);
       } else {
         if (dir === 'inc') nextMfdPageGroup();
@@ -66,7 +72,9 @@ export const RightSidePanel: React.FC<{ unitType?: 'PFD' | 'MFD' }> = ({ unitTyp
 
   const handleFmsInner = (dir: 'inc' | 'dec') => {
     if (unitType === 'MFD') {
-      if (pageDef?.onInnerKnob) {
+      if (onMfdFmsInner) {
+        onMfdFmsInner(dir);
+      } else if (pageDef?.onInnerKnob) {
         pageDef.onInnerKnob(dir);
       } else {
         if (dir === 'inc') nextMfdPageSelection();
@@ -83,8 +91,13 @@ export const RightSidePanel: React.FC<{ unitType?: 'PFD' | 'MFD' }> = ({ unitTyp
     if (unitType === 'MFD') {
       if (btn === 'FPL') toggleMfdModal('FPL');
       else if (btn === 'PROC') toggleMfdModal('PROC');
-      else if (btn === 'ENT' && pageDef?.onEnt) pageDef.onEnt();
-      else if (btn === 'CLR' && pageDef?.onClr) pageDef.onClr();
+      else if (btn === 'ENT') {
+        if (onMfdEnt) onMfdEnt();
+        else if (pageDef?.onEnt) pageDef.onEnt();
+      } else if (btn === 'CLR') {
+        if (onMfdClr) onMfdClr();
+        else if (pageDef?.onClr) pageDef.onClr();
+      }
     } else {
       if (btn === 'MENU') togglePfdMenu('SETUP');
       else if (btn === 'DIR') togglePfdMenu('DIRECT_TO');
