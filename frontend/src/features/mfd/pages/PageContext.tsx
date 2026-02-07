@@ -103,6 +103,8 @@ interface PageStateContextType {
   setOnMfdEnt: (handler: (() => void) | undefined) => void;
   onMfdClr?: () => void;
   setOnMfdClr: (handler: (() => void) | undefined) => void;
+  onMfdCrsr?: () => void;
+  setOnMfdCrsr: (handler: (() => void) | undefined) => void;
 
   // Current Visible Softkeys
   /** Get the 12 softkeys that should be rendered right now */
@@ -313,6 +315,7 @@ export const PageProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [onMfdFmsInner, setOnMfdFmsInner] = useState<((dir: 'inc' | 'dec') => void) | undefined>();
   const [onMfdEnt, setOnMfdEnt] = useState<(() => void) | undefined>();
   const [onMfdClr, setOnMfdClr] = useState<(() => void) | undefined>();
+  const [onMfdCrsr, setOnMfdCrsr] = useState<(() => void) | undefined>();
 
   /**
    * The list of major page groups that can be cycled using the outer knob on MFD.
@@ -443,6 +446,8 @@ export const PageProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setOnMfdEnt,
         onMfdClr,
         setOnMfdClr,
+        onMfdCrsr,
+        setOnMfdCrsr,
         getVisibleSoftkeys,
       }}
     >

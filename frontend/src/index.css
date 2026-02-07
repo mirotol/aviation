@@ -19,6 +19,7 @@
   --bg-black: #0a0b0d; /* Deepest shadows */
   --bg-dark: #141619; /* Main panel background */
   --bg-surface: #1c1f24; /* Card / Component background */
+  --bg-popup: #2a2d32; /* Popup / Modal background (lighter gray) */
   --border-color: #2d3238; /* Subtle panel borders */
   --panel-gray: #111111;
   --bezel-gray: #222222;

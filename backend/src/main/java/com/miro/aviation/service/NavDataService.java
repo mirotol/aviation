@@ -154,19 +154,50 @@ public class NavDataService {
 
     /**
      * Searches for navigation points by identifier or name.
+     * Searches both airports and navaids.
      *
-     * @param query The search string (e.g. "EFHK")
-     * @return List of matching {@link NavPoint} objects
+     * @param query The search string (e.g. "EFHK", "EFTP")
+     * @return List of matching {@link NavPoint} objects (airports and navaids)
      */
     public List<NavPoint> search(String query) {
+        logger.debug("Search called with query: '{}'", query);
+
         if (query == null || query.isBlank()) {
+            logger.debug("Query is null or blank, returning empty list");
             return List.of();
         }
         String upperQuery = query.toUpperCase();
-        return airports.stream()
-                .filter(a -> a.getIdentifier().toUpperCase().contains(upperQuery))
+        logger.debug("Uppercase query: '{}'", upperQuery);
+
+        List<NavPoint> results = new ArrayList<>();
+
+        // Search airports
+        long airportMatches = airports.stream()
+                .filter(a -> a.getIdentifier() != null && a.getIdentifier().toUpperCase().contains(upperQuery))
+                .peek(results::add)
+                .count();
+        logger.debug("Found {} airport matches", airportMatches);
+
+        // Search navaids
+        long navaidMatches = navaids.stream()
+                .filter(n -> n.getIdentifier() != null && n.getIdentifier().toUpperCase().contains(upperQuery))
+                .peek(results::add)
+                .count();
+        logger.debug("Found {} navaid matches", navaidMatches);
+
+        List<NavPoint> limitedResults = results.stream()
                 .limit(20)
                 .collect(Collectors.toList());
+
+        logger.info("Search for '{}' returned {} results (limited to 20)", query, limitedResults.size());
+        if (!limitedResults.isEmpty()) {
+            logger.debug("First result: ident={}, type={}, name={}",
+                limitedResults.get(0).getIdentifier(),
+                limitedResults.get(0).getType(),
+                limitedResults.get(0).getName());
+        }
+
+        return limitedResults;
     }
 
     /**

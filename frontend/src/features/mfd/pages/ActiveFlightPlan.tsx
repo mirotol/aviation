@@ -1,72 +1,166 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { usePageContext } from './PageContext';
 import { useFlightPlan } from '../../../hooks/useFlightPlan';
 import { NavPoint } from '../../../providers/WebSocketContext';
+import { WaypointInfoPopup } from '../components/WaypointInfoPopup';
+import { DuplicateSelectionPopup } from '../components/DuplicateSelectionPopup';
 import '../styles/ActiveFlightPlan.css';
 
 const CHARS = ' ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
 
+type ColumnType = 'ident' | 'runway' | 'dtk' | 'dis' | 'alt';
+
 export const ActiveFlightPlan: React.FC = () => {
-  const { setOnMfdFmsOuter, setOnMfdFmsInner, setOnMfdEnt, setOnMfdClr, toggleMfdModal } =
-    usePageContext();
+  const {
+    setOnMfdFmsOuter,
+    setOnMfdFmsInner,
+    setOnMfdEnt,
+    setOnMfdClr,
+    setOnMfdCrsr,
+    toggleMfdModal,
+  } = usePageContext();
   const { flightPlan, updateFlightPlan } = useFlightPlan();
 
   const [focusIndex, setFocusIndex] = useState<number>(0);
-  const [isAdding, setIsAdding] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [charIndex, setCharIndex] = useState(0); // Which character of the 4-5 char ident we are editing
+  const [focusColumn, setFocusColumn] = useState<ColumnType>('ident');
+  const [cursorActive, setCursorActive] = useState(false);
+  const [lastCursorPosition, setLastCursorPosition] = useState<{ row: number; col: ColumnType }>({
+    row: 0,
+    col: 'ident',
+  });
+  const [showWaypointInfo, setShowWaypointInfo] = useState(false);
+  const [showDuplicateSelection, setShowDuplicateSelection] = useState(false);
+  const [waypointSearchQuery, setWaypointSearchQuery] = useState('     '); // 5 spaces for waypoint info popup
+  const [waypointCharIndex, setWaypointCharIndex] = useState(0); // Which character we're editing in waypoint popup
   const [searchResults, setSearchResults] = useState<NavPoint[]>([]);
   const [selectedResultIndex, setSelectedResultIndex] = useState(0);
 
-  const totalRows = (flightPlan?.length || 0) + 1; // Always waypoints + 1 placeholder
+  // Index mapping:
+  // - Origin (runway): always index 0
+  // - Enroute waypoints: indices 1 to flightPlan.length - 2 (if they exist)
+  // - Enroute placeholder: next available index after existing enroute waypoints
+  // - Destination: last index
+
+  const hasFlightPlan = flightPlan && flightPlan.length > 0;
+  const hasMultiplePoints = flightPlan && flightPlan.length > 1;
+
+  const originIndex = 0;
+  const enrouteStartIndex = 1;
+  const enrouteEndIndex = hasFlightPlan ? flightPlan.length - 1 : 1;
+  const enroutePlaceholderIndex = enrouteEndIndex;
+  const destinationIndex = hasFlightPlan ? flightPlan.length : 1;
+
+  const totalRows = destinationIndex + 1;
 
   const origin = flightPlan?.[0]?.ident || '----';
   const destination =
     flightPlan?.length && flightPlan.length > 1 ? flightPlan[flightPlan.length - 1].ident : '----';
 
-  // Reset focus when entering/leaving adding mode
+  // Helper to check if a cell is focused
+  const isCellFocused = (rowIndex: number, column: ColumnType) => {
+    return (
+      cursorActive &&
+      focusIndex === rowIndex &&
+      focusColumn === column &&
+      !showWaypointInfo &&
+      !showDuplicateSelection
+    );
+  };
+
+  // Save cursor position when cursor is active
   useEffect(() => {
-    if (isAdding) {
-      setSearchQuery('     '); // 5 spaces
-      setCharIndex(0);
-      setSearchResults([]);
-      setSelectedResultIndex(0);
+    if (cursorActive) {
+      setLastCursorPosition({ row: focusIndex, col: focusColumn });
     }
-  }, [isAdding]);
+  }, [focusIndex, focusColumn, cursorActive]);
+
+  // Reset waypoint info when opening
+  useEffect(() => {
+    if (showWaypointInfo && !showDuplicateSelection) {
+      // Check if we're on an existing waypoint
+      const isOnExistingWaypoint = hasFlightPlan && focusIndex < (flightPlan?.length || 0);
+      if (isOnExistingWaypoint) {
+        // Pre-fill with existing waypoint ident
+        const currentWaypoint = flightPlan![focusIndex];
+        setWaypointSearchQuery(currentWaypoint.ident.padEnd(5, ' '));
+        setSearchResults([currentWaypoint]);
+        setSelectedResultIndex(0);
+      } else {
+        // Empty for new waypoint
+        setWaypointSearchQuery('     ');
+        setSearchResults([]);
+        setSelectedResultIndex(0);
+      }
+      setWaypointCharIndex(0);
+    }
+  }, [showWaypointInfo, showDuplicateSelection, hasFlightPlan, focusIndex, flightPlan]);
 
   const handleSearch = useCallback(async (query: string) => {
     const trimmed = query.trim();
+    console.log('[FPL Search] Query:', query, 'Trimmed:', trimmed);
+
     if (trimmed.length === 0) {
+      console.log('[FPL Search] Empty query, clearing results');
       setSearchResults([]);
       return;
     }
     try {
-      const response = await fetch(`/api/nav/search?q=${trimmed}`);
+      const url = `/api/nav/search?q=${trimmed}`;
+      console.log('[FPL Search] Fetching:', url);
+      const response = await fetch(url);
+      console.log('[FPL Search] Response status:', response.status, response.ok);
+      console.log('[FPL Search] Response headers:', response.headers.get('content-type'));
+
+      // Get the response text first to see what we're actually getting
+      const responseText = await response.text();
+      console.log('[FPL Search] Response text:', responseText);
+
       if (response.ok) {
-        const data = await response.json();
-        setSearchResults(data);
-        setSelectedResultIndex(0);
+        try {
+          const data = JSON.parse(responseText);
+          console.log('[FPL Search] Parsed data:', data);
+          console.log('[FPL Search] Number of results:', data.length);
+          setSearchResults(data);
+          setSelectedResultIndex(0);
+        } catch (parseError) {
+          console.error('[FPL Search] JSON parse error:', parseError);
+          console.error('[FPL Search] Failed to parse response text:', responseText);
+        }
+      } else {
+        console.error('[FPL Search] Response not OK:', response.status, response.statusText);
+        console.error('[FPL Search] Response body:', responseText);
       }
     } catch (error) {
-      console.error('Search failed', error);
+      console.error('[FPL Search] Failed', error);
     }
   }, []);
 
   useEffect(() => {
-    if (isAdding) {
-      handleSearch(searchQuery);
+    if (showWaypointInfo && !showDuplicateSelection) {
+      handleSearch(waypointSearchQuery);
     }
-  }, [searchQuery, isAdding, handleSearch]);
+  }, [waypointSearchQuery, showWaypointInfo, showDuplicateSelection, handleSearch]);
 
   useEffect(() => {
     setOnMfdFmsOuter(() => (dir: 'inc' | 'dec') => {
-      if (isAdding) {
-        // Move cursor in the input field
-        setCharIndex((prev) => {
+      if (!cursorActive && !showWaypointInfo && !showDuplicateSelection) return;
+
+      if (showDuplicateSelection) {
+        // Navigate duplicate list
+        if (searchResults.length > 1) {
+          setSelectedResultIndex((prev) => {
+            const delta = dir === 'inc' ? 1 : -1;
+            return (prev + delta + searchResults.length) % searchResults.length;
+          });
+        }
+      } else if (showWaypointInfo) {
+        // Move cursor in the waypoint search field
+        setWaypointCharIndex((prev) => {
           const delta = dir === 'inc' ? 1 : -1;
           return Math.max(0, Math.min(4, prev + delta));
         });
       } else {
+        // Navigate flight plan rows
         setFocusIndex((prev) => {
           const delta = dir === 'inc' ? 1 : -1;
           return (prev + delta + totalRows) % totalRows;
@@ -75,64 +169,104 @@ export const ActiveFlightPlan: React.FC = () => {
     });
 
     setOnMfdFmsInner(() => (dir: 'inc' | 'dec') => {
-      if (isAdding) {
-        if (searchResults.length > 0) {
-          setSelectedResultIndex((prev) => {
-            const delta = dir === 'inc' ? 1 : -1;
-            return (prev + delta + searchResults.length) % searchResults.length;
-          });
+      if (!cursorActive && !showWaypointInfo && !showDuplicateSelection) return;
+
+      if (showDuplicateSelection) {
+        // Do nothing - inner knob doesn't do anything in duplicate selection
+        return;
+      } else if (showWaypointInfo) {
+        // Cycle characters in the waypoint search field
+        setWaypointSearchQuery((prev) => {
+          const chars = prev.split('');
+          const currentChar = chars[waypointCharIndex];
+          const idx = CHARS.indexOf(currentChar);
+          const delta = dir === 'inc' ? 1 : -1;
+          const nextIdx = (idx + delta + CHARS.length) % CHARS.length;
+          chars[waypointCharIndex] = CHARS[nextIdx];
+          return chars.join('');
+        });
+      } else {
+        // Open waypoint info when on ident column, otherwise move between columns
+        if (focusColumn === 'ident') {
+          setShowWaypointInfo(true);
         } else {
-          setSearchQuery((prev) => {
-            const chars = prev.split('');
-            const currentCol = charIndex;
-            const currentChar = chars[currentCol];
-            const idx = CHARS.indexOf(currentChar);
+          // Inner knob moves between columns
+          const columns: ColumnType[] = ['ident', 'dtk', 'dis', 'alt'];
+          setFocusColumn((prev) => {
+            const currentIdx = columns.indexOf(prev);
             const delta = dir === 'inc' ? 1 : -1;
-            const nextIdx = (idx + delta + CHARS.length) % CHARS.length;
-            chars[currentCol] = CHARS[nextIdx];
-            return chars.join('');
+            const nextIdx = (currentIdx + delta + columns.length) % columns.length;
+            return columns[nextIdx];
           });
         }
-      } else {
-        // Inner knob can also scroll in FPL
-        setFocusIndex((prev) => {
-          const delta = dir === 'inc' ? 1 : -1;
-          return (prev + delta + totalRows) % totalRows;
-        });
       }
     });
 
     setOnMfdEnt(() => () => {
-      if (isAdding) {
-        if (searchResults.length > 0) {
-          const selected = searchResults[selectedResultIndex];
+      if (!cursorActive && !showWaypointInfo && !showDuplicateSelection) return;
+
+      if (showDuplicateSelection) {
+        // Accept selected duplicate and go back to waypoint info
+        setShowDuplicateSelection(false);
+        // The selected result is already in searchResults[selectedResultIndex]
+      } else if (showWaypointInfo) {
+        const trimmedQuery = waypointSearchQuery.trim();
+
+        if (trimmedQuery.length === 0) {
+          // Empty query, close popup
+          setShowWaypointInfo(false);
+        } else if (searchResults.length > 1) {
+          // Multiple results, show duplicate selection popup
+          setShowDuplicateSelection(true);
+        } else if (searchResults.length === 1) {
+          // Single result, accept it
+          const selected = searchResults[0];
           const newPlan = [...(flightPlan || [])];
-          // Insert at focusIndex
-          newPlan.splice(focusIndex, 0, selected);
+
+          // Check if we're editing existing waypoint or adding new
+          const isOnExistingWaypoint = hasFlightPlan && focusIndex < (flightPlan?.length || 0);
+          if (isOnExistingWaypoint) {
+            // Replace existing waypoint
+            newPlan[focusIndex] = selected;
+          } else {
+            // Insert new waypoint
+            newPlan.splice(focusIndex, 0, selected);
+          }
+
           updateFlightPlan(newPlan);
-          setIsAdding(false);
-          setFocusIndex(focusIndex + 1);
-        } else {
-          // If no results, maybe just try to search for whatever is there?
-          // For now, do nothing or close if empty
-          if (searchQuery.trim() === '') setIsAdding(false);
-          else {
-            // If they pressed ENT with text but no results yet, maybe wait or try one last search?
-            // Actually, search is triggered by query change, so if no results, there are no results.
-            setIsAdding(false);
+          setShowWaypointInfo(false);
+          if (!isOnExistingWaypoint) {
+            setFocusIndex(focusIndex + 1);
           }
         }
-      } else {
-        setIsAdding(true);
+        // If no results, do nothing (let user continue editing)
       }
     });
 
     setOnMfdClr(() => () => {
-      if (isAdding) {
-        setIsAdding(false);
+      if (showDuplicateSelection) {
+        // Close duplicate selection, go back to waypoint info
+        setShowDuplicateSelection(false);
+      } else if (showWaypointInfo) {
+        // Close waypoint info
+        setShowWaypointInfo(false);
       } else {
-        toggleMfdModal('FPL'); // Close FPL
+        // Close FPL
+        toggleMfdModal('FPL');
       }
+    });
+
+    setOnMfdCrsr(() => () => {
+      if (showWaypointInfo || showDuplicateSelection) return; // Don't toggle cursor during waypoint operations
+
+      setCursorActive((prev) => {
+        if (!prev) {
+          // Activating cursor - restore last position
+          setFocusIndex(lastCursorPosition.row);
+          setFocusColumn(lastCursorPosition.col);
+        }
+        return !prev;
+      });
     });
 
     return () => {
@@ -140,21 +274,28 @@ export const ActiveFlightPlan: React.FC = () => {
       setOnMfdFmsInner(undefined);
       setOnMfdEnt(undefined);
       setOnMfdClr(undefined);
+      setOnMfdCrsr(undefined);
     };
   }, [
-    isAdding,
+    showWaypointInfo,
+    showDuplicateSelection,
+    cursorActive,
     focusIndex,
+    focusColumn,
+    lastCursorPosition,
     totalRows,
     flightPlan,
+    hasFlightPlan,
     updateFlightPlan,
-    searchQuery,
-    charIndex,
+    waypointSearchQuery,
+    waypointCharIndex,
     searchResults,
     selectedResultIndex,
     setOnMfdFmsOuter,
     setOnMfdFmsInner,
     setOnMfdEnt,
     setOnMfdClr,
+    setOnMfdCrsr,
     toggleMfdModal,
   ]);
 
@@ -189,147 +330,162 @@ export const ActiveFlightPlan: React.FC = () => {
                 )}
               </div>
             </div>
-            {flightPlan?.length && flightPlan.length > 0 ? (
-              <>
-                <div
-                  key="origin-runway"
-                  className={`fpl-row fpl-runway-row ${focusIndex === 0 && !isAdding ? 'focused' : ''}`}
+            {/* Origin row - always shown */}
+            {hasFlightPlan ? (
+              <div key="origin-runway" className="fpl-row fpl-runway-row">
+                <span
+                  className={`col-ident ${isCellFocused(originIndex, 'ident') ? 'cell-focused' : ''}`}
                 >
-                  <span className="col-ident">Runway</span>
-                  <span className="col-dtk"></span>
-                  <span className="col-dis"></span>
-                  <span className="col-alt"></span>
-                </div>
-              </>
-            ) : null}
-            {!isAdding && (!flightPlan || flightPlan.length === 0) && focusIndex === 0 && (
-              <div className="fpl-row focused">
-                <span className="col-ident">_ _ _ _ _</span>
-                <span className="col-dtk"></span>
-                <span className="col-dis"></span>
-                <span className="col-alt"></span>
+                  Runway
+                </span>
+                <span
+                  className={`col-dtk ${isCellFocused(originIndex, 'dtk') ? 'cell-focused' : ''}`}
+                ></span>
+                <span
+                  className={`col-dis ${isCellFocused(originIndex, 'dis') ? 'cell-focused' : ''}`}
+                ></span>
+                <span
+                  className={`col-alt ${isCellFocused(originIndex, 'alt') ? 'cell-focused' : ''}`}
+                ></span>
               </div>
-            )}
-            {!isAdding && (!flightPlan || flightPlan.length === 0) && focusIndex !== 0 && (
+            ) : (
               <div className="fpl-row">
-                <span className="col-ident">_ _ _ _ _</span>
-                <span className="col-dtk"></span>
-                <span className="col-dis"></span>
-                <span className="col-alt"></span>
-              </div>
-            )}
-
-            {isAdding && focusIndex === 0 && (
-              <div className="fpl-row focused fpl-runway-row">
-                <div className="adding-row">
-                  <div className="ident-input">
-                    {searchQuery.split('').map((c, i) => (
-                      <span key={i} className={charIndex === i ? 'char-focused' : ''}>
-                        {c === ' ' ? '_' : c}
-                      </span>
-                    ))}
-                  </div>
-                </div>
+                <span
+                  className={`col-ident ${isCellFocused(originIndex, 'ident') ? 'cell-focused' : ''}`}
+                >
+                  _ _ _ _ _
+                </span>
+                <span
+                  className={`col-dtk ${isCellFocused(originIndex, 'dtk') ? 'cell-focused' : ''}`}
+                ></span>
+                <span
+                  className={`col-dis ${isCellFocused(originIndex, 'dis') ? 'cell-focused' : ''}`}
+                ></span>
+                <span
+                  className={`col-alt ${isCellFocused(originIndex, 'alt') ? 'cell-focused' : ''}`}
+                ></span>
               </div>
             )}
 
             {/* Procedures could be injected here if they existed in the model */}
 
             <div className="fpl-section-header">ENROUTE</div>
-            {flightPlan?.slice(1, -1).map((wp, i) => {
-              const actualIndex = i + 1;
-              return (
-                <div
-                  key={`enroute-${i}`}
-                  className={`fpl-row ${focusIndex === actualIndex && !isAdding ? 'focused' : ''}`}
-                >
-                  <span className="col-ident">{wp.ident}</span>
-                  <span className="col-dtk">---°</span>
-                  <span className="col-dis">---NM</span>
-                  <span className="col-alt"></span>
-                </div>
-              );
-            })}
-
-            {/* Enroute placeholder should be here if we have at least origin and destination */}
-            {(flightPlan?.length || 0) >= 2 &&
-              (!isAdding || (focusIndex > 0 && focusIndex < (flightPlan?.length || 0))) && (
-                <div
-                  className={`fpl-row ${focusIndex > 0 && focusIndex < (flightPlan?.length || 0) && !isAdding ? 'focused' : ''}`}
-                >
-                  <span className="col-ident">_ _ _ _ _</span>
-                  <span className="col-dtk">---°</span>
-                  <span className="col-dis">---NM</span>
-                  <span className="col-alt"></span>
-                </div>
-              )}
-
-            {isAdding && focusIndex > 0 && focusIndex < (flightPlan?.length || 0) && (
-              <div className="fpl-row focused">
-                <div className="adding-row">
-                  <div className="ident-input">
-                    {searchQuery.split('').map((c, i) => (
-                      <span key={i} className={charIndex === i ? 'char-focused' : ''}>
-                        {c === ' ' ? '_' : c}
-                      </span>
-                    ))}
+            {/* Enroute waypoints - only exist if we have 3+ waypoints */}
+            {hasMultiplePoints &&
+              flightPlan.slice(1, -1).map((wp, i) => {
+                const wpIndex = enrouteStartIndex + i;
+                return (
+                  <div key={`enroute-${i}`} className="fpl-row">
+                    <span
+                      className={`col-ident ${isCellFocused(wpIndex, 'ident') ? 'cell-focused' : ''}`}
+                    >
+                      {wp.ident}
+                    </span>
+                    <span
+                      className={`col-dtk ${isCellFocused(wpIndex, 'dtk') ? 'cell-focused' : ''}`}
+                    >
+                      ---°
+                    </span>
+                    <span
+                      className={`col-dis ${isCellFocused(wpIndex, 'dis') ? 'cell-focused' : ''}`}
+                    >
+                      ---NM
+                    </span>
+                    <span
+                      className={`col-alt ${isCellFocused(wpIndex, 'alt') ? 'cell-focused' : ''}`}
+                    ></span>
                   </div>
-                </div>
+                );
+              })}
+
+            {/* Enroute placeholder - shown when we have origin and destination but want to add enroute waypoint */}
+            {hasMultiplePoints && (
+              <div className="fpl-row">
+                <span
+                  className={`col-ident ${isCellFocused(enroutePlaceholderIndex, 'ident') ? 'cell-focused' : ''}`}
+                >
+                  _ _ _ _ _
+                </span>
+                <span
+                  className={`col-dtk ${isCellFocused(enroutePlaceholderIndex, 'dtk') ? 'cell-focused' : ''}`}
+                >
+                  ---°
+                </span>
+                <span
+                  className={`col-dis ${isCellFocused(enroutePlaceholderIndex, 'dis') ? 'cell-focused' : ''}`}
+                >
+                  ---NM
+                </span>
+                <span
+                  className={`col-alt ${isCellFocused(enroutePlaceholderIndex, 'alt') ? 'cell-focused' : ''}`}
+                ></span>
               </div>
             )}
 
             <div className="fpl-section-header">DESTINATION</div>
-            {flightPlan?.length && flightPlan.length > 1 ? (
-              <div
-                className={`fpl-row ${focusIndex === flightPlan.length - 1 && !isAdding ? 'focused' : ''}`}
-              >
-                <span className="col-ident">{flightPlan[flightPlan.length - 1].ident}</span>
-                <span className="col-dtk">---°</span>
-                <span className="col-dis">---NM</span>
-                <span className="col-alt"></span>
+            {/* Destination - show actual waypoint if we have 2+ points, otherwise placeholder */}
+            {hasMultiplePoints ? (
+              <div className="fpl-row">
+                <span
+                  className={`col-ident ${isCellFocused(destinationIndex - 1, 'ident') ? 'cell-focused' : ''}`}
+                >
+                  {flightPlan[flightPlan.length - 1].ident}
+                </span>
+                <span
+                  className={`col-dtk ${isCellFocused(destinationIndex - 1, 'dtk') ? 'cell-focused' : ''}`}
+                >
+                  ---°
+                </span>
+                <span
+                  className={`col-dis ${isCellFocused(destinationIndex - 1, 'dis') ? 'cell-focused' : ''}`}
+                >
+                  ---NM
+                </span>
+                <span
+                  className={`col-alt ${isCellFocused(destinationIndex - 1, 'alt') ? 'cell-focused' : ''}`}
+                ></span>
               </div>
-            ) : !isAdding || focusIndex < (flightPlan?.length || 0) ? (
-              <div
-                className={`fpl-row ${focusIndex === (flightPlan?.length || 0) && !isAdding ? 'focused' : ''}`}
-              >
-                <span className="col-ident">_ _ _ _ _</span>
-                <span className="col-dtk">---°</span>
-                <span className="col-dis">---NM</span>
-                <span className="col-alt"></span>
-              </div>
-            ) : null}
-
-            {isAdding && focusIndex >= (flightPlan?.length || 0) && (
-              <div className="fpl-row focused">
-                <div className="adding-row">
-                  <div className="ident-input">
-                    {searchQuery.split('').map((c, i) => (
-                      <span key={i} className={charIndex === i ? 'char-focused' : ''}>
-                        {c === ' ' ? '_' : c}
-                      </span>
-                    ))}
-                  </div>
-                </div>
+            ) : (
+              <div className="fpl-row">
+                <span
+                  className={`col-ident ${isCellFocused(destinationIndex, 'ident') ? 'cell-focused' : ''}`}
+                >
+                  _ _ _ _ _
+                </span>
+                <span
+                  className={`col-dtk ${isCellFocused(destinationIndex, 'dtk') ? 'cell-focused' : ''}`}
+                >
+                  ---°
+                </span>
+                <span
+                  className={`col-dis ${isCellFocused(destinationIndex, 'dis') ? 'cell-focused' : ''}`}
+                >
+                  ---NM
+                </span>
+                <span
+                  className={`col-alt ${isCellFocused(destinationIndex, 'alt') ? 'cell-focused' : ''}`}
+                ></span>
               </div>
             )}
           </div>
         </div>
 
-        {isAdding && searchResults.length > 0 && (
-          <div className="search-results-overlay">
-            <div className="search-results-header">WAYPOINT INFORMATION</div>
-            <div className="search-results-list">
-              {searchResults.map((res, i) => (
-                <div
-                  key={i}
-                  className={`search-result-item ${selectedResultIndex === i ? 'focused' : ''}`}
-                >
-                  <span className="res-ident">{res.ident}</span>
-                  <span className="res-type">{res.type}</span>
-                </div>
-              ))}
-            </div>
-          </div>
+        {/* Waypoint Information Popup */}
+        {showWaypointInfo && !showDuplicateSelection && (
+          <WaypointInfoPopup
+            waypointSearchQuery={waypointSearchQuery}
+            waypointCharIndex={waypointCharIndex}
+            searchResults={searchResults}
+          />
+        )}
+
+        {/* Duplicate Selection Popup */}
+        {showDuplicateSelection && searchResults.length > 1 && (
+          <DuplicateSelectionPopup
+            waypointSearchQuery={waypointSearchQuery}
+            searchResults={searchResults}
+            selectedResultIndex={selectedResultIndex}
+          />
         )}
       </div>
 
@@ -341,7 +497,7 @@ export const ActiveFlightPlan: React.FC = () => {
       <div className="fpl-weather">
         <div className="section-title">SELECTED WAYPOINT WEATHER</div>
         <div className="weather-content placeholder">
-          {isAdding || focusIndex >= (flightPlan?.length || 0)
+          {focusIndex >= (flightPlan?.length || 0)
             ? 'No waypoint selected'
             : `Weather for ${flightPlan?.[focusIndex]?.ident || '---'}`}
         </div>

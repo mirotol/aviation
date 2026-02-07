@@ -45,6 +45,7 @@ export const RightSidePanel: React.FC<{ unitType?: 'PFD' | 'MFD' }> = ({ unitTyp
     onMfdFmsInner,
     onMfdEnt,
     onMfdClr,
+    onMfdCrsr,
   } = mfdContext;
 
   const { pfdMenuMode, onPfdFmsOuter, onPfdFmsInner, onPfdEnt, onPfdClr, togglePfdMenu } =
@@ -184,7 +185,11 @@ export const RightSidePanel: React.FC<{ unitType?: 'PFD' | 'MFD' }> = ({ unitTyp
           label="FMS"
           onOuterChange={(dir) => handleFmsOuter(dir)}
           onInnerChange={(dir) => handleFmsInner(dir)}
-          onPush={(id) => console.log(`${id} Pushed`)}
+          onPush={() => {
+            if (unitType === 'MFD' && onMfdCrsr) {
+              onMfdCrsr();
+            }
+          }}
         />
       </div>
     </div>

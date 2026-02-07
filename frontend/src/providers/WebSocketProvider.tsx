@@ -52,7 +52,7 @@ export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
 
   useEffect(() => {
     const client = new Client({
-      webSocketFactory: () => new SockJS('http://localhost:8080/ws'),
+      webSocketFactory: () => new SockJS('/ws'),
       reconnectDelay: RECONNECT_INTERVAL,
       heartbeatIncoming: 4000,
       heartbeatOutgoing: 4000,

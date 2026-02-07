@@ -20,9 +20,17 @@ export interface FlightSnapshot {
 
 export interface NavPoint {
   ident: string;
+  name?: string;
   type: string;
   latitude: number;
   longitude: number;
+  elevation?: number;
+  icaoCode?: string;
+  iataCode?: string;
+  gpsCode?: string;
+  localCode?: string;
+  frequencyKhz?: number;
+  associatedAirport?: string;
 }
 
 export interface WebSocketContextType {
