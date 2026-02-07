@@ -2,47 +2,59 @@
   width: 100%;
   height: 100%;
   background-color: #000;
-  border-left: 2px solid #555;
+  border: 1px solid #555;
   display: flex;
   flex-direction: column;
   overflow: hidden;
   position: relative;
+  box-sizing: border-box;
 }
 
 .fpl-header {
   background-color: #000;
   color: var(--universal-cyan);
   padding: 4px 8px;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: bold;
   text-align: center;
+  border-bottom: 1px solid #555;
 }
 
 .fpl-route-header {
   background-color: #000;
-  color: #fff;
+  color: var(--universal-cyan);
   padding: 6px 8px;
   font-size: 15px;
   font-weight: bold;
   text-align: left;
   border-bottom: 1px solid #555;
-  display: flex;
-  align-items: baseline;
+  display: grid;
+  grid-template-columns: 1fr 45px 55px 45px;
+  align-items: center;
 }
 
 .fpl-route-header .col-dtk,
 .fpl-route-header .col-dis,
 .fpl-route-header .col-alt {
   font-size: 11px;
+  color: #fff;
+  text-align: center;
+}
+
+.fpl-route-header .col-ident {
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .fpl-route-header .origin,
 .fpl-route-header .destination {
-  color: #fff;
+  color: var(--universal-cyan);
 }
 
 .fpl-route-header .arrow {
-  color: var(--universal-cyan);
+  color: #fff;
+  font-size: 14px;
 }
 
 .fpl-content {
@@ -72,6 +84,7 @@
   font-weight: bold;
   display: flex;
   justify-content: space-between;
+  border-bottom: 1px solid #555;
 }
 
 .fpl-section-header > div {
@@ -87,12 +100,9 @@
   color: #fff;
 }
 
-.fpl-runway-row .col-ident {
-  padding-left: 12px;
-}
-
 .fpl-row {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr 45px 55px 45px;
   padding: 4px 8px;
   font-size: 14px;
   color: #fff;
@@ -100,39 +110,50 @@
 }
 
 .fpl-row.focused {
-  background-color: #fff;
-  color: #000;
+  background-color: transparent;
+  color: #fff;
 }
 
 .cell-focused {
   background-color: var(--universal-cyan);
   color: #000;
-  padding: 2px 4px;
-  margin: -2px -4px;
+  padding: 0px 2px;
+  margin: 0px -2px;
 }
 
 .col-ident {
-  width: 35%;
+  color: var(--universal-cyan);
+  font-weight: bold;
 }
+
 .col-dtk {
-  width: 20%;
   text-align: right;
+  padding-right: 4px;
   color: var(--universal-cyan);
 }
+
 .fpl-row.focused .col-dtk {
   color: inherit;
 }
+
 .col-dis {
-  width: 25%;
   text-align: right;
+  padding-right: 4px;
 }
+
 .col-alt {
-  width: 20%;
   text-align: right;
+  padding-right: 4px;
   color: var(--universal-cyan);
 }
+
 .fpl-row.focused .col-alt {
   color: inherit;
+}
+
+.fpl-runway-row .col-ident {
+  padding-left: 12px;
+  color: var(--universal-cyan);
 }
 
 .fpl-vnv-profile,

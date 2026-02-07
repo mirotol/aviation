@@ -2,6 +2,7 @@ import React from 'react';
 import { BezelButton } from './BezelButton';
 import './styles/BottomPanel.css';
 import { usePageContext } from '../../features/mfd/pages/PageContext';
+import { usePFDContext } from '../../features/pfd/pages/PFDContext';
 
 const ArrowUpIcon = () => (
   <svg width="12" height="10" viewBox="0 0 12 10" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -11,9 +12,11 @@ const ArrowUpIcon = () => (
 
 export const BottomPanel: React.FC<{ type: 'PFD' | 'MFD' }> = ({ type }) => {
   const prefix = `${type}_`;
-  const { getVisibleSoftkeys } = usePageContext();
+  const mfdContext = usePageContext();
+  const pfdContext = usePFDContext();
 
-  const softkeys = getVisibleSoftkeys(type);
+  const softkeys =
+    type === 'MFD' ? mfdContext.getVisibleSoftkeys() : pfdContext.getVisibleSoftkeys();
 
   return (
     <div className="bottom-panel">
@@ -24,7 +27,7 @@ export const BottomPanel: React.FC<{ type: 'PFD' | 'MFD' }> = ({ type }) => {
             id={`${prefix}SOFTKEY_${i + 1}`}
             variant="softkey"
             label={<ArrowUpIcon />}
-            onClick={key.action}
+            onClick={key?.action}
           />
         ))}
       </div>

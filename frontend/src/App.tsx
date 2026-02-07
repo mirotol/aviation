@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import Cockpit from './features/cockpit/components/Cockpit';
-import InfoPanel from './features/cockpit/components/InfoPanel';
+import InfoPanel from './features/telemetry/components/InfoPanel';
 import { PlaybackControls } from './features/playback/components/PlaybackControls';
 
 import './App.css';

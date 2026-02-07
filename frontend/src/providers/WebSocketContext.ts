@@ -35,7 +35,6 @@ export interface NavPoint {
 
 export interface WebSocketContextType {
   snapshot: FlightSnapshot | null;
-  flightPlan: NavPoint[] | null;
   switchProvider: (provider: 'simulated' | 'recorded', fileName?: string) => void;
   setPaused: (paused: boolean) => void;
   setSpeed: (speed: number) => void;

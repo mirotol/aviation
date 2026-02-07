@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { usePageContext } from './PageContext';
 import { useFlightPlan } from '../../../hooks/useFlightPlan';
+import { useWebSocket } from '../../../hooks/useWebSocket';
+import { useFlightData } from '../../playback/hooks/useFlightData';
 import { NavPoint } from '../../../providers/WebSocketContext';
 import { WaypointInfoPopup } from '../components/WaypointInfoPopup';
 import { DuplicateSelectionPopup } from '../components/DuplicateSelectionPopup';
@@ -19,7 +21,8 @@ export const ActiveFlightPlan: React.FC = () => {
     setOnMfdCrsr,
     toggleMfdModal,
   } = usePageContext();
-  const { flightPlan, updateFlightPlan } = useFlightPlan();
+  const { flightPlan, setFlightPlan } = useFlightPlan();
+  const { updateFlightPlan } = useWebSocket();
 
   const [focusIndex, setFocusIndex] = useState<number>(0);
   const [focusColumn, setFocusColumn] = useState<ColumnType>('ident');
@@ -34,6 +37,7 @@ export const ActiveFlightPlan: React.FC = () => {
   const [waypointCharIndex, setWaypointCharIndex] = useState(0); // Which character we're editing in waypoint popup
   const [searchResults, setSearchResults] = useState<NavPoint[]>([]);
   const [selectedResultIndex, setSelectedResultIndex] = useState(0);
+  const [isExplicitlySelected, setIsExplicitlySelected] = useState(false);
 
   // Index mapping:
   // - Origin (runway): always index 0
@@ -51,6 +55,8 @@ export const ActiveFlightPlan: React.FC = () => {
   const destinationIndex = hasFlightPlan ? flightPlan.length : 1;
 
   const totalRows = destinationIndex + 1;
+  const snapshot = useFlightData();
+  const activeWaypointIndex = snapshot?.activeWaypointIndex ?? -1;
 
   const origin = flightPlan?.[0]?.ident || '----';
   const destination =
@@ -74,61 +80,68 @@ export const ActiveFlightPlan: React.FC = () => {
     }
   }, [focusIndex, focusColumn, cursorActive]);
 
-  // Reset waypoint info when opening
   useEffect(() => {
     if (showWaypointInfo && !showDuplicateSelection) {
-      // Check if we're on an existing waypoint
+      // If we are already displaying search results (e.g. from a duplicate selection)
+      // we DON'T want to reset them or re-trigger a search.
+      // But if we're on an existing waypoint, we DO want to pre-fill it.
+
+      if (isExplicitlySelected) {
+        return;
+      }
+
       const isOnExistingWaypoint = hasFlightPlan && focusIndex < (flightPlan?.length || 0);
+
+      if (searchResults.length > 0) {
+        // If we have results, check if they match the current focus if it's an existing waypoint
+        if (isOnExistingWaypoint) {
+          const currentWaypoint = flightPlan![focusIndex];
+          if (searchResults.length === 1 && searchResults[0].ident === currentWaypoint.ident) {
+            return;
+          }
+        }
+      }
+
       if (isOnExistingWaypoint) {
         // Pre-fill with existing waypoint ident
         const currentWaypoint = flightPlan![focusIndex];
         setWaypointSearchQuery(currentWaypoint.ident.padEnd(5, ' '));
         setSearchResults([currentWaypoint]);
         setSelectedResultIndex(0);
-      } else {
-        // Empty for new waypoint
+        setWaypointCharIndex(0);
+        setIsExplicitlySelected(true);
+      } else if (!isExplicitlySelected) {
+        // Fresh open for a new waypoint
         setWaypointSearchQuery('     ');
         setSearchResults([]);
         setSelectedResultIndex(0);
+        setWaypointCharIndex(0);
+        setIsExplicitlySelected(false);
       }
-      setWaypointCharIndex(0);
+    } else if (!showWaypointInfo && !showDuplicateSelection) {
+      // When both popups are closed, we can safely reset isExplicitlySelected
+      // but only if we're NOT in the middle of a transition (which we aren't here)
+      if (isExplicitlySelected) {
+        setIsExplicitlySelected(false);
+      }
     }
-  }, [showWaypointInfo, showDuplicateSelection, hasFlightPlan, focusIndex, flightPlan]);
+  }, [showWaypointInfo, showDuplicateSelection, focusIndex, isExplicitlySelected]);
 
   const handleSearch = useCallback(async (query: string) => {
     const trimmed = query.trim();
-    console.log('[FPL Search] Query:', query, 'Trimmed:', trimmed);
 
     if (trimmed.length === 0) {
-      console.log('[FPL Search] Empty query, clearing results');
       setSearchResults([]);
       return;
     }
     try {
       const url = `/api/nav/search?q=${trimmed}`;
-      console.log('[FPL Search] Fetching:', url);
       const response = await fetch(url);
-      console.log('[FPL Search] Response status:', response.status, response.ok);
-      console.log('[FPL Search] Response headers:', response.headers.get('content-type'));
-
-      // Get the response text first to see what we're actually getting
-      const responseText = await response.text();
-      console.log('[FPL Search] Response text:', responseText);
 
       if (response.ok) {
-        try {
-          const data = JSON.parse(responseText);
-          console.log('[FPL Search] Parsed data:', data);
-          console.log('[FPL Search] Number of results:', data.length);
-          setSearchResults(data);
-          setSelectedResultIndex(0);
-        } catch (parseError) {
-          console.error('[FPL Search] JSON parse error:', parseError);
-          console.error('[FPL Search] Failed to parse response text:', responseText);
-        }
-      } else {
-        console.error('[FPL Search] Response not OK:', response.status, response.statusText);
-        console.error('[FPL Search] Response body:', responseText);
+        const data = await response.json();
+        setSearchResults(data);
+        setSelectedResultIndex(0);
       }
     } catch (error) {
       console.error('[FPL Search] Failed', error);
@@ -136,10 +149,16 @@ export const ActiveFlightPlan: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    if (showWaypointInfo && !showDuplicateSelection) {
+    if (showWaypointInfo && !showDuplicateSelection && !isExplicitlySelected) {
       handleSearch(waypointSearchQuery);
     }
-  }, [waypointSearchQuery, showWaypointInfo, showDuplicateSelection, handleSearch]);
+  }, [
+    waypointSearchQuery,
+    showWaypointInfo,
+    showDuplicateSelection,
+    handleSearch,
+    isExplicitlySelected,
+  ]);
 
   useEffect(() => {
     setOnMfdFmsOuter(() => (dir: 'inc' | 'dec') => {
@@ -176,6 +195,7 @@ export const ActiveFlightPlan: React.FC = () => {
         return;
       } else if (showWaypointInfo) {
         // Cycle characters in the waypoint search field
+        setIsExplicitlySelected(false);
         setWaypointSearchQuery((prev) => {
           const chars = prev.split('');
           const currentChar = chars[waypointCharIndex];
@@ -183,6 +203,12 @@ export const ActiveFlightPlan: React.FC = () => {
           const delta = dir === 'inc' ? 1 : -1;
           const nextIdx = (idx + delta + CHARS.length) % CHARS.length;
           chars[waypointCharIndex] = CHARS[nextIdx];
+
+          // Clear characters after the currently edited character index
+          for (let i = waypointCharIndex + 1; i < chars.length; i++) {
+            chars[i] = ' ';
+          }
+
           return chars.join('');
         });
       } else {
@@ -207,8 +233,11 @@ export const ActiveFlightPlan: React.FC = () => {
 
       if (showDuplicateSelection) {
         // Accept selected duplicate and go back to waypoint info
+        const selected = searchResults[selectedResultIndex];
+        setSearchResults([selected]);
+        setWaypointSearchQuery(selected.ident.padEnd(5, ' '));
+        setIsExplicitlySelected(true);
         setShowDuplicateSelection(false);
-        // The selected result is already in searchResults[selectedResultIndex]
       } else if (showWaypointInfo) {
         const trimmedQuery = waypointSearchQuery.trim();
 
@@ -218,9 +247,13 @@ export const ActiveFlightPlan: React.FC = () => {
         } else if (searchResults.length > 1) {
           // Multiple results, show duplicate selection popup
           setShowDuplicateSelection(true);
-        } else if (searchResults.length === 1) {
-          // Single result, accept it
+        } else if (searchResults.length === 1 || isExplicitlySelected) {
+          // Single result or explicitly selected, accept it
           const selected = searchResults[0];
+          if (!selected) {
+            // If we are explicitly selected but results were cleared, try one more search or show error
+            return;
+          }
           const newPlan = [...(flightPlan || [])];
 
           // Check if we're editing existing waypoint or adding new
@@ -233,8 +266,15 @@ export const ActiveFlightPlan: React.FC = () => {
             newPlan.splice(focusIndex, 0, selected);
           }
 
+          setFlightPlan(newPlan);
           updateFlightPlan(newPlan);
           setShowWaypointInfo(false);
+          setWaypointSearchQuery('     ');
+          setSearchResults([]);
+          setSelectedResultIndex(0);
+          setWaypointCharIndex(0);
+          setIsExplicitlySelected(false);
+
           if (!isOnExistingWaypoint) {
             setFocusIndex(focusIndex + 1);
           }
@@ -248,8 +288,13 @@ export const ActiveFlightPlan: React.FC = () => {
         // Close duplicate selection, go back to waypoint info
         setShowDuplicateSelection(false);
       } else if (showWaypointInfo) {
-        // Close waypoint info
+        // Close waypoint info and reset states
         setShowWaypointInfo(false);
+        setWaypointSearchQuery('     ');
+        setSearchResults([]);
+        setSelectedResultIndex(0);
+        setWaypointCharIndex(0);
+        setIsExplicitlySelected(false);
       } else {
         // Close FPL
         toggleMfdModal('FPL');
@@ -291,6 +336,7 @@ export const ActiveFlightPlan: React.FC = () => {
     waypointCharIndex,
     searchResults,
     selectedResultIndex,
+    isExplicitlySelected,
     setOnMfdFmsOuter,
     setOnMfdFmsInner,
     setOnMfdEnt,
@@ -309,9 +355,9 @@ export const ActiveFlightPlan: React.FC = () => {
           <span className="arrow"> / </span>
           <span className="destination">{destination}</span>
         </div>
-        <span className="col-dtk">DTK</span>
-        <span className="col-dis">DIS</span>
-        <span className="col-alt">ALT</span>
+        <div className="col-dtk">DTK</div>
+        <div className="col-dis">DIS</div>
+        <div className="col-alt">ALT</div>
       </div>
 
       <div className="fpl-content">
@@ -332,7 +378,10 @@ export const ActiveFlightPlan: React.FC = () => {
             </div>
             {/* Origin row - always shown */}
             {hasFlightPlan ? (
-              <div key="origin-runway" className="fpl-row fpl-runway-row">
+              <div
+                key="origin-runway"
+                className={`fpl-row fpl-runway-row ${activeWaypointIndex === 0 ? 'active-leg' : ''}`}
+              >
                 <span
                   className={`col-ident ${isCellFocused(originIndex, 'ident') ? 'cell-focused' : ''}`}
                 >
@@ -375,7 +424,10 @@ export const ActiveFlightPlan: React.FC = () => {
               flightPlan.slice(1, -1).map((wp, i) => {
                 const wpIndex = enrouteStartIndex + i;
                 return (
-                  <div key={`enroute-${i}`} className="fpl-row">
+                  <div
+                    key={`enroute-${i}`}
+                    className={`fpl-row ${wpIndex === activeWaypointIndex ? 'active-leg' : ''}`}
+                  >
                     <span
                       className={`col-ident ${isCellFocused(wpIndex, 'ident') ? 'cell-focused' : ''}`}
                     >

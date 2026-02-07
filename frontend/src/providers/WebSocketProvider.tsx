@@ -1,7 +1,8 @@
-import React, { useEffect, useRef, useState, ReactNode, useCallback } from 'react';
+import React, { useEffect, useRef, useState, ReactNode, useCallback, useContext } from 'react';
 import { Client } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 import { WebSocketContext, FlightSnapshot, NavPoint } from './WebSocketContext';
+import { FlightPlanContext } from './FlightPlanContext';
 
 interface WebSocketProviderProps {
   children: ReactNode;
@@ -10,8 +11,10 @@ interface WebSocketProviderProps {
 const RECONNECT_INTERVAL = 5000;
 
 export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
+  const flightPlanContext = useContext(FlightPlanContext);
+  const setFlightPlan = flightPlanContext?.setFlightPlan;
+
   const [snapshot, setSnapshot] = useState<FlightSnapshot | null>(null);
-  const [flightPlan, setFlightPlan] = useState<NavPoint[] | null>(null);
   const [isConnected, setIsConnected] = useState(false);
   const [activeProvider, setActiveProvider] = useState<'simulated' | 'recorded'>('simulated');
   const [selectedFlight, setSelectedFlight] = useState<string | null>(null);
@@ -65,7 +68,8 @@ export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
         });
 
         client.subscribe('/user/queue/flightPlan', (message) => {
-          setFlightPlan(JSON.parse(message.body));
+          const plan = JSON.parse(message.body);
+          if (setFlightPlan) setFlightPlan(plan);
         });
 
         // Initial sync on connection
@@ -105,24 +109,27 @@ export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
     // The connection should stay open during provider switches.
   }, []);
 
-  const switchProvider = useCallback((provider: 'simulated' | 'recorded', fileName?: string) => {
-    if (clientRef.current?.connected) {
-      // Send everything in ONE payload to avoid race conditions
-      clientRef.current.publish({
-        destination: '/app/switchProvider',
-        body: JSON.stringify({
-          type: provider,
-          fileName: fileName,
-          paused: stateRef.current.isPaused, // Use current UI state
-          speed: stateRef.current.speed,
-        }),
-      });
-    }
-    setActiveProvider(provider);
-    if (fileName) setSelectedFlight(fileName);
-    // Clear old flight plan when switching to avoid visual artifacts
-    setFlightPlan(null);
-  }, []);
+  const switchProvider = useCallback(
+    (provider: 'simulated' | 'recorded', fileName?: string) => {
+      if (clientRef.current?.connected) {
+        // Send everything in ONE payload to avoid race conditions
+        clientRef.current.publish({
+          destination: '/app/switchProvider',
+          body: JSON.stringify({
+            type: provider,
+            fileName: fileName,
+            paused: stateRef.current.isPaused, // Use current UI state
+            speed: stateRef.current.speed,
+          }),
+        });
+      }
+      setActiveProvider(provider);
+      if (fileName) setSelectedFlight(fileName);
+      // Clear old flight plan when switching to avoid visual artifacts
+      if (setFlightPlan) setFlightPlan(null);
+    },
+    [setFlightPlan]
+  );
 
   const updateFlightPlan = useCallback((waypoints: NavPoint[]) => {
     if (clientRef.current?.connected) {
@@ -166,8 +173,6 @@ export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
     <WebSocketContext.Provider
       value={{
         snapshot,
-        flightPlan,
-        updateFlightPlan,
         switchProvider,
         setPaused,
         setSpeed,
@@ -178,6 +183,7 @@ export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
         activeProvider,
         selectedFlight,
         reconnectCountdown,
+        updateFlightPlan,
       }}
     >
       {children}

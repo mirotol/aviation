@@ -77,10 +77,16 @@
   transition: all 0.2s ease;
 }
 
+.source-btn:hover {
+  border-color: var(--text-dim);
+}
+
 .source-btn.active {
-  background-color: var(--primary-color);
-  color: var(--text-bright);
+  color: var(--primary-color);
   border-color: var(--primary-color);
+  background: rgba(74, 144, 226, 0.05);
+  box-shadow: var(--glow-box);
+  text-shadow: var(--glow-text);
 }
 
 .flight-select {
@@ -166,4 +172,52 @@
 
 .json-raw::-webkit-scrollbar-thumb:hover {
   background: var(--text-dim);
+}
+
+.fpl-card {
+  background-color: var(--panel-gray);
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid var(--bezel-gray);
+}
+
+.fpl-list {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.fpl-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  background-color: var(--bg-surface);
+  border-radius: 4px;
+  border: 1px solid transparent;
+}
+
+.fpl-item.active-leg {
+  border-color: var(--universal-magenta);
+  background-color: rgba(255, 0, 255, 0.05);
+}
+
+.wp-ident {
+  color: var(--universal-cyan);
+  font-weight: bold;
+  font-family: 'Roboto Mono', monospace;
+}
+
+.active-leg .wp-ident {
+  color: var(--universal-magenta);
+}
+
+.wp-name {
+  color: var(--text-dim);
+  font-size: 0.8rem;
+  text-align: right;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 150px;
 }
